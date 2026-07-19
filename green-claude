@@ -34,9 +34,16 @@
 #
 # Fichiers fournis :
 #   rules/basic.json          15 règles de base (audit de code)
-#   rules/ecoconception.json  21 règles RGESN / GR491 / GSF (audit de code)
+#   rules/ecoconception.json  35 règles couvrant les 9 familles du RGESN 2024,
+#                             avec renvoi aux critères officiels (rgesn_ref)
+#                             et aux familles GR491 (gr491_famille)
 #   rules/boris.json          12 pratiques de sobriété avec Claude Code,
 #                             inspirées de Boris Cherny (checklist d'usage)
+#
+# Double vocation du projet :
+#   1. Utiliser Claude sobrement (modèle proportionné, tokens, cache…)
+#   2. Faire produire à Claude du code sobre (les règles d'éco-conception
+#      servent à auditer le code ET à guider sa génération)
 # =============================================================================
 
 # =============================================================================
@@ -153,7 +160,7 @@ EXEMPLES :
 RÈGLES EMBARQUÉES :
   • ${#BASIC_RULES[@]} règles de base intégrées (aucune dépendance)
   • rules/basic.json          15 règles de base (audit, nécessite jq)
-  • rules/ecoconception.json  21 règles RGESN/GR491/GSF (audit, nécessite jq)
+  • rules/ecoconception.json  35 règles — 9 familles RGESN 2024 + GR491 (audit)
   • rules/boris.json          12 pratiques de sobriété Claude Code (checklist)
 
 HEURES CREUSES : $OFFPEAK_START:00 - $OFFPEAK_END:00 UTC
