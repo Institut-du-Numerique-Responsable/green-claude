@@ -1,0 +1,188 @@
+{
+  "metadata": {
+    "name": "Boris Cherny — Sobriété avec Claude Code",
+    "description": "12 pratiques d'usage de Claude Code inspirées de Boris Cherny (créateur de Claude Code), relues sous l'angle de la sobriété numérique : moins de tokens gaspillés = moins d'énergie consommée.",
+    "version": "2.0.0",
+    "source": "https://howborisusesclaudecode.com/",
+    "author_note": "Boris Cherny est le créateur de Claude Code chez Anthropic. Ses conseils visent d'abord l'efficacité ; nous les reprenons ici parce qu'un usage efficace de l'IA est aussi un usage sobre : chaque aller-retour évité, chaque contexte allégé, chaque re-prompt supprimé économise des tokens, donc du calcul, donc de l'énergie.",
+    "count": 12,
+    "type": "practices",
+    "type_note": "Ces règles décrivent des PRATIQUES D'USAGE, pas des motifs de code : elles n'ont pas de 'patterns' grep-ables. L'audit --eco-check les ignore ; utilisez --list-rules pour les consulter comme checklist."
+  },
+  "categories": {
+    "contexte": {
+      "name": "Gérer le contexte",
+      "description": "Le contexte envoyé au modèle est retraité (et facturé) à chaque tour de conversation. Un contexte propre et minimal réduit directement les tokens consommés.",
+      "rules": [
+        {
+          "id": "BORIS-CTX-01",
+          "title": "Minimalisme de contexte",
+          "principle": "« Donnez au modèle le prompt minimal, les outils minimaux, et laissez-le récupérer lui-même le contexte dont il a besoin. »",
+          "description": "Ne pas pré-charger d'énormes prompts système ni des listes d'outils exhaustives. Donner l'objectif et un moyen d'aller chercher le contexte (fichiers, recherche), puis laisser faire.",
+          "why_green": "Chaque token du prompt est retraité à chaque tour de conversation. Un prompt système obèse multiplie le coût de TOUS les échanges suivants.",
+          "how": "Écrire un brief court avec l'objectif et les contraintes. Ne pas coller des fichiers entiers si le modèle peut les lire lui-même au besoin.",
+          "impact": "Élevé",
+          "source_ref": "Reflecting on a Year — Context Minimalism",
+          "patterns": [],
+          "tags": ["contexte", "tokens", "prompt"]
+        },
+        {
+          "id": "BORIS-CTX-02",
+          "title": "Rembobiner plutôt que corriger",
+          "principle": "« Corriger dans le chat pollue le contexte ; rembobiner le nettoie. »",
+          "description": "Quand Claude se trompe, ne pas empiler des messages de correction (« non, essaie plutôt X ») : la tentative ratée reste dans le contexte et est refacturée à chaque tour. Utiliser /rewind (double Échap) et re-prompter proprement.",
+          "why_green": "Une tentative ratée conservée dans l'historique est retraitée à chaque échange suivant — des milliers de tokens morts payés en boucle.",
+          "how": "Double-tap Échap ou /rewind pour revenir avant l'erreur, puis reformuler la demande avec la leçon apprise.",
+          "impact": "Élevé",
+          "source_ref": "New Feature Launches — Rewind Over Correcting",
+          "patterns": [],
+          "tags": ["contexte", "correction", "rewind"]
+        },
+        {
+          "id": "BORIS-CTX-03",
+          "title": "/clear pour une nouvelle tâche, /compact pour une tâche liée",
+          "principle": "« Nouvelle tâche → /clear ; tâche liée qui a besoin du contexte → /compact avec une consigne. »",
+          "description": "/clear repart de zéro (le contexte est exactement ce que vous décidez). /compact fait résumer la conversation par le modèle — pratique mais avec perte. Orienter le résumé : « /compact garde le refactor d'auth, jette le débogage des tests ».",
+          "why_green": "Continuer une conversation-fleuve pour une tâche sans rapport, c'est payer tout l'historique inutile à chaque tour.",
+          "how": "Avant chaque nouvelle tâche, se demander : ai-je besoin de cet historique ? Non → /clear. Partiellement → /compact <consigne>.",
+          "impact": "Élevé",
+          "source_ref": "New Feature Launches — /compact vs /clear",
+          "patterns": [],
+          "tags": ["contexte", "compact", "clear"]
+        },
+        {
+          "id": "BORIS-CTX-04",
+          "title": "Compacter avant la zone de dégradation",
+          "principle": "« Le context rot s'installe vers 300-400k tokens : forcer une compaction plus tôt. »",
+          "description": "Sur les très longues sessions, la qualité se dégrade bien avant la limite du contexte. Abaisser le seuil d'auto-compaction (CLAUDE_CODE_AUTO_COMPACT_WINDOW) et compacter proactivement avec une consigne.",
+          "why_green": "Un contexte dégradé produit de mauvaises réponses… qu'il faut refaire. Tokens du contexte dégradé + tokens des reprises = double gaspillage.",
+          "how": "CLAUDE_CODE_AUTO_COMPACT_WINDOW=400000 et /compact <consigne> aux moments calmes (jamais en plein milieu d'une tâche).",
+          "impact": "Moyen",
+          "source_ref": "New Feature Launches — Lower Your Auto-Compact Threshold",
+          "patterns": [],
+          "tags": ["contexte", "compaction", "sessions-longues"]
+        }
+      ]
+    },
+    "brief": {
+      "name": "Préparer la tâche",
+      "description": "La majorité des tokens gaspillés viennent d'allers-retours évitables : demandes floues, corrections en cascade, re-explications.",
+      "rules": [
+        {
+          "id": "BORIS-BRIEF-01",
+          "title": "Le contexte complet dès le premier message",
+          "principle": "« La délégation ne marche qu'avec un contexte de tâche complet : objectif, contraintes, critères d'acceptation. »",
+          "description": "Un bon brief contient : (1) l'objectif en langage clair, (2) les contraintes (ce qu'il ne faut pas toucher, les contrats à respecter), (3) les critères d'acceptation (comment vérifier que c'est fini).",
+          "why_green": "Un brief incomplet déclenche des questions de clarification, des implémentations à refaire, des tours de correction — chacun refacture tout le contexte.",
+          "how": "Exemple : « Objectif : rate-limiting sur /api/login. Contraintes : pas de changement de schéma BD, utiliser Redis. Acceptation : 5 req/min par IP → 429, tests existants verts. »",
+          "impact": "Élevé",
+          "source_ref": "New Feature Launches — Full Task Context Upfront",
+          "patterns": [],
+          "tags": ["brief", "specification", "delegation"]
+        },
+        {
+          "id": "BORIS-BRIEF-02",
+          "title": "Déléguer, pas micro-piloter",
+          "principle": "« Traitez Claude comme un ingénieur à qui l'on délègue, pas comme un binôme à surveiller pas à pas. »",
+          "description": "L'ancien réflexe — décrire une étape, regarder la sortie, corriger, décrire l'étape suivante — multiplie les interruptions et les tours. Écrire un brief net, lancer, revenir quand c'est fini.",
+          "why_green": "Chaque micro-intervention est un tour de plus, avec tout le contexte refacturé. Moins d'interruptions = moins de tours = moins de tokens.",
+          "how": "Rédiger le brief complet (voir BORIS-BRIEF-01), lancer, et ne reprendre la main que sur une vraie question ou à la fin.",
+          "impact": "Moyen",
+          "source_ref": "New Feature Launches — Delegation over Guidance",
+          "patterns": [],
+          "tags": ["delegation", "autonomie", "workflow"]
+        }
+      ]
+    },
+    "memoire": {
+      "name": "Capitaliser (ne jamais payer deux fois)",
+      "description": "Tout ce qui est ré-expliqué à chaque session est payé à chaque session. Écrire une fois, réutiliser toujours.",
+      "rules": [
+        {
+          "id": "BORIS-MEM-01",
+          "title": "Écrire la règle, pas re-corriger",
+          "principle": "« À chaque erreur de Claude, je ne lui dis pas de faire autrement : je lui demande de l'écrire dans le CLAUDE.md. »",
+          "description": "Une correction conversationnelle répare CETTE exécution. Une règle écrite dans CLAUDE.md répare toutes les exécutions futures. Le taux d'erreur baisse dans le temps au lieu de repartir de zéro à chaque session.",
+          "why_green": "La même erreur re-corrigée à chaque session = les mêmes tokens re-gaspillés à chaque session. La règle écrite coûte une fois.",
+          "how": "Après toute correction : « Ajoute une règle dans CLAUDE.md pour ne plus refaire cette erreur. » Claude excelle à rédiger ses propres règles.",
+          "impact": "Élevé",
+          "source_ref": "Reflecting on a Year — When Claude Errs, Write It Down",
+          "patterns": [],
+          "tags": ["claude-md", "memoire", "capitalisation"]
+        },
+        {
+          "id": "BORIS-MEM-02",
+          "title": "Une skill pour tout ce qui se répète",
+          "principle": "« Si vous faites quelque chose plus d'une fois par jour, transformez-le en skill ou en commande. »",
+          "description": "Les workflows répétés (revue, déploiement, analyse) re-décrits à la main à chaque fois coûtent leur explication complète à chaque usage. Une slash command ou une skill versionnée dans git ne coûte que son invocation.",
+          "why_green": "Ré-expliquer un workflow de 500 tokens 10 fois = 5000 tokens. La skill : écrite une fois, invoquée en quelques tokens.",
+          "how": "Créer des commandes dans .claude/commands/ et des skills partagées en git pour toute l'équipe.",
+          "impact": "Moyen",
+          "source_ref": "Core Workflow — Slash Commands ; Advanced Patterns — Create Your Own Skills",
+          "patterns": [],
+          "tags": ["skills", "commandes", "reutilisation"]
+        }
+      ]
+    },
+    "verification": {
+      "name": "Vérifier pour ne pas refaire",
+      "description": "Le conseil le plus important de Boris Cherny — et le plus sobre : un résultat juste du premier coup n'est jamais refait.",
+      "rules": [
+        {
+          "id": "BORIS-VERIF-01",
+          "title": "Donner à Claude un moyen de vérifier son travail",
+          "principle": "« C'est probablement la chose la plus importante : si Claude a cette boucle de feedback, la qualité du résultat final est multipliée par 2 ou 3. »",
+          "description": "Tests, commande bash, navigateur, simulateur : peu importe le moyen, Claude doit pouvoir constater lui-même si ça marche. Sans boucle de vérification, l'utilisateur découvre les défauts et relance des cycles de correction.",
+          "why_green": "Chaque cycle « livré cassé → signalé → recorrigé » refacture tout le contexte. La vérification intégrée convertit ces cycles en un seul passage.",
+          "how": "Fournir dans le brief la commande de test, l'URL à vérifier, ou le critère mesurable. Exiger la vérification avant de déclarer « terminé ».",
+          "impact": "Élevé",
+          "source_ref": "Core Workflow — The Most Important Tip: Verification",
+          "patterns": [],
+          "tags": ["verification", "tests", "qualite"]
+        }
+      ]
+    },
+    "compute": {
+      "name": "Proportionner la puissance",
+      "description": "Adapter le niveau de calcul à la tâche : sortir un canon pour tuer une mouche est le gaspillage le plus évitable.",
+      "rules": [
+        {
+          "id": "BORIS-CPU-01",
+          "title": "Adapter le niveau d'effort à la tâche",
+          "principle": "« Quatre niveaux : low (réponses rapides), medium, high, max (raisonne aussi longtemps que nécessaire). »",
+          "description": "Le niveau d'effort (/effort) contrôle la profondeur de raisonnement, donc la consommation de tokens. Les tâches conversationnelles courtes n'ont pas besoin de xhigh/max ; les problèmes durs, si — et un bon raisonnement du premier coup évite des reprises.",
+          "why_green": "Effort maximal sur une question triviale = tokens de raisonnement purement gaspillés. Effort trop faible sur un problème dur = reprises. L'optimum écologique est l'adéquation, pas le minimum systématique.",
+          "how": "/effort low pour les questions simples et les scripts ; high/xhigh pour le code complexe ; max réservé aux problèmes vraiment difficiles.",
+          "impact": "Élevé",
+          "source_ref": "End of Week Ships — /effort ; Mastering Opus — Effort Mastery",
+          "patterns": [],
+          "tags": ["effort", "modeles", "proportionnalite"]
+        },
+        {
+          "id": "BORIS-CPU-02",
+          "title": "Pas de panel d'agents pour une petite tâche",
+          "principle": "« La plupart des tâches de code classiques n'ont pas besoin d'un panel de 5 relecteurs. »",
+          "description": "Les workflows multi-agents et les fan-outs massifs sont puissants mais très gourmands en tokens. Les réserver aux tâches qui en valent la peine (migrations, recherches larges) et fixer des budgets (« utilise 10k tokens »). Surveiller avec /usage ce qui consomme.",
+          "why_green": "Un workflow multi-agents multiplie la consommation par le nombre d'agents. Sur un correctif de 20 lignes, c'est du calcul brûlé pour rien.",
+          "how": "Avant de lancer des sous-agents ou un workflow : « cette tâche a-t-elle vraiment besoin de plus de calcul ? » Fixer un budget de tokens dans le prompt ; vérifier /usage en cas de doute.",
+          "impact": "Élevé",
+          "source_ref": "A Harness for Every Task — Pair With /goal, /loop, and Token Budgets",
+          "patterns": [],
+          "tags": ["sous-agents", "workflows", "budget-tokens"]
+        },
+        {
+          "id": "BORIS-CPU-03",
+          "title": "--bare pour les scripts et l'automatisation",
+          "principle": "« Pour l'usage non-interactif, --bare évite de charger CLAUDE.md, settings et MCP : démarrage 10x plus rapide. »",
+          "description": "Un appel scripté (claude -p) n'a généralement pas besoin de tout le contexte projet. Le flag --bare charge uniquement ce qui est spécifié explicitement.",
+          "why_green": "Chaque invocation scriptée qui charge un contexte projet inutile paie ces tokens pour rien — multiplié par le nombre d'exécutions du script.",
+          "how": "Dans les scripts et les crons : claude -p --bare \"...\" en spécifiant explicitement le seul contexte nécessaire.",
+          "impact": "Moyen",
+          "source_ref": "Hidden & Underutilized Features — --bare",
+          "patterns": [],
+          "tags": ["scripts", "automatisation", "demarrage"]
+        }
+      ]
+    }
+  }
+}

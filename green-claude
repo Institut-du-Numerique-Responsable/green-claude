@@ -1,0 +1,532 @@
+#!/bin/bash
+
+# =============================================================================
+# Green Claude — Wrapper éco-responsable pour Claude Code
+#
+# Usage : green-claude [OPTIONS] <prompt>
+#
+# Le wrapper applique quatre leviers de sobriété avant d'appeler Claude :
+#   1. Choix du modèle proportionné à la complexité de la tâche
+#   2. Limitation de la taille des fichiers envoyés (moins de tokens)
+#   3. Incitation aux heures creuses (électricité moins carbonée)
+#   4. Cache local des réponses (pas deux fois la même requête)
+# Et un audit d'éco-conception du code (--eco-check) basé sur des fichiers
+# de règles JSON (voir « FORMAT DES RÈGLES » ci-dessous).
+# =============================================================================
+
+# =============================================================================
+# FORMAT DES RÈGLES (rules/*.json)
+#
+# Deux structures sont acceptées :
+#   a) plate      : { "metadata": {...}, "rules": [ <règle>, ... ] }
+#   b) catégorisée: { "metadata": {...}, "categories": { "<clé>": {
+#                     "name": "...", "rules": [ <règle>, ... ] } } }
+#
+# Une <règle> contient au minimum :
+#   id             identifiant unique (ex. "ECO-3.1")
+#   title          intitulé court
+#   impact         "Élevé" | "Moyen" | "Faible"
+#   recommendation quoi faire à la place
+#   patterns       liste d'expressions régulières (grep -E) détectant le
+#                  problème dans le code. Liste vide = règle de PRATIQUE
+#                  (checklist) : affichée par --list-rules, ignorée par
+#                  l'audit --eco-check.
+#
+# Fichiers fournis :
+#   rules/basic.json          15 règles de base (audit de code)
+#   rules/ecoconception.json  21 règles RGESN / GR491 / GSF (audit de code)
+#   rules/boris.json          12 pratiques de sobriété avec Claude Code,
+#                             inspirées de Boris Cherny (checklist d'usage)
+# =============================================================================
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RULES_DIR="$SCRIPT_DIR/rules"
+CACHE_FILE="$HOME/.green_claude_cache"
+
+# Règles de base embarquées (fonctionnent sans jq)
+# Format : "motif_grep:Catégorie:Recommandation"
+BASIC_RULES=(
+    "SELECT \*:Base de données:Évite SELECT *, sélectionne les colonnes nécessaires"
+    "for.*{.*for:Algorithmes:Évite les boucles imbriquées (O(n²))"
+    "@keyframes:CSS:Limite les animations énergivores"
+    "lodash:JavaScript:Préfère les fonctions natives ou date-fns à lodash/moment"
+    "bootstrap:CSS:Préfère du CSS sur mesure ou un framework purgé"
+    "autoplay:HTML:Désactive l'autoplay des vidéos (façade cliquable)"
+    "localStorage\.:Stockage:Limite le stockage local et prévois une expiration"
+    "new.*Connection:Base de données:Utilise un pool de connexions"
+    "googletagmanager:Tracking:Limite les scripts de tracking tiers"
+)
+
+# Modèle recommandé par niveau de complexité.
+# Sobriété = proportionnalité : le plus petit modèle qui fait bien le travail.
+#   simple  → Haiku  (rapide, léger : questions simples, reformulations)
+#   medium  → Sonnet (équilibré : la plupart des tâches de code)
+#   complex → Opus   (raisonnement profond : à réserver aux problèmes durs)
+MODEL_RECOMMENDATIONS=(
+    "simple:claude-haiku-4-5"
+    "medium:claude-sonnet-4-6"
+    "complex:claude-opus-4-8"
+)
+
+# Heures creuses (UTC) : période où le mix électrique est généralement
+# moins carboné et les data centers moins sollicités.
+OFFPEAK_START=22
+OFFPEAK_END=6
+
+# Limites de taille des fichiers envoyés (octets) : moins de données
+# envoyées au modèle = moins de tokens = moins d'énergie.
+MAX_FILE_SIZE=10240    # 10 Ko par fichier
+MAX_TOTAL_SIZE=524288  # 500 Ko au total
+MAX_FILES=5
+
+# =============================================================================
+# COULEURS ET AFFICHAGE
+# =============================================================================
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+NC='\033[0m'
+
+print_error()   { echo -e "${RED}[ERREUR]${NC} $1"; }
+print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
+print_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
+print_warning() { echo -e "${YELLOW}[ATTENTION]${NC} $1"; }
+print_header()  { echo -e "${MAGENTA}$1${NC}"; }
+
+# Taille d'un fichier en octets (GNU coreutils puis BSD/macOS)
+file_size() {
+    stat -c%s "$1" 2>/dev/null || stat -f%z "$1" 2>/dev/null || echo 0
+}
+
+# =============================================================================
+# DÉPENDANCES
+# =============================================================================
+HAS_JQ=false
+command -v jq &> /dev/null && HAS_JQ=true
+
+# =============================================================================
+# AIDE
+# =============================================================================
+show_help() {
+    cat <<EOF
+🌱 Green Claude — Wrapper éco-responsable pour Claude Code
+
+Réduit l'empreinte des requêtes IA (modèle proportionné, limites de taille,
+heures creuses, cache) et audite le code avec des règles d'éco-conception
+issues des référentiels RGESN, GR491 et Green Software Foundation.
+
+USAGE :
+  green-claude [OPTIONS] <prompt>
+
+OPTIONS :
+  --file <fichier>       Fichier(s) à joindre au prompt (max $MAX_FILES, répétable)
+  --model <modèle>       Forcer un modèle (haiku|sonnet|opus ou ID complet)
+  --complexity <niveau>  simple|medium|complex → choisit le modèle adapté
+  --eco-check            Auditer les fichiers avec les règles d'éco-conception
+  --rules <fichier>      Fichier de règles JSON pour l'audit
+                         (défaut : rules/ecoconception.json)
+  --ignore-offpeak       Ignorer l'avertissement heures creuses
+  --no-cache             Désactiver le cache local
+  --list-models          Afficher les modèles recommandés
+  --list-rules           Afficher les règles disponibles
+  --help, -h             Cette aide
+
+EXEMPLES :
+  # Question simple → Haiku (le plus léger)
+  green-claude --complexity simple "Explique cette regex"
+
+  # Audit éco-conception seul (sans appel à Claude)
+  green-claude --file src/app.js --eco-check
+
+  # Audit avec le référentiel complet
+  green-claude --file src/app.js --rules rules/ecoconception.json --eco-check
+
+  # Consulter les pratiques de sobriété Claude Code (Boris Cherny)
+  green-claude --list-rules
+
+RÈGLES EMBARQUÉES :
+  • ${#BASIC_RULES[@]} règles de base intégrées (aucune dépendance)
+  • rules/basic.json          15 règles de base (audit, nécessite jq)
+  • rules/ecoconception.json  21 règles RGESN/GR491/GSF (audit, nécessite jq)
+  • rules/boris.json          12 pratiques de sobriété Claude Code (checklist)
+
+HEURES CREUSES : $OFFPEAK_START:00 - $OFFPEAK_END:00 UTC
+CACHE : $CACHE_FILE
+EOF
+}
+
+# =============================================================================
+# HEURES CREUSES
+# La nuit (UTC), le mix électrique est généralement moins carboné. On avertit,
+# on n'interdit pas : la sobriété proposée, pas imposée.
+# =============================================================================
+check_offpeak() {
+    local current_hour=$((10#$(date -u +%H)))
+
+    if [ "$current_hour" -ge "$OFFPEAK_START" ] || [ "$current_hour" -lt "$OFFPEAK_END" ]; then
+        return 0
+    fi
+
+    local wait_hours=$((OFFPEAK_START - current_hour))
+    print_warning "Heure de pointe. Dans $wait_hours h (22h-6h UTC), l'électricité sera plus verte."
+    read -p "Continuer quand même ? (o/n) : " -n 1 -r
+    echo
+    [[ $REPLY =~ ^[OoYy]$ ]]
+}
+
+# =============================================================================
+# LIMITES DE TAILLE DES FICHIERS
+# =============================================================================
+check_files() {
+    local total_size=0
+    local file_count=0
+
+    for file in "$@"; do
+        if [ ! -f "$file" ]; then
+            print_error "Fichier introuvable : $file"
+            return 1
+        fi
+
+        local size
+        size=$(file_size "$file")
+        total_size=$((total_size + size))
+        file_count=$((file_count + 1))
+
+        if [ "$size" -gt "$MAX_FILE_SIZE" ]; then
+            print_error "Fichier trop grand : $file ($((size / 1024)) Ko > $((MAX_FILE_SIZE / 1024)) Ko)"
+            return 1
+        fi
+        if [ "$total_size" -gt "$MAX_TOTAL_SIZE" ]; then
+            print_error "Taille totale trop grande : $((total_size / 1024)) Ko > $((MAX_TOTAL_SIZE / 1024)) Ko"
+            return 1
+        fi
+        if [ "$file_count" -gt "$MAX_FILES" ]; then
+            print_error "Trop de fichiers : $file_count > $MAX_FILES"
+            return 1
+        fi
+    done
+    return 0
+}
+
+# =============================================================================
+# AUDIT ÉCO-CONCEPTION — MODE BASIQUE (sans jq)
+# Passe les règles embarquées BASIC_RULES sur chaque fichier.
+# =============================================================================
+eco_audit_basic() {
+    local files=("$@")
+    local issues_found=0
+
+    print_header "════════════════════════════════════════"
+    print_header "  🌱 Audit Éco-Conception (mode basique)"
+    print_header "════════════════════════════════════════"
+    echo ""
+
+    for file in "${files[@]}"; do
+        print_info "🔍 Analyse de : $file"
+        for rule in "${BASIC_RULES[@]}"; do
+            IFS=":" read -r pattern category recommendation <<< "$rule"
+            if grep -qE "$pattern" "$file" 2>/dev/null; then
+                print_warning "⚠️  [$category] $recommendation"
+                issues_found=$((issues_found + 1))
+            fi
+        done
+        echo ""
+    done
+
+    if [ $issues_found -eq 0 ]; then
+        print_success "✅ Aucune issue d'éco-conception détectée"
+    else
+        print_warning "⚠️  $issues_found issue(s) d'éco-conception détectée(s)"
+    fi
+    echo ""
+}
+
+# =============================================================================
+# AUDIT ÉCO-CONCEPTION — MODE AVANCÉ (avec jq)
+# Accepte les deux structures de règles (plate ou catégorisée) et ignore
+# les règles sans pattern (pratiques d'usage, non détectables dans le code).
+# =============================================================================
+eco_audit_advanced() {
+    local rules_file="$1"
+    shift
+    local files=("$@")
+
+    if [ ! -f "$rules_file" ]; then
+        print_error "Fichier de règles introuvable : $rules_file"
+        return 1
+    fi
+
+    print_header "════════════════════════════════════════"
+    print_header "  🌱 Audit Éco-Conception (mode avancé)"
+    print_header "  Règles : $(jq -r '.metadata.name' "$rules_file")"
+    print_header "════════════════════════════════════════"
+    echo ""
+
+    local issues_found=0
+
+    # Aplatis les règles en lignes TSV : id, catégorie, titre, impact,
+    # patterns (joints par |), recommandation. Les règles sans pattern
+    # sont exclues : rien à chercher dans le code.
+    while IFS=$'\t' read -r id category title impact patterns recommendation; do
+        for file in "${files[@]}"; do
+            if grep -qE "$patterns" "$file" 2>/dev/null; then
+                local color="$GREEN" icon="✓"
+                case "$impact" in
+                    "Moyen") color="$YELLOW"; icon="⚠️ " ;;
+                    "Élevé") color="$RED";    icon="❌" ;;
+                esac
+                echo -e "${color}${icon} ${id} — ${title}${NC}"
+                echo -e "   → Catégorie : ${category}"
+                echo -e "   → Impact : ${impact}"
+                echo -e "   → Fichier : ${file}"
+                echo -e "   → Recommandation : ${recommendation}"
+                echo ""
+                issues_found=$((issues_found + 1))
+                break
+            fi
+        done
+    done < <(jq -r '
+        (if .categories
+         then [.categories[] as $c | $c.rules[] | . + {category: $c.name}]
+         else [.rules[] | . + {category: (.category // "-")}]
+         end)
+        | .[]
+        | select((.patterns // []) | length > 0)
+        | [.id, .category, .title, .impact, (.patterns | join("|")), .recommendation]
+        | @tsv' "$rules_file")
+
+    if [ $issues_found -eq 0 ]; then
+        print_success "✅ Aucune issue d'éco-conception détectée"
+    else
+        print_warning "⚠️  $issues_found issue(s) d'éco-conception détectée(s)"
+    fi
+    echo ""
+}
+
+# =============================================================================
+# LISTE DES RÈGLES
+# =============================================================================
+list_rules() {
+    print_header "════════════════════════════════════════"
+    print_header "  🌱 Règles d'éco-conception disponibles"
+    print_header "════════════════════════════════════════"
+    echo ""
+
+    print_info "Règles de base embarquées (sans dépendance) :"
+    for rule in "${BASIC_RULES[@]}"; do
+        IFS=":" read -r pattern category recommendation <<< "$rule"
+        echo "  • [$category] $recommendation"
+    done
+    echo ""
+
+    if [ "$HAS_JQ" = true ]; then
+        for f in "$RULES_DIR"/*.json; do
+            [ -f "$f" ] || continue
+            local name count
+            name=$(jq -r '.metadata.name' "$f")
+            count=$(jq -r '.metadata.count' "$f")
+            print_info "$(basename "$f") — $name ($count règles)"
+            # Affiche id + titre, en signalant les pratiques (sans pattern)
+            jq -r '
+                (if .categories then [.categories[].rules[]] else .rules end)
+                | .[]
+                | "  • " + .id + " — " + .title
+                  + (if ((.patterns // []) | length) == 0 then "  [pratique]" else "" end)
+            ' "$f"
+            echo ""
+        done
+        print_info "Audit : green-claude --file <src> --rules rules/<fichier>.json --eco-check"
+        print_info "Les règles marquées [pratique] sont des habitudes d'usage : non détectables"
+        print_info "dans le code, elles servent de checklist."
+    else
+        print_info "Installe jq pour afficher les règles détaillées des fichiers rules/*.json :"
+        print_info "  brew install jq   (macOS)  /  sudo apt install jq   (Debian/Ubuntu)"
+    fi
+    echo ""
+}
+
+# =============================================================================
+# CHOIX DU MODÈLE
+# =============================================================================
+recommend_model() {
+    local complexity="$1"
+    for rec in "${MODEL_RECOMMENDATIONS[@]}"; do
+        IFS=":" read -r level model <<< "$rec"
+        if [ "$level" = "$complexity" ]; then
+            echo "$model"
+            return
+        fi
+    done
+    echo "claude-sonnet-4-6"
+}
+
+# =============================================================================
+# CACHE LOCAL
+# Une même question posée deux fois ne doit coûter qu'un seul appel.
+# Stockage simple : un fichier par requête, nommé par hachage du prompt.
+# =============================================================================
+cache_key() {
+    printf '%s' "$1" | shasum -a 256 2>/dev/null | cut -d' ' -f1 || \
+    printf '%s' "$1" | sha256sum | cut -d' ' -f1
+}
+
+cache_get() {
+    local key
+    key=$(cache_key "$1")
+    [ -f "$CACHE_FILE.$key" ] && cat "$CACHE_FILE.$key"
+}
+
+cache_add() {
+    local key
+    key=$(cache_key "$1")
+    printf '%s\n' "$2" > "$CACHE_FILE.$key"
+}
+
+# =============================================================================
+# RÉSUMÉ DES PARAMÈTRES SOBRES
+# =============================================================================
+show_summary() {
+    local model="$1"
+    echo ""
+    print_info "🌱 Paramètres Green Claude :"
+    print_info "   • Modèle : $model"
+    print_info "   • Taille max/fichier : $((MAX_FILE_SIZE / 1024)) Ko — fichiers max : $MAX_FILES"
+    print_info "   • Heures creuses : $OFFPEAK_START:00 - $OFFPEAK_END:00 UTC"
+    if [ "$HAS_JQ" = true ]; then
+        print_info "   • Audit avancé : disponible (jq installé)"
+    else
+        print_info "   • Audit avancé : installe jq pour l'activer"
+    fi
+    echo ""
+}
+
+# =============================================================================
+# MAIN
+# =============================================================================
+
+FILES=()
+MODEL=""
+COMPLEXITY="medium"
+IGNORE_OFFPEAK=false
+NO_CACHE=false
+ECO_CHECK=false
+RULES_FILE=""
+LIST_MODELS=false
+LIST_RULES=false
+SHOW_HELP=false
+PROMPT=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --file)           FILES+=("$2"); shift 2 ;;
+        --model)          MODEL="$2"; shift 2 ;;
+        --complexity)     COMPLEXITY="$2"; shift 2 ;;
+        --rules)          RULES_FILE="$2"; shift 2 ;;
+        --ignore-offpeak) IGNORE_OFFPEAK=true; shift ;;
+        --no-cache)       NO_CACHE=true; shift ;;
+        --eco-check)      ECO_CHECK=true; shift ;;
+        --list-models)    LIST_MODELS=true; shift ;;
+        --list-rules)     LIST_RULES=true; shift ;;
+        --help|-h)        SHOW_HELP=true; shift ;;
+        *)
+            if [ -z "$PROMPT" ]; then PROMPT="$1"; else PROMPT="$PROMPT $1"; fi
+            shift
+            ;;
+    esac
+done
+
+if [ "$SHOW_HELP" = true ] || { [ -z "$PROMPT" ] && [ ${#FILES[@]} -eq 0 ] && \
+   [ "$ECO_CHECK" = false ] && [ "$LIST_MODELS" = false ] && [ "$LIST_RULES" = false ]; }; then
+    show_help
+    exit 0
+fi
+
+if [ "$LIST_MODELS" = true ]; then
+    print_info "Modèles recommandés par niveau de complexité :"
+    for rec in "${MODEL_RECOMMENDATIONS[@]}"; do
+        IFS=":" read -r level model <<< "$rec"
+        echo "  • $level → $model"
+    done
+    exit 0
+fi
+
+if [ "$LIST_RULES" = true ]; then
+    list_rules
+    exit 0
+fi
+
+# --- Audit éco-conception ---
+if [ "$ECO_CHECK" = true ] && [ ${#FILES[@]} -gt 0 ]; then
+    if [ "$HAS_JQ" = true ]; then
+        eco_audit_advanced "${RULES_FILE:-$RULES_DIR/ecoconception.json}" "${FILES[@]}"
+    else
+        eco_audit_basic "${FILES[@]}"
+    fi
+    # Audit seul, sans prompt : on s'arrête là
+    [ -z "$PROMPT" ] && exit 0
+fi
+
+# --- Vérifications avant l'appel à Claude ---
+
+if [ ${#FILES[@]} -gt 0 ] && ! check_files "${FILES[@]}"; then
+    exit 1
+fi
+
+if [ "$IGNORE_OFFPEAK" = false ] && ! check_offpeak; then
+    exit 0
+fi
+
+# Cache : même prompt (+ fichiers) déjà posé → réponse locale, zéro appel
+CACHE_INPUT="$PROMPT ${FILES[*]}"
+if [ "$NO_CACHE" = false ] && [ -n "$PROMPT" ]; then
+    CACHED=$(cache_get "$CACHE_INPUT")
+    if [ -n "$CACHED" ]; then
+        print_success "✅ Réponse servie depuis le cache local (zéro token consommé)"
+        echo "$CACHED"
+        exit 0
+    fi
+fi
+
+# Modèle : forcé (--model) ou déduit de la complexité
+if [ -n "$MODEL" ]; then
+    case "$MODEL" in
+        haiku)  MODEL="claude-haiku-4-5" ;;
+        sonnet) MODEL="claude-sonnet-4-6" ;;
+        opus)   MODEL="claude-opus-4-8" ;;
+    esac
+else
+    MODEL=$(recommend_model "$COMPLEXITY")
+fi
+
+show_summary "$MODEL"
+
+# CLI Claude Code : binaire `claude`
+if ! command -v claude &> /dev/null; then
+    print_error "CLI Claude Code introuvable."
+    print_info "Installation : npm install -g @anthropic-ai/claude-code"
+    exit 1
+fi
+
+# Construit le prompt final : contenu des fichiers joints, puis la question.
+FULL_PROMPT="$PROMPT"
+for file in "${FILES[@]}"; do
+    FULL_PROMPT+=$'\n\n'"--- Fichier : $file ---"$'\n'"$(cat "$file")"
+done
+
+# Appel en mode non-interactif (-p). --bare : ne charge pas le contexte
+# projet (CLAUDE.md, MCP…), inutile pour un appel scripté → moins de tokens.
+RESPONSE=$(claude -p --model "$MODEL" "$FULL_PROMPT" 2>&1)
+STATUS=$?
+
+echo "$RESPONSE"
+
+if [ $STATUS -eq 0 ] && [ "$NO_CACHE" = false ] && [ -n "$PROMPT" ] && [ -n "$RESPONSE" ]; then
+    cache_add "$CACHE_INPUT" "$RESPONSE"
+    print_success "💾 Réponse mise en cache pour la prochaine fois"
+fi

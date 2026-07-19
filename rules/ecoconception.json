@@ -1,0 +1,236 @@
+{
+  "metadata": {
+    "name": "Éco-conception de services numériques — RGESN / GR491 / GSF",
+    "description": "21 règles d'éco-conception inspirées des référentiels publics : RGESN (Référentiel Général d'Écoconception de Services Numériques), GR491 (guide de l'ISIT) et les patterns de la Green Software Foundation.",
+    "version": "2.0.0",
+    "sources": [
+      "https://ecologie.numerique.gouv.fr/rg-esn/",
+      "https://gr491.isit-europe.org/",
+      "https://greensoftware.foundation/"
+    ],
+    "count": 21,
+    "type": "code_audit",
+    "type_note": "Ces règles portent sur le CODE et l'architecture : la plupart ont des 'patterns' (expressions régulières) détectables par l'audit --eco-check. Celles sans pattern (stratégie, hébergement) servent de checklist via --list-rules."
+  },
+  "categories": {
+    "strategie": {
+      "name": "Stratégie & Gouvernance",
+      "description": "Intégrer l'éco-conception dans la démarche produit, en amont du code.",
+      "rules": [
+        {
+          "id": "ECO-1.1",
+          "title": "Mesurer avant d'optimiser",
+          "description": "Évaluer l'impact environnemental du service avant toute refonte majeure : on ne réduit bien que ce que l'on mesure.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Auditer le service avec EcoIndex, GreenFrame ou Scaphandre, et garder ces mesures comme référence avant/après.",
+          "tags": ["strategie", "audit", "mesure"]
+        },
+        {
+          "id": "ECO-1.2",
+          "title": "Des critères environnementaux dans les user stories",
+          "description": "Faire de l'éco-conception un critère d'acceptation, pas une réflexion après coup.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Ajouter aux stories des critères mesurables : poids de page maximal, budget requêtes, seuil EcoIndex.",
+          "tags": ["gouvernance", "processus", "agile"]
+        }
+      ]
+    },
+    "conception": {
+      "name": "Conception",
+      "description": "Les choix de conception pèsent plus lourd que toutes les optimisations de code qui suivront.",
+      "rules": [
+        {
+          "id": "ECO-2.1",
+          "title": "Privilégier la solution la plus simple (low-tech)",
+          "description": "Un framework lourd pour un site vitrine, c'est du JavaScript téléchargé, parsé et exécuté par chaque visiteur pour rien.",
+          "impact": "Élevé",
+          "patterns": ["react", "angular", "vue", "next"],
+          "recommendation": "Avant d'adopter un framework, évaluer si du HTML/CSS statique, du Vanilla JS ou HTMX suffisent au besoin réel.",
+          "tags": ["low-tech", "simplicite", "frameworks"]
+        },
+        {
+          "id": "ECO-2.2",
+          "title": "Limiter les fonctionnalités au nécessaire",
+          "description": "80 % des besoins sont couverts par 20 % des fonctionnalités ; le reste coûte en développement, en maintenance et en exécution.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Supprimer ou ne pas développer les fonctionnalités utilisées par moins de 5 % des utilisateurs.",
+          "tags": ["mvp", "minimalisme", "yagni"]
+        },
+        {
+          "id": "ECO-2.3",
+          "title": "Concevoir pour durer",
+          "description": "Un service qui doit être refait tous les deux ans multiplie son empreinte de fabrication logicielle.",
+          "impact": "Moyen",
+          "patterns": ["deprecated", "TODO.*remove"],
+          "recommendation": "Prévoir les migrations de données, documenter pour le long terme, éviter les dépendances à durée de vie courte.",
+          "tags": ["durabilite", "maintenance", "perennite"]
+        },
+        {
+          "id": "ECO-2.4",
+          "title": "Choisir des formats ouverts",
+          "description": "Les formats propriétaires imposent des logiciels lourds et créent une dépendance qui force au renouvellement.",
+          "impact": "Moyen",
+          "patterns": ["\\.docx", "\\.xlsx", "\\.pptx"],
+          "recommendation": "Préférer ODF, CSV, JSON, Markdown : lisibles partout, y compris sur du matériel ancien.",
+          "tags": ["formats", "ouverture", "standards"]
+        }
+      ]
+    },
+    "developpement": {
+      "name": "Développement",
+      "description": "Réduire le travail demandé au processeur, à la mémoire et au réseau.",
+      "rules": [
+        {
+          "id": "ECO-3.1",
+          "title": "Optimiser les requêtes SQL",
+          "description": "SELECT *, fonctions dans les WHERE et tris aléatoires font travailler la base bien au-delà du besoin.",
+          "impact": "Élevé",
+          "patterns": ["SELECT \\*", "WHERE 1=1", "ORDER BY.*RAND\\(\\)"],
+          "recommendation": "Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE.",
+          "tags": ["sql", "performance", "base-de-donnees"]
+        },
+        {
+          "id": "ECO-3.2",
+          "title": "Utiliser des pools de connexions",
+          "description": "Ouvrir une connexion à la base à chaque requête est coûteux en CPU et en latence, côté application comme côté serveur.",
+          "impact": "Élevé",
+          "patterns": ["new.*Connection", "createConnection"],
+          "recommendation": "Configurer un pool de connexions (pg-pool, HikariCP, mysql2/promise).",
+          "tags": ["base-de-donnees", "connexions", "pool"]
+        },
+        {
+          "id": "ECO-3.3",
+          "title": "Éviter les boucles imbriquées sur de gros volumes",
+          "description": "Deux boucles imbriquées sur n éléments = n² itérations : ce qui passe sur 100 éléments s'effondre sur 100 000.",
+          "impact": "Élevé",
+          "patterns": ["for.*\\{.*for", "while.*\\{.*for", "\\.forEach.*\\.forEach"],
+          "recommendation": "Utiliser des structures adaptées (tables de hachage, ensembles) pour ramener la complexité à O(n).",
+          "tags": ["algorithmes", "complexite", "cpu"]
+        },
+        {
+          "id": "ECO-3.4",
+          "title": "Éviter les bibliothèques lourdes pour des besoins simples",
+          "description": "Importer lodash pour trois fonctions ou moment pour formater une date fait payer des centaines de Ko à chaque visiteur.",
+          "impact": "Élevé",
+          "patterns": ["lodash", "moment", "jquery"],
+          "recommendation": "Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).",
+          "tags": ["javascript", "bundle", "poids"]
+        },
+        {
+          "id": "ECO-3.5",
+          "title": "Limiter et nettoyer les dépendances",
+          "description": "Chaque dépendance ajoute du poids au build, de la surface d'attaque et du travail de maintenance.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Auditer régulièrement (npm prune, depcheck) et supprimer les dépendances inutilisées.",
+          "tags": ["dependances", "minimalisme", "maintenance"]
+        },
+        {
+          "id": "ECO-3.6",
+          "title": "Charger à la demande (lazy loading)",
+          "description": "Charger d'emblée des images, composants et routes que l'utilisateur ne verra peut-être jamais gaspille bande passante et énergie.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Utiliser loading=\"lazy\" sur les images et iframes, et le découpage de code (dynamic import) pour les routes et composants.",
+          "tags": ["chargement", "performance", "a-la-demande"]
+        }
+      ]
+    },
+    "exploitation": {
+      "name": "Exploitation & Hébergement",
+      "description": "Le même code peut consommer très différemment selon comment et où il est servi.",
+      "rules": [
+        {
+          "id": "ECO-4.1",
+          "title": "Choisir un hébergement sobre",
+          "description": "L'électricité du data center est une part majeure de l'empreinte d'usage d'un service.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Privilégier les hébergeurs transparents sur leur mix énergétique et leur PUE (voir l'annuaire de la Green Web Foundation).",
+          "tags": ["hebergement", "energie", "datacenter"]
+        },
+        {
+          "id": "ECO-4.2",
+          "title": "Activer la compression HTTP",
+          "description": "GZIP/Brotli divisent couramment par 3 à 5 le poids des réponses texte (HTML, CSS, JS, JSON).",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Activer Brotli (ou à défaut GZIP) sur le serveur web ou le reverse proxy.",
+          "tags": ["serveur", "compression", "reseau"]
+        },
+        {
+          "id": "ECO-4.3",
+          "title": "Configurer le cache HTTP",
+          "description": "Une ressource servie depuis le cache du navigateur ne coûte ni réseau ni serveur.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Définir Cache-Control avec des durées longues pour les assets versionnés, plus ETag/Last-Modified pour le reste.",
+          "tags": ["cache", "http", "performance"]
+        }
+      ]
+    },
+    "contenu": {
+      "name": "Contenus & Interface",
+      "description": "Images, vidéos, polices et scripts tiers : là où se joue l'essentiel du poids des pages.",
+      "rules": [
+        {
+          "id": "ECO-5.1",
+          "title": "Optimiser les images",
+          "description": "Les images représentent souvent 50 à 80 % du poids d'une page.",
+          "impact": "Élevé",
+          "patterns": ["\\.png", "\\.jpe?g"],
+          "recommendation": "Convertir en WebP/AVIF, servir des tailles adaptées via srcset, compresser systématiquement.",
+          "tags": ["images", "webp", "compression"]
+        },
+        {
+          "id": "ECO-5.2",
+          "title": "Pas de vidéo en lecture automatique",
+          "description": "L'autoplay télécharge et décode de la vidéo que l'utilisateur n'a pas demandée — le pire ratio utilité/consommation du web.",
+          "impact": "Élevé",
+          "patterns": ["autoplay"],
+          "recommendation": "Remplacer l'autoplay par une image de couverture cliquable (façade) ; ne charger la vidéo qu'au clic.",
+          "tags": ["video", "autoplay", "energie"]
+        },
+        {
+          "id": "ECO-5.3",
+          "title": "Préférer les polices système",
+          "description": "Chaque police personnalisée est un téléchargement de plus, bloquant souvent l'affichage du texte.",
+          "impact": "Faible",
+          "patterns": ["@font-face"],
+          "recommendation": "Utiliser la pile system-ui ; si une police personnalisée est indispensable, la sous-ensembler (subset) et utiliser font-display: swap.",
+          "tags": ["polices", "performance", "systeme"]
+        },
+        {
+          "id": "ECO-5.4",
+          "title": "Éviter les scripts de tracking superflus",
+          "description": "Les scripts publicitaires et de mesure d'audience s'exécutent chez chaque visiteur, à chaque page, souvent pour des données peu exploitées.",
+          "impact": "Élevé",
+          "patterns": ["googletagmanager", "gtag\\(", "facebook.*pixel"],
+          "recommendation": "Limiter le tracking au strict nécessaire ; préférer une mesure d'audience légère et respectueuse (ex. Matomo auto-hébergé, Plausible).",
+          "tags": ["tracking", "vie-privee", "scripts-tiers"]
+        },
+        {
+          "id": "ECO-5.5",
+          "title": "Interactions simples en HTML/CSS plutôt qu'en JavaScript",
+          "description": "Menus, accordéons, infobulles : beaucoup d'interactions courantes existent nativement en HTML/CSS, sans coût d'exécution JS.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Utiliser <details>/<summary>, :hover, :focus-within et les formulaires natifs avant d'écrire du JavaScript.",
+          "tags": ["html", "css", "javascript"]
+        },
+        {
+          "id": "ECO-5.6",
+          "title": "Des icônes en SVG plutôt qu'en images bitmap",
+          "description": "Un SVG inline de quelques centaines d'octets remplace un PNG de plusieurs Ko, et reste net à toutes les tailles.",
+          "impact": "Faible",
+          "patterns": ["icon.*\\.png"],
+          "recommendation": "Utiliser des SVG inline ou un sprite SVG ; éviter les polices d'icônes complètes pour trois pictogrammes.",
+          "tags": ["icones", "svg", "poids"]
+        }
+      ]
+    }
+  }
+}

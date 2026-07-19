@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "name": "Green Claude — Règles de base",
+    "description": "15 règles d'éco-conception essentielles, détectables par simple recherche de motifs dans le code. Sous-ensemble pédagogique du référentiel complet (voir rules/ecoconception.json).",
+    "version": "2.0.0",
+    "count": 15,
+    "type": "code_audit"
+  },
+  "rules": [
+    {
+      "id": "BASIC-001",
+      "category": "Base de données",
+      "title": "Éviter SELECT *",
+      "description": "Sélectionner toutes les colonnes fait transiter et traiter des données inutiles à chaque requête.",
+      "impact": "Élevé",
+      "patterns": ["SELECT \\*"],
+      "recommendation": "Lister explicitement les colonnes nécessaires : SELECT col1, col2 FROM table.",
+      "tags": ["sql", "performance", "reseau"]
+    },
+    {
+      "id": "BASIC-002",
+      "category": "Algorithmes",
+      "title": "Éviter les boucles imbriquées",
+      "description": "Deux boucles imbriquées donnent une complexité O(n²) : le coût explose avec le volume de données.",
+      "impact": "Élevé",
+      "patterns": ["for.*\\{.*for", "while.*\\{.*for", "for.*\\{.*while"],
+      "recommendation": "Utiliser des structures adaptées (tables de hachage, ensembles) pour ramener la complexité à O(n).",
+      "tags": ["algorithmes", "complexite", "cpu"]
+    },
+    {
+      "id": "BASIC-003",
+      "category": "CSS",
+      "title": "Limiter les animations",
+      "description": "Les animations permanentes sollicitent le GPU en continu, y compris quand personne ne les regarde.",
+      "impact": "Moyen",
+      "patterns": ["@keyframes", "transition:.*all"],
+      "recommendation": "Réserver les animations aux interactions utiles ; animer transform/opacity uniquement ; respecter prefers-reduced-motion.",
+      "tags": ["css", "gpu", "energie"]
+    },
+    {
+      "id": "BASIC-004",
+      "category": "JavaScript",
+      "title": "Éviter les bibliothèques lourdes pour des besoins simples",
+      "description": "lodash ou moment pour quelques fonctions, c'est des centaines de Ko téléchargés et parsés par chaque visiteur.",
+      "impact": "Élevé",
+      "patterns": ["require\\('lodash'\\)", "from 'lodash'", "require\\('moment'\\)", "from 'moment'"],
+      "recommendation": "Préférer les fonctions natives du langage ou des alternatives légères (date-fns au lieu de moment).",
+      "tags": ["javascript", "bundle", "poids"]
+    },
+    {
+      "id": "BASIC-005",
+      "category": "Réseau",
+      "title": "Regrouper les requêtes HTTP",
+      "description": "Chaque requête a un coût fixe (connexion, en-têtes, traitement serveur) indépendant de sa taille.",
+      "impact": "Élevé",
+      "patterns": [],
+      "recommendation": "Regrouper les appels API quand c'est possible, mettre en cache les réponses, éviter le polling agressif.",
+      "tags": ["reseau", "http", "performance"]
+    },
+    {
+      "id": "BASIC-006",
+      "category": "Base de données",
+      "title": "Utiliser un pool de connexions",
+      "description": "Ouvrir une connexion à chaque requête coûte cher en CPU et en latence des deux côtés.",
+      "impact": "Élevé",
+      "patterns": ["mysql\\.createConnection", "new.*Connection"],
+      "recommendation": "Configurer un pool (pg-pool, mysql2/promise, HikariCP).",
+      "tags": ["base-de-donnees", "connexions", "pool"]
+    },
+    {
+      "id": "BASIC-007",
+      "category": "Images",
+      "title": "Optimiser les images",
+      "description": "Les images non optimisées sont la première cause de pages lourdes.",
+      "impact": "Moyen",
+      "patterns": ["\\.png", "\\.jpe?g"],
+      "recommendation": "Convertir en WebP/AVIF, utiliser srcset, compresser systématiquement.",
+      "tags": ["images", "webp", "compression"]
+    },
+    {
+      "id": "BASIC-008",
+      "category": "CSS",
+      "title": "Éviter les frameworks CSS complets pour de petits besoins",
+      "description": "Importer Bootstrap entier pour une grille et deux boutons fait payer des centaines de Ko inutiles.",
+      "impact": "Moyen",
+      "patterns": ["bootstrap"],
+      "recommendation": "Écrire le CSS nécessaire, ou n'importer que les modules utilisés (purge/tree-shaking du framework).",
+      "tags": ["css", "framework", "poids"]
+    },
+    {
+      "id": "BASIC-009",
+      "category": "JavaScript",
+      "title": "Éviter les setInterval trop fréquents",
+      "description": "Un intervalle court réveille le CPU en permanence, même quand rien ne change à l'écran.",
+      "impact": "Moyen",
+      "patterns": ["setInterval\\([^,]+,\\s*[0-9]{1,2}\\)", "setInterval\\([^,]+,\\s*[1-4][0-9]{2}\\)"],
+      "recommendation": "Espacer les intervalles (> 500 ms), préférer les événements ou requestAnimationFrame, tout couper quand l'onglet est masqué.",
+      "tags": ["javascript", "cpu", "timers"]
+    },
+    {
+      "id": "BASIC-010",
+      "category": "Données",
+      "title": "Limiter le stockage local",
+      "description": "Accumuler des données dans localStorage sans expiration finit par peser sur chaque lecture/écriture.",
+      "impact": "Faible",
+      "patterns": ["localStorage\\."],
+      "recommendation": "Stocker le minimum, prévoir une expiration, nettoyer les données obsolètes.",
+      "tags": ["stockage", "donnees", "navigateur"]
+    },
+    {
+      "id": "BASIC-011",
+      "category": "Chargement",
+      "title": "Charger à la demande (lazy loading)",
+      "description": "Charger d'emblée ce que l'utilisateur ne verra peut-être jamais gaspille bande passante et énergie.",
+      "impact": "Élevé",
+      "patterns": [],
+      "recommendation": "Utiliser loading=\"lazy\" sur images et iframes, et le découpage de code pour les routes.",
+      "tags": ["chargement", "performance", "a-la-demande"]
+    },
+    {
+      "id": "BASIC-012",
+      "category": "Build",
+      "title": "Minifier les assets",
+      "description": "Les fichiers JS/CSS non minifiés transportent commentaires et espaces inutiles vers chaque visiteur.",
+      "impact": "Moyen",
+      "patterns": [],
+      "recommendation": "Activer la minification dans le build (esbuild, Terser, CSSNano) — c'est gratuit et systématique.",
+      "tags": ["build", "minification", "poids"]
+    },
+    {
+      "id": "BASIC-013",
+      "category": "Tracking",
+      "title": "Limiter les scripts de tracking",
+      "description": "Les scripts de mesure et de publicité s'exécutent chez chaque visiteur, à chaque page.",
+      "impact": "Élevé",
+      "patterns": ["googletagmanager", "gtag\\(", "facebook.*pixel"],
+      "recommendation": "Ne garder que la mesure réellement exploitée ; préférer des solutions légères (Matomo, Plausible).",
+      "tags": ["tracking", "vie-privee", "scripts-tiers"]
+    },
+    {
+      "id": "BASIC-014",
+      "category": "Serveur",
+      "title": "Activer la compression GZIP/Brotli",
+      "description": "La compression divise couramment par 3 à 5 le poids des réponses texte.",
+      "impact": "Moyen",
+      "patterns": [],
+      "recommendation": "Activer Brotli (ou GZIP) sur le serveur web ou le reverse proxy.",
+      "tags": ["serveur", "compression", "reseau"]
+    },
+    {
+      "id": "BASIC-015",
+      "category": "Interface",
+      "title": "Proposer un mode sombre",
+      "description": "Sur les écrans OLED, les pixels sombres consomment moins que les pixels clairs.",
+      "impact": "Faible",
+      "patterns": [],
+      "recommendation": "Respecter prefers-color-scheme et proposer un thème sombre.",
+      "tags": ["theme", "energie", "oled"]
+    }
+  ]
+}
