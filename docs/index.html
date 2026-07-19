@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Green Claude — Sobriété numérique pour Claude Code | Éco-conception IA</title>
+  <meta name="description" content="Green Claude : wrapper éco-responsable open source pour Claude Code. Réduisez l'empreinte carbone de vos requêtes IA et produisez du code éco-conçu selon les référentiels RGESN 2024, GR491 et Green Software Foundation.">
+  <link rel="canonical" href="https://institut-du-numerique-responsable.github.io/green-claude/">
+  <meta property="og:title" content="Green Claude — Sobriété numérique pour Claude Code">
+  <meta property="og:description" content="Wrapper éco-responsable open source : IA frugale (modèle proportionné, cache, tokens limités) et audit d'éco-conception RGESN 2024 / GR491.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://institut-du-numerique-responsable.github.io/green-claude/">
+  <meta property="og:locale" content="fr_FR">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Green Claude",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS, Linux",
+    "description": "Wrapper éco-responsable pour Claude Code : sobriété numérique des requêtes IA et audit d'éco-conception du code selon les référentiels RGESN 2024, GR491 et Green Software Foundation.",
+    "license": "https://opensource.org/licenses/MIT",
+    "url": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
+    "author": { "@type": "Organization", "name": "Institut du Numérique Responsable" },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+  }
+  </script>
+  <style>
+    /* Page éco-conçue : polices système, zéro JavaScript, zéro requête externe,
+       mode sombre natif — elle applique les règles qu'elle promeut. */
+    :root {
+      --bg: #fdfcf8; --fg: #1e2a22; --muted: #5a6b5f;
+      --accent: #1b7a4a; --card: #f1f0e8; --border: #ddd9cc;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #131a16; --fg: #e6e9e4; --muted: #9db0a3;
+              --accent: #5ecb92; --card: #1c2620; --border: #2e3b33; }
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg); color: var(--fg);
+      line-height: 1.65; padding: 0 1.25rem;
+    }
+    main { max-width: 46rem; margin: 0 auto; padding: 3rem 0 4rem; }
+    h1 { font-size: 2rem; line-height: 1.2; margin-bottom: .75rem; }
+    h2 { font-size: 1.35rem; margin: 2.5rem 0 .75rem; color: var(--accent); }
+    p  { margin-bottom: 1rem; }
+    a  { color: var(--accent); }
+    .tagline { font-size: 1.15rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .cta {
+      display: inline-block; background: var(--accent); color: var(--bg);
+      padding: .65rem 1.3rem; border-radius: .4rem; text-decoration: none;
+      font-weight: 600; margin: .25rem .5rem .25rem 0;
+    }
+    .cta.secondary { background: transparent; color: var(--accent);
+                     border: 1.5px solid var(--accent); }
+    .duo { display: grid; gap: 1rem; grid-template-columns: 1fr;
+           margin: 1.25rem 0; }
+    @media (min-width: 40rem) { .duo { grid-template-columns: 1fr 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border);
+            border-radius: .6rem; padding: 1.1rem 1.2rem; }
+    .card h3 { font-size: 1.05rem; margin-bottom: .5rem; }
+    .card p { font-size: .95rem; margin-bottom: 0; color: var(--muted); }
+    ul { padding-left: 1.2rem; margin-bottom: 1rem; }
+    li { margin-bottom: .45rem; }
+    pre {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: .5rem; padding: 1rem; overflow-x: auto;
+      font-size: .88rem; margin-bottom: 1rem;
+    }
+    code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+    footer { border-top: 1px solid var(--border); margin-top: 3rem;
+             padding-top: 1.25rem; font-size: .88rem; color: var(--muted); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>🌱 Green Claude</h1>
+  <p class="tagline">Sobriété numérique pour <strong>Claude Code</strong> : des requêtes IA frugales, et du code éco-conçu selon le <strong>RGESN&nbsp;2024</strong> et le <strong>GR491</strong>.</p>
+
+  <p>
+    <a class="cta" href="https://github.com/Institut-du-Numerique-Responsable/green-claude">Voir sur GitHub</a>
+    <a class="cta secondary" href="https://github.com/Institut-du-Numerique-Responsable/green-claude#-installation">Installer</a>
+  </p>
+
+  <h2>Une double vocation</h2>
+  <p>L'impact environnemental de « coder avec l'IA » a deux faces — Green Claude agit sur les deux :</p>
+  <div class="duo">
+    <div class="card">
+      <h3>1. Utiliser Claude sobrement</h3>
+      <p>Modèle proportionné à la tâche, données envoyées limitées, cache local des réponses, heures creuses, et 12 pratiques de sobriété inspirées de Boris Cherny (créateur de Claude Code). Moins de tokens = moins d'énergie.</p>
+    </div>
+    <div class="card">
+      <h3>2. Produire du code sobre</h3>
+      <p>35 règles d'éco-conception alignées sur les 9 familles du RGESN 2024, avec renvoi aux critères officiels. Elles auditent le code (<code>--eco-check</code>) et guident Claude pour qu'il le conçoive sobre dès le départ.</p>
+    </div>
+  </div>
+
+  <h2>En 30 secondes</h2>
+  <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
+cd green-claude && ./install.sh
+
+# Question simple → petit modèle
+green-claude --complexity simple "Explique cette regex"
+
+# Audit d'éco-conception, sans appel IA (zéro token)
+green-claude --file src/app.js --eco-check</code></pre>
+
+  <h2>Ce que contient le projet</h2>
+  <ul>
+    <li><strong>Un wrapper</strong> <code>green-claude</code> pour le CLI Claude Code : choix du modèle, limites de taille, cache, heures creuses ;</li>
+    <li><strong>35 règles d'éco-conception</strong> couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a> — dont l'Algorithmie et l'IA frugale — reliées au <a href="https://gr491.isit-europe.org/">GR491</a> ;</li>
+    <li><strong>12 pratiques de sobriété</strong> d'usage de Claude Code, sourcées et expliquées (pourquoi c'est sobre, quel geste faire) ;</li>
+    <li><strong>Un audit de code</strong> qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</li>
+  </ul>
+
+  <h2>Pourquoi c'est important</h2>
+  <p>Chaque requête à un grand modèle consomme de l'énergie — et le code généré sera exécuté des millions de fois pendant des années. La sobriété numérique se joue donc aux deux bouts : <em>pendant</em> le développement assisté par IA, et <em>dans</em> le logiciel produit. Green Claude outille les deux, en s'appuyant sur les référentiels publics français et internationaux.</p>
+
+  <footer>
+    <p>Un projet open source (MIT) de l'<strong>Institut du Numérique Responsable</strong>.<br>
+    Cette page applique les règles qu'elle promeut : zéro JavaScript, zéro requête externe, polices système, mode sombre natif — moins de 6 Ko.</p>
+  </footer>
+</main>
+</body>
+</html>

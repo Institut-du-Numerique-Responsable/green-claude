@@ -1,5 +1,10 @@
 # 🌱 Green Claude — Sobriété numérique pour Claude Code
 
+[![Licence MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
+[![RGESN 2024](https://img.shields.io/badge/RGESN-2024-1b7a4a.svg)](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/)
+[![Release](https://img.shields.io/github/v/release/Institut-du-Numerique-Responsable/green-claude)](https://github.com/Institut-du-Numerique-Responsable/green-claude/releases)
+[![Site](https://img.shields.io/badge/site-green--claude-blue)](https://institut-du-numerique-responsable.github.io/green-claude/)
+
 **Green Claude** est un wrapper éco-responsable pour [Claude Code](https://claude.com/claude-code) qui agit dans **les deux sens** :
 
 1. **Réduire l'impact d'utiliser Claude** — chaque requête IA consomme de l'énergie ; le wrapper la rend aussi sobre que possible (modèle proportionné, données limitées, cache, heures creuses, pratiques de sobriété).
