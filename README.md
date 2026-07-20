@@ -1,5 +1,3 @@
-<p align="center"><img src="docs/assets/logo.jpg" alt="Green Claude" width="300"></p>
-
 # Green Claude : sobriété numérique pour Claude Code
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
@@ -65,7 +63,7 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 ---
 
-## Les pratiques Boris : utiliser Claude sobrement, pas seulement en produire
+## Les pratiques Boris : utiliser Claude sobrement et avec bon sens
 
 Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête consomme de l'énergie. [Boris Cherny](https://howborisusesclaudecode.com/), créateur de Claude Code, documente des pratiques d'usage efficace. Un usage efficace est aussi un usage sobre : chaque aller-retour évité économise des tokens, chaque contexte allégé aussi.
 
