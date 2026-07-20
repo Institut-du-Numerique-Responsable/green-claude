@@ -1,91 +1,93 @@
 #!/bin/bash
 
 # =============================================================================
-# Green Claude — Script d'installation
-# Installe le wrapper éco-responsable pour Claude Code dans ~/green-claude
+# Green Claude — Installation
+# Installe le skill éco-conception dans ~/.claude/skills/green-claude
+# et propose le hook de cache/heures creuses (~/.claude/hooks/).
 # =============================================================================
 
 set -e
 
-# Couleurs
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-# Chemins
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INSTALL_DIR="$HOME/green-claude"
+SKILLS_DIR="$HOME/.claude/skills/green-claude"
+HOOKS_DIR="$HOME/.claude/hooks"
+SETTINGS_FILE="$HOME/.claude/settings.json"
 
-# Fonctions d'affichage
 print_error()   { echo -e "${RED}[ERREUR]${NC} $1"; }
 print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
 print_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[ATTENTION]${NC} $1"; }
 
-# =============================================================================
-# Vérification root
-# =============================================================================
 if [ "$EUID" -eq 0 ]; then
     print_warning "L'installation en root n'est pas recommandée. Utilise ton utilisateur normal."
 fi
 
 # =============================================================================
-# Étape 1 : Dossier d'installation
+# Étape 1 : Skill (éco-conception du code + pratiques Boris)
 # =============================================================================
-print_info "Création du dossier $INSTALL_DIR..."
-mkdir -p "$INSTALL_DIR"
-print_success "Dossier créé"
+print_info "Installation du skill dans $SKILLS_DIR..."
+mkdir -p "$SKILLS_DIR"
+cp -r "$SCRIPT_DIR/skill/green-claude/." "$SKILLS_DIR/"
+chmod +x "$SKILLS_DIR/scripts/"*.sh
+print_success "Skill installé"
 
-# =============================================================================
-# Étape 2 : Copie des fichiers
-# =============================================================================
-print_info "Copie des fichiers..."
-cp "$SCRIPT_DIR/green-claude" "$INSTALL_DIR/"
-cp -r "$SCRIPT_DIR/rules" "$INSTALL_DIR/"
-chmod +x "$INSTALL_DIR/green-claude"
-print_success "Fichiers copiés"
-
-# =============================================================================
-# Étape 3 : Configuration du PATH
-# =============================================================================
-print_info "Configuration du PATH..."
-
-if grep -q "green-claude" "$HOME/.bashrc" "$HOME/.zshrc" 2>/dev/null; then
-    print_info "PATH déjà configuré"
-else
-    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-        [ -f "$rc" ] || continue
-        {
-            echo ""
-            echo "# Green Claude — wrapper éco-responsable pour Claude Code"
-            echo 'export PATH="$HOME/green-claude:$PATH"'
-        } >> "$rc"
-    done
-    print_success "PATH configuré"
-    print_info "Ouvre un nouveau terminal ou exécute : source ~/.zshrc (ou ~/.bashrc)"
+if ! command -v jq >/dev/null 2>&1; then
+    print_warning "jq n'est pas installé : le script d'audit (scripts/eco-audit.sh) en a besoin."
+    print_warning "  brew install jq        (macOS)"
+    print_warning "  sudo apt install jq    (Debian/Ubuntu)"
 fi
 
 # =============================================================================
-# Résumé final
+# Étape 2 : Hooks (cache local + avertissement heures creuses)
+# Optionnel : ce que le skill ne peut pas faire lui-même (interception avant
+# l'appel au modèle). Proposé, pas imposé.
+# =============================================================================
+print_info ""
+read -p "Installer aussi le hook de cache local / heures creuses ? (o/n) : " -n 1 -r
+echo
+if [[ $REPLY =~ ^[OoYy]$ ]]; then
+    mkdir -p "$HOOKS_DIR"
+    cp "$SCRIPT_DIR/hooks/green-claude-cache.sh" "$HOOKS_DIR/"
+    cp "$SCRIPT_DIR/hooks/green-claude-cache-save.sh" "$HOOKS_DIR/"
+    chmod +x "$HOOKS_DIR/green-claude-cache.sh" "$HOOKS_DIR/green-claude-cache-save.sh"
+    print_success "Scripts de hook copiés dans $HOOKS_DIR"
+    print_warning "Câblage à faire à la main dans $SETTINGS_FILE (les clés exactes dépendent"
+    print_warning "de ta version de Claude Code — vérifie la doc hooks avant de coller) :"
+    cat << 'EOF'
+
+  {
+    "hooks": {
+      "UserPromptSubmit": [
+        { "hooks": [{ "type": "command", "command": "~/.claude/hooks/green-claude-cache.sh" }] }
+      ],
+      "Stop": [
+        { "hooks": [{ "type": "command", "command": "~/.claude/hooks/green-claude-cache-save.sh" }] }
+      ]
+    }
+  }
+
+EOF
+else
+    print_info "Hook ignoré — installable plus tard depuis $SCRIPT_DIR/hooks/"
+fi
+
+# =============================================================================
+# Résumé
 # =============================================================================
 print_info ""
 print_success "=========================================="
 print_success "✅ Installation de Green Claude terminée !"
 print_success "=========================================="
 print_info ""
-print_info "Pour commencer :"
-print_info "  green-claude --help"
-print_info "  green-claude --file mon_fichier.js --eco-check"
-print_info "  green-claude --complexity simple \"Ta question\""
+print_info "Le skill s'applique automatiquement dès que Claude Code écrit ou revoit du code."
+print_info "Pour la checklist complète : /green-claude"
+print_info "Pour un audit ciblé : demande à Claude \"audit éco-conception de ce fichier\""
 print_info ""
-print_info "Dossier d'installation : $INSTALL_DIR"
-print_info ""
-print_info "Prérequis pour les requêtes IA :"
-print_info "  npm install -g @anthropic-ai/claude-code"
-print_info ""
-print_info "Astuce : installe jq pour activer l'audit avancé (RGESN/GR491/GSF) :"
-print_info "  brew install jq        (macOS)"
-print_info "  sudo apt install jq    (Debian/Ubuntu)"
+print_info "Dossier du skill : $SKILLS_DIR"
 print_info ""

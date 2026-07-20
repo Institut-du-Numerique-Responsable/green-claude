@@ -5,7 +5,7 @@
     "version": "2.0.0",
     "source": "https://howborisusesclaudecode.com/",
     "author_note": "Boris Cherny est le créateur de Claude Code chez Anthropic. Ses conseils visent d'abord l'efficacité ; nous les reprenons ici parce qu'un usage efficace de l'IA est aussi un usage sobre : chaque aller-retour évité, chaque contexte allégé, chaque re-prompt supprimé économise des tokens, donc du calcul, donc de l'énergie.",
-    "count": 12,
+    "count": 14,
     "type": "practices",
     "type_note": "Ces règles décrivent des PRATIQUES D'USAGE, pas des motifs de code : elles n'ont pas de 'patterns' grep-ables. L'audit --eco-check les ignore ; utilisez --list-rules pour les consulter comme checklist."
   },
@@ -24,7 +24,11 @@
           "impact": "Élevé",
           "source_ref": "Reflecting on a Year — Context Minimalism",
           "patterns": [],
-          "tags": ["contexte", "tokens", "prompt"]
+          "tags": [
+            "contexte",
+            "tokens",
+            "prompt"
+          ]
         },
         {
           "id": "BORIS-CTX-02",
@@ -36,7 +40,11 @@
           "impact": "Élevé",
           "source_ref": "New Feature Launches — Rewind Over Correcting",
           "patterns": [],
-          "tags": ["contexte", "correction", "rewind"]
+          "tags": [
+            "contexte",
+            "correction",
+            "rewind"
+          ]
         },
         {
           "id": "BORIS-CTX-03",
@@ -48,7 +56,11 @@
           "impact": "Élevé",
           "source_ref": "New Feature Launches — /compact vs /clear",
           "patterns": [],
-          "tags": ["contexte", "compact", "clear"]
+          "tags": [
+            "contexte",
+            "compact",
+            "clear"
+          ]
         },
         {
           "id": "BORIS-CTX-04",
@@ -60,7 +72,45 @@
           "impact": "Moyen",
           "source_ref": "New Feature Launches — Lower Your Auto-Compact Threshold",
           "patterns": [],
-          "tags": ["contexte", "compaction", "sessions-longues"]
+          "tags": [
+            "contexte",
+            "compaction",
+            "sessions-longues"
+          ]
+        },
+        {
+          "id": "BORIS-CTX-05",
+          "title": "Cartographier le code plutôt que le relire",
+          "principle": "« Une carte du code lue une fois vaut mieux que le même dossier relu à chaque session. »",
+          "description": "Maintenir un index du code (fichiers clés, rôle, exports principaux) pour que Claude s'oriente sans parcourir l'arborescence ni relire des fichiers entiers à chaque fois.",
+          "why_green": "Explorer un code inconnu à coups de recherches et de lectures complètes consomme des tokens à chaque session. Un index (ou un graphe de connaissances du dépôt) réduit ce coût à une lecture unique, réutilisée ensuite.",
+          "how": "Générer un fichier d'index (ex. CODEMAP.md) ou un graphe de connaissances du dépôt avec un outil dédié — par exemple le skill open source graphify (MIT, github.com/Graphify-Labs/graphify) qui transforme un dossier de code en graphe interrogeable. Le lire en premier plutôt que d'explorer à l'aveugle.",
+          "impact": "Moyen",
+          "source_ref": "Exemple d'outil : graphify (Graphify-Labs, MIT) — cité à titre illustratif, non audité par le projet",
+          "patterns": [],
+          "tags": [
+            "contexte",
+            "cartographie",
+            "tokens",
+            "outils"
+          ]
+        },
+        {
+          "id": "BORIS-CTX-06",
+          "title": "Réponses denses, sans verbiage",
+          "principle": "« Le texte de sortie est aussi du contexte : chaque mot superflu est reproduit et refacturé au tour suivant. »",
+          "description": "Limiter les réponses aux informations utiles — pas de reformulation de la question, pas de résumé de ce qui vient d'être fait si le diff/résultat parle de lui-même.",
+          "why_green": "Un style verbeux gonfle chaque réponse et, en conversation multi-tours, chaque réponse précédente est retraitée dans le contexte suivant : la verbosité se paie plusieurs fois.",
+          "how": "Aller droit au résultat. Des outils comme le skill open source caveman (MIT, github.com/juliusbrussee/caveman) illustrent l'idée en poussant la compression du style jusqu'à l'extrême ; l'esprit à retenir est la densité, pas nécessairement l'outil lui-même.",
+          "impact": "Moyen",
+          "source_ref": "Exemple d'outil : caveman (juliusbrussee, MIT) — cité à titre illustratif, non audité par le projet",
+          "patterns": [],
+          "tags": [
+            "contexte",
+            "verbosite",
+            "tokens",
+            "outils"
+          ]
         }
       ]
     },
@@ -78,7 +128,11 @@
           "impact": "Élevé",
           "source_ref": "New Feature Launches — Full Task Context Upfront",
           "patterns": [],
-          "tags": ["brief", "specification", "delegation"]
+          "tags": [
+            "brief",
+            "specification",
+            "delegation"
+          ]
         },
         {
           "id": "BORIS-BRIEF-02",
@@ -90,7 +144,11 @@
           "impact": "Moyen",
           "source_ref": "New Feature Launches — Delegation over Guidance",
           "patterns": [],
-          "tags": ["delegation", "autonomie", "workflow"]
+          "tags": [
+            "delegation",
+            "autonomie",
+            "workflow"
+          ]
         }
       ]
     },
@@ -108,7 +166,11 @@
           "impact": "Élevé",
           "source_ref": "Reflecting on a Year — When Claude Errs, Write It Down",
           "patterns": [],
-          "tags": ["claude-md", "memoire", "capitalisation"]
+          "tags": [
+            "claude-md",
+            "memoire",
+            "capitalisation"
+          ]
         },
         {
           "id": "BORIS-MEM-02",
@@ -120,7 +182,11 @@
           "impact": "Moyen",
           "source_ref": "Core Workflow — Slash Commands ; Advanced Patterns — Create Your Own Skills",
           "patterns": [],
-          "tags": ["skills", "commandes", "reutilisation"]
+          "tags": [
+            "skills",
+            "commandes",
+            "reutilisation"
+          ]
         }
       ]
     },
@@ -138,7 +204,11 @@
           "impact": "Élevé",
           "source_ref": "Core Workflow — The Most Important Tip: Verification",
           "patterns": [],
-          "tags": ["verification", "tests", "qualite"]
+          "tags": [
+            "verification",
+            "tests",
+            "qualite"
+          ]
         }
       ]
     },
@@ -156,7 +226,11 @@
           "impact": "Élevé",
           "source_ref": "End of Week Ships — /effort ; Mastering Opus — Effort Mastery",
           "patterns": [],
-          "tags": ["effort", "modeles", "proportionnalite"]
+          "tags": [
+            "effort",
+            "modeles",
+            "proportionnalite"
+          ]
         },
         {
           "id": "BORIS-CPU-02",
@@ -168,7 +242,11 @@
           "impact": "Élevé",
           "source_ref": "A Harness for Every Task — Pair With /goal, /loop, and Token Budgets",
           "patterns": [],
-          "tags": ["sous-agents", "workflows", "budget-tokens"]
+          "tags": [
+            "sous-agents",
+            "workflows",
+            "budget-tokens"
+          ]
         },
         {
           "id": "BORIS-CPU-03",
@@ -180,7 +258,11 @@
           "impact": "Moyen",
           "source_ref": "Hidden & Underutilized Features — --bare",
           "patterns": [],
-          "tags": ["scripts", "automatisation", "demarrage"]
+          "tags": [
+            "scripts",
+            "automatisation",
+            "demarrage"
+          ]
         }
       ]
     }
