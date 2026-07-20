@@ -7,7 +7,7 @@
 
 **Green Claude** est un skill pour [Claude Code](https://claude.com/claude-code) qui guide Claude vers un code éco-conçu, de façon automatique, sans commande à retenir.
 
-Un projet de l'[Institut du Numérique Responsable](https://github.com/Institut-du-Numerique-Responsable), sous licence MIT.
+Un projet de l'[Institut du Numérique Responsable](https://institutnr.org), sous licence MIT.
 
 > Un code éco-conçu = moins de ressources consommées chez chaque utilisateur, à chaque exécution, pendant toute la vie du logiciel.
 
@@ -45,7 +45,7 @@ L'audit (`skill/green-claude/scripts/eco-audit.sh`) est un script déterministe 
 
 ## Les règles : 35 règles alignées sur les 9 familles du RGESN 2024
 
-[`skill/green-claude/rules/ecoconception.json`](skill/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
+[`skill/green-claude/rules/ecoconception.json`](skill/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
 
 | Famille RGESN | Règles | Exemples |
 |---|---|---|
