@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Claude — Sobriété numérique pour Claude Code | Éco-conception IA</title>
-  <meta name="description" content="Green Claude : wrapper éco-responsable open source pour Claude Code. Réduisez l'empreinte carbone de vos requêtes IA et produisez du code éco-conçu selon les référentiels RGESN 2024, GR491 et Green Software Foundation.">
+  <meta name="description" content="Green Claude : skill open source pour Claude Code qui guide Claude vers un code éco-conçu, automatiquement, selon les référentiels RGESN 2024, GR491 et Green Software Foundation.">
   <link rel="canonical" href="https://institut-du-numerique-responsable.github.io/green-claude/">
   <meta property="og:title" content="Green Claude — Sobriété numérique pour Claude Code">
-  <meta property="og:description" content="Wrapper éco-responsable open source : IA frugale (modèle proportionné, cache, tokens limités) et audit d'éco-conception RGESN 2024 / GR491.">
+  <meta property="og:description" content="Skill open source pour Claude Code : code éco-conçu par défaut (RGESN 2024 / GR491), plus un hook optionnel de cache local et heures creuses.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://institut-du-numerique-responsable.github.io/green-claude/">
   <meta property="og:locale" content="fr_FR">
@@ -18,7 +18,7 @@
     "name": "Green Claude",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "macOS, Linux",
-    "description": "Wrapper éco-responsable pour Claude Code : sobriété numérique des requêtes IA et audit d'éco-conception du code selon les référentiels RGESN 2024, GR491 et Green Software Foundation.",
+    "description": "Skill pour Claude Code : sobriété numérique du code produit (RGESN 2024, GR491, Green Software Foundation), installé une fois et appliqué automatiquement.",
     "license": "https://opensource.org/licenses/MIT",
     "url": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
     "author": { "@type": "Organization", "name": "Institut du Numérique Responsable" },
@@ -77,50 +77,44 @@
 <body>
 <main>
   <h1>🌱 Green Claude</h1>
-  <p class="tagline">Sobriété numérique pour <strong>Claude Code</strong> : des requêtes IA frugales, et du code éco-conçu selon le <strong>RGESN&nbsp;2024</strong> et le <strong>GR491</strong>.</p>
+  <p class="tagline">Un skill pour <strong>Claude Code</strong> qui guide Claude vers un code éco-conçu selon le <strong>RGESN&nbsp;2024</strong> et le <strong>GR491</strong> — installé une fois, appliqué automatiquement.</p>
 
   <p>
     <a class="cta" href="https://github.com/Institut-du-Numerique-Responsable/green-claude">Voir sur GitHub</a>
-    <a class="cta secondary" href="https://github.com/Institut-du-Numerique-Responsable/green-claude#-installation">Installer</a>
+    <a class="cta secondary" href="https://github.com/Institut-du-Numerique-Responsable/green-claude#installation">Installer</a>
   </p>
 
-  <h2>Une double vocation</h2>
-  <p>L'impact environnemental de « coder avec l'IA » a deux faces — Green Claude agit sur les deux :</p>
+  <h2>Ce que le skill fait pour toi</h2>
   <div class="duo">
     <div class="card">
-      <h3>1. Utiliser Claude sobrement</h3>
-      <p>Modèle proportionné à la tâche, données envoyées limitées, cache local des réponses, heures creuses, et 12 pratiques de sobriété inspirées de Boris Cherny (créateur de Claude Code). Moins de tokens = moins d'énergie.</p>
+      <h3>Pendant que Claude code</h3>
+      <p>35 règles d'éco-conception alignées sur les 9 familles du RGESN 2024, avec renvoi aux critères officiels : Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
     </div>
     <div class="card">
-      <h3>2. Produire du code sobre</h3>
-      <p>35 règles d'éco-conception alignées sur les 9 familles du RGESN 2024, avec renvoi aux critères officiels. Elles auditent le code (<code>--eco-check</code>) et guident Claude pour qu'il le conçoive sobre dès le départ.</p>
+      <h3>Sur demande, un audit</h3>
+      <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep sur les règles), zéro coût de raisonnement, qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</p>
     </div>
   </div>
 
   <h2>En 30 secondes</h2>
   <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
-cd green-claude && ./install.sh
-
-# Question simple → petit modèle
-green-claude --complexity simple "Explique cette regex"
-
-# Audit d'éco-conception, sans appel IA (zéro token)
-green-claude --file src/app.js --eco-check</code></pre>
+cd green-claude && ./install.sh</code></pre>
+  <p>Le skill s'installe dans <code>~/.claude/skills/green-claude</code> et se charge automatiquement dans les sessions Claude Code suivantes — rien à taper ensuite. Tape <code>/green-claude</code> pour voir la checklist complète.</p>
 
   <h2>Ce que contient le projet</h2>
   <ul>
-    <li><strong>Un wrapper</strong> <code>green-claude</code> pour le CLI Claude Code : choix du modèle, limites de taille, cache, heures creuses ;</li>
+    <li><strong>Un skill</strong> Claude Code, auto-invoqué dès qu'il s'agit d'écrire ou revoir du code ;</li>
     <li><strong>35 règles d'éco-conception</strong> couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a> — dont l'Algorithmie et l'IA frugale — reliées au <a href="https://gr491.isit-europe.org/">GR491</a> ;</li>
-    <li><strong>12 pratiques de sobriété</strong> d'usage de Claude Code, sourcées et expliquées (pourquoi c'est sobre, quel geste faire) ;</li>
-    <li><strong>Un audit de code</strong> qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</li>
+    <li><strong>14 pratiques de sobriété</strong> d'usage de Claude Code inspirées de Boris Cherny (créateur de Claude Code), sourcées et expliquées ;</li>
+    <li><strong>Un hook optionnel</strong> (cache local des réponses, avertissement heures creuses) pour ce qu'un skill ne peut pas faire lui-même — proposé à l'installation, jamais imposé.</li>
   </ul>
 
   <h2>Pourquoi c'est important</h2>
-  <p>Chaque requête à un grand modèle consomme de l'énergie — et le code généré sera exécuté des millions de fois pendant des années. La sobriété numérique se joue donc aux deux bouts : <em>pendant</em> le développement assisté par IA, et <em>dans</em> le logiciel produit. Green Claude outille les deux, en s'appuyant sur les référentiels publics français et internationaux.</p>
+  <p>Le code généré par l'IA sera exécuté des millions de fois, pendant des années, chez des milliers d'utilisateurs : c'est là que se joue l'essentiel de l'empreinte du « coder avec l'IA ». Green Claude outille ce moment précis, en s'appuyant sur les référentiels publics français et internationaux plutôt que sur des règles maison.</p>
 
   <footer>
     <p>Un projet open source (MIT) de l'<strong>Institut du Numérique Responsable</strong>.<br>
-    Cette page applique les règles qu'elle promeut : zéro JavaScript, zéro requête externe, polices système, mode sombre natif — moins de 6 Ko.</p>
+    Cette page applique les règles qu'elle promeut : zéro JavaScript, zéro requête externe, polices système, mode sombre natif — moins de 8 Ko.</p>
   </footer>
 </main>
 </body>
