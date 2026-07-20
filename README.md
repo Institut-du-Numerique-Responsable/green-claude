@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/assets/logo.jpg" alt="Green Claude" width="220"></p>
+<p align="center"><img src="docs/assets/logo.jpg" alt="Green Claude" width="300"></p>
 
-# 🌱 Green Claude : sobriété numérique pour Claude Code
+# Green Claude : sobriété numérique pour Claude Code
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
 [![RGESN 2024](https://img.shields.io/badge/RGESN-2024-1b7a4a.svg)](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/)
