@@ -39,13 +39,13 @@ Rien à taper. Trois façons de s'en servir :
 | Auditer un fichier existant | Demande simplement : *« audit éco-conception de ce fichier »* |
 | Voir la checklist complète | Tape `/green-claude` |
 
-L'audit (`scripts/eco-audit.sh`) est un script déterministe (grep sur les règles) : il ne coûte pas de raisonnement au modèle, juste la lecture du résultat.
+L'audit (`skill/green-claude/scripts/eco-audit.sh`) est un script déterministe (grep sur les règles) : il ne coûte pas de raisonnement au modèle, juste la lecture du résultat.
 
 ---
 
 ## Les règles : 35 règles alignées sur les 9 familles du RGESN 2024
 
-`rules/ecoconception.json` couvre les **9 familles** du [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
+[`skill/green-claude/rules/ecoconception.json`](skill/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
 
 | Famille RGESN | Règles | Exemples |
 |---|---|---|
@@ -67,7 +67,7 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête consomme de l'énergie. [Boris Cherny](https://howborisusesclaudecode.com/), créateur de Claude Code, documente des pratiques d'usage efficace — et un usage efficace est aussi un usage sobre : chaque aller-retour évité, chaque contexte allégé, économise des tokens.
 
-`rules/boris.json` en reprend 14, dont deux ajoutées avec des exemples d'outils open source vérifiés :
+[`skill/green-claude/rules/boris.json`](skill/green-claude/rules/boris.json) en reprend 14, dont deux ajoutées avec des exemples d'outils open source vérifiés :
 
 | Pratique | Le geste |
 |---|---|
@@ -82,7 +82,7 @@ Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête
 | Adapter le niveau d'effort | `/effort low/high/max` selon la tâche, jamais par défaut au maximum |
 | `--bare` pour les scripts | Démarrage sans contexte projet, pour l'automatisation |
 
-Détail complet : [`rules/boris.json`](rules/boris.json).
+Détail complet : [`skill/green-claude/rules/boris.json`](skill/green-claude/rules/boris.json).
 
 > Les outils tiers cités (graphify, caveman) sont des exemples illustratifs vérifiés (open source, licence MIT) — le projet ne les audite pas et n'en dépend pas.
 
