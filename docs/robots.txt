@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://institut-du-numerique-responsable.github.io/green-claude/sitemap.xml
