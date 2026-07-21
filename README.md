@@ -2,14 +2,22 @@
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
 [![RGESN 2024](https://img.shields.io/badge/RGESN-2024-1b7a4a.svg)](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/)
+[![GR491](https://img.shields.io/badge/GR491-r%C3%A9f%C3%A9rentiel-1b7a4a.svg)](https://gr491.isit-europe.org/)
 [![Release](https://img.shields.io/github/v/release/Institut-du-Numerique-Responsable/green-claude)](https://github.com/Institut-du-Numerique-Responsable/green-claude/releases)
 [![Site](https://img.shields.io/badge/site-green--claude-blue)](https://institut-du-numerique-responsable.github.io/green-claude/)
+[![Dernier commit](https://img.shields.io/github/last-commit/Institut-du-Numerique-Responsable/green-claude)](https://github.com/Institut-du-Numerique-Responsable/green-claude/commits/main)
+[![Stars GitHub](https://img.shields.io/github/stars/Institut-du-Numerique-Responsable/green-claude?style=flat)](https://github.com/Institut-du-Numerique-Responsable/green-claude/stargazers)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **Green Claude** est un skill pour [Claude Code](https://claude.com/claude-code) qui guide Claude vers un code éco-conçu, de façon automatique, sans commande à retenir.
 
 Un projet de l'[Institut du Numérique Responsable](https://institutnr.org), sous licence MIT.
 
 > Un code éco-conçu = moins de ressources consommées chez chaque utilisateur, à chaque exécution, pendant toute la vie du logiciel.
+
+Ce dépôt est spécifique à Claude Code. Une version indépendante des règles,
+portable vers d'autres assistants IA et d'autres langages, est en cours de
+développement ici : [regles-ecoconception-ia](https://github.com/Institut-du-Numerique-Responsable/regles-ecoconception-ia).
 
 ---
 

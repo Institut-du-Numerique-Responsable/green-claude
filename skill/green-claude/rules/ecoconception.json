@@ -160,10 +160,10 @@
           "description": "Un framework lourd pour un site vitrine, c'est du JavaScript téléchargé, parsé et exécuté par chaque visiteur pour rien.",
           "impact": "Élevé",
           "patterns": [
-            "react",
-            "angular",
-            "vue",
-            "next"
+            "\\breact\\b",
+            "\\bangular\\b",
+            "\\bvue\\b",
+            "\\bnext\\b"
           ],
           "recommendation": "Avant d'adopter un framework, évaluer si du HTML/CSS statique, du Vanilla JS ou HTMX suffisent au besoin réel.",
           "rgesn_ref": "3.1",
@@ -381,9 +381,10 @@
           "description": "Importer lodash pour trois fonctions ou moment pour formater une date fait payer des centaines de Ko à chaque visiteur.",
           "impact": "Élevé",
           "patterns": [
-            "lodash",
-            "moment",
-            "jquery"
+            "\\blodash\\b",
+            "from ['\"]moment['\"]",
+            "require\\(['\"]moment['\"]\\)",
+            "\\bjquery\\b"
           ],
           "recommendation": "Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).",
           "rgesn_ref": "6.x",

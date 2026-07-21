@@ -1,17 +1,14 @@
 ---
 name: green-claude
 description: |
-  Sobriété numérique pour Claude Code — éco-conception du code produit (RGESN 2024,
-  GR491, Green Software Foundation) et pratiques d'usage sobre (Boris Cherny).
-  PROACTIF : dès que Claude écrit, modifie ou revoit du code, applique les règles
-  d'éco-conception pertinentes sans qu'on le demande (formats, requêtes réseau,
-  images, boucles, cache, pagination, etc.). Sur demande explicite d'audit
-  ("audit éco-conception", "vérifie la sobriété de ce code", "--eco-check"),
-  lance scripts/eco-audit.sh sur les fichiers concernés.
-  BROWSE : invoqué avec /green-claude, affiche la checklist complète des 35 règles
-  RGESN/GR491 et des 14 pratiques Boris.
+  Use when Claude écrit, modifie ou revoit du code (formats de fichiers, requêtes
+  réseau, images/assets, boucles, cache, pagination, dépendances, choix de
+  framework ou de modèle IA), quand l'utilisateur demande un audit de sobriété
+  ("audit éco-conception", "vérifie la sobriété de ce code", "--eco-check",
+  "RGESN", "GR491", "écoconception", "green IT"), ou quand invoqué via
+  /green-claude pour parcourir la checklist des règles.
 author: Institut du Numérique Responsable
-version: 1.0.0
+version: 1.0.1
 license: MIT
 user-invocable: true
 ---
@@ -64,7 +61,9 @@ pour l'utilisateur (impact Élevé d'abord).
 Certaines règles n'ont pas de pattern détectable dans le code (ex. "mesurer avant
 d'optimiser", "critères environnementaux dans les user stories") : ce sont des
 règles de démarche, à rappeler en checklist plutôt qu'à chercher par grep — le
-script les ignore déjà.
+script les ignore déjà lors de l'audit, mais les liste avec
+`scripts/eco-audit.sh --list-rules` (règles ecoconception.json sans pattern +
+pratiques boris.json).
 
 ## Mode browse (`/green-claude`)
 
