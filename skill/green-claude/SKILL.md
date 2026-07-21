@@ -8,7 +8,7 @@ description: |
   "RGESN", "GR491", "écoconception", "green IT"), ou quand invoqué via
   /green-claude pour parcourir la checklist des règles.
 author: Institut du Numérique Responsable
-version: 1.0.1
+version: 1.1.0
 license: MIT
 user-invocable: true
 ---
@@ -17,13 +17,25 @@ user-invocable: true
 
 Deux jeux de règles, deux moments d'application :
 
-1. **`rules/ecoconception.json`** (35 règles, RGESN 2024 / GR491 / Green Software Foundation)
-   — à appliquer **pendant que tu écris ou modifies du code**. C'est le code qui va
+1. **`rules/ecoconception.json`** (35 règles, RGESN 2024 / GR491 / Green Software Foundation),
+   à appliquer **pendant que tu écris ou modifies du code**. C'est le code qui va
    tourner pendant des années chez les utilisateurs : la sobriété se joue là, pas
    après coup.
-2. **`rules/boris.json`** (14 pratiques d'usage) — à appliquer **pendant la conversation
+2. **`rules/boris.json`** (14 pratiques d'usage), à appliquer **pendant la conversation
    elle-même** : contexte minimal, rembobiner plutôt que corriger, éviter les
    allers-retours inutiles. Un usage efficace de Claude Code est aussi un usage sobre.
+
+## Pourquoi un skill, et pas juste une liste de règles
+
+Une liste de règles dans un fichier reste inerte : personne ne la relit avant
+chaque ligne de code, elle vieillit sans que personne s'en aperçoive, et son
+respect dépend de la mémoire de qui l'a écrite ou lue une fois. Un skill
+change trois choses : Claude Code le charge et l'applique à chaque session
+sans qu'on ait à le rappeler, il combine sélection automatique (les familles
+pertinentes pour ce que tu écris, pas les 49 règles à chaque fois) et
+vérification a posteriori via le script d'audit, et il vit dans le même flux
+que le code plutôt que dans un document séparé qu'on consulte une fois puis
+qu'on oublie.
 
 ## Mode proactif (par défaut)
 
@@ -38,7 +50,7 @@ algorithmie. Concrètement, sans qu'on te le demande :
 - Compresse et dimensionne correctement les images et assets.
 
 Si une contrainte de sobriété entre en tension avec une demande explicite du user
-(perf, deadline, lisibilité), signale le compromis en une phrase — ne bloque jamais
+(perf, deadline, lisibilité), signale le compromis en une phrase. Ne bloque jamais
 silencieusement le travail demandé.
 
 Pour la conversation elle-même, applique les réflexes Boris : prompt minimal, ne pas
@@ -54,13 +66,13 @@ Quand l'utilisateur demande explicitement un audit ("audit éco-conception",
 bash <chemin-du-skill>/scripts/eco-audit.sh fichier1 fichier2 ...
 ```
 
-C'est un script déterministe (grep sur les patterns des règles) — aucun coût de
-raisonnement pour la détection, tu n'as qu'à interpréter et prioriser la sortie
+C'est un script déterministe (grep sur les patterns des règles), sans coût de
+raisonnement pour la détection : tu n'as qu'à interpréter et prioriser la sortie
 pour l'utilisateur (impact Élevé d'abord).
 
 Certaines règles n'ont pas de pattern détectable dans le code (ex. "mesurer avant
 d'optimiser", "critères environnementaux dans les user stories") : ce sont des
-règles de démarche, à rappeler en checklist plutôt qu'à chercher par grep — le
+règles de démarche, à rappeler en checklist plutôt qu'à chercher par grep. Le
 script les ignore déjà lors de l'audit, mais les liste avec
 `scripts/eco-audit.sh --list-rules` (règles ecoconception.json sans pattern +
 pratiques boris.json).

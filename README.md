@@ -11,7 +11,7 @@
 
 **Green Claude** est un skill pour [Claude Code](https://claude.com/claude-code) qui guide Claude vers un code éco-conçu, de façon automatique, sans commande à retenir.
 
-Un projet de l'[Institut du Numérique Responsable](https://institutnr.org), sous licence MIT.
+Une production de l'[Institut du Numérique Responsable](https://institutnr.org), 2026, sous licence MIT.
 
 > Un code éco-conçu = moins de ressources consommées chez chaque utilisateur, à chaque exécution, pendant toute la vie du logiciel.
 
@@ -24,6 +24,18 @@ développement ici : [regles-ecoconception-ia](https://github.com/Institut-du-Nu
 ## En une phrase
 
 Tu installes le skill une fois. Ensuite, quand Claude Code écrit ou revoit du code dans tes projets, il applique de lui-même les règles d'éco-conception (**RGESN 2024**, **GR491**, **Green Software Foundation**), sans que tu aies à le lui demander à chaque fois.
+
+## Pourquoi un skill plutôt qu'une simple liste de règles
+
+Une checklist RGESN en PDF ou en wiki dépend de la mémoire de qui l'a lue une fois. Personne ne la rouvre avant chaque ligne de code, et son application varie d'une personne à l'autre selon qui s'en souvient ce jour-là.
+
+Un skill Claude Code apporte trois différences concrètes :
+
+- **Chargement automatique à chaque session.** Le skill se charge tout seul, sans qu'on ait à le mentionner en tête de conversation.
+- **Sélection contextuelle des règles.** Claude applique les familles pertinentes pour ce qu'il écrit à l'instant : un backend déclenche les règles SQL et pools de connexions, pas les règles UX/UI sur l'autoplay.
+- **Vérification a posteriori intégrée.** Le script d'audit (`eco-audit.sh`) tourne à la demande sur le code déjà écrit, sans coût de raisonnement pour le modèle, pour attraper ce que l'application proactive a raté.
+
+La checklist reste un document qu'on consulte. Le skill s'exécute au moment où le code s'écrit, dans la session de travail elle-même.
 
 ## Installation
 

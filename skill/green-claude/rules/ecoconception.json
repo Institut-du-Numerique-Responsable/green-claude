@@ -8,7 +8,7 @@
       "https://gr491.isit-europe.org/",
       "https://greensoftware.foundation/"
     ],
-    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier est une SÉLECTION actionnable, pas une reproduction : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
+    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 35 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
     "count": 35,
     "type": "code_audit",
     "type_note": "Les règles avec 'patterns' sont détectées dans le code par l'audit --eco-check. Celles sans pattern sont des règles de conception/processus : elles servent de checklist via --list-rules."
