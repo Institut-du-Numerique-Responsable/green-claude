@@ -9,7 +9,7 @@ description: |
   ("audit éco-conception", "vérifie la sobriété de ce code", "--eco-check"),
   lance scripts/eco-audit.sh sur les fichiers concernés.
   BROWSE : invoqué avec /green-claude, affiche la checklist complète des 35 règles
-  RGESN/GR491 et des 12 pratiques Boris.
+  RGESN/GR491 et des 14 pratiques Boris.
 author: Institut du Numérique Responsable
 version: 1.0.0
 license: MIT
@@ -24,7 +24,7 @@ Deux jeux de règles, deux moments d'application :
    — à appliquer **pendant que tu écris ou modifies du code**. C'est le code qui va
    tourner pendant des années chez les utilisateurs : la sobriété se joue là, pas
    après coup.
-2. **`rules/boris.json`** (12 pratiques d'usage) — à appliquer **pendant la conversation
+2. **`rules/boris.json`** (14 pratiques d'usage) — à appliquer **pendant la conversation
    elle-même** : contexte minimal, rembobiner plutôt que corriger, éviter les
    allers-retours inutiles. Un usage efficace de Claude Code est aussi un usage sobre.
 
@@ -68,7 +68,7 @@ script les ignore déjà.
 
 ## Mode browse (`/green-claude`)
 
-Affiche les 9 familles RGESN de `rules/ecoconception.json` et les 12 pratiques de
+Affiche les 9 familles RGESN de `rules/ecoconception.json` et les 14 pratiques de
 `rules/boris.json` sous forme de checklist, avec le titre et la recommandation de
 chaque règle. Utile pour une revue de conception en amont du code.
 

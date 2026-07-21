@@ -1,7 +1,7 @@
 {
   "metadata": {
     "name": "Boris Cherny — Sobriété avec Claude Code",
-    "description": "12 pratiques d'usage de Claude Code inspirées de Boris Cherny (créateur de Claude Code), relues sous l'angle de la sobriété numérique : moins de tokens gaspillés = moins d'énergie consommée.",
+    "description": "14 pratiques d'usage de Claude Code inspirées de Boris Cherny (créateur de Claude Code), relues sous l'angle de la sobriété numérique : moins de tokens gaspillés = moins d'énergie consommée.",
     "version": "2.0.0",
     "source": "https://howborisusesclaudecode.com/",
     "author_note": "Boris Cherny est le créateur de Claude Code chez Anthropic. Ses conseils visent d'abord l'efficacité ; nous les reprenons ici parce qu'un usage efficace de l'IA est aussi un usage sobre : chaque aller-retour évité, chaque contexte allégé, chaque re-prompt supprimé économise des tokens, donc du calcul, donc de l'énergie.",

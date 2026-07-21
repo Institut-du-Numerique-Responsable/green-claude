@@ -27,7 +27,11 @@
           "recommendation": "Auditer le service (EcoIndex, GreenFrame, Scaphandre), fixer des objectifs chiffrés et garder ces mesures comme référence avant/après.",
           "rgesn_ref": "1.4, 1.5",
           "gr491_famille": "Stratégie",
-          "tags": ["strategie", "mesure", "objectifs"]
+          "tags": [
+            "strategie",
+            "mesure",
+            "objectifs"
+          ]
         },
         {
           "id": "ECO-STRAT-02",
@@ -38,18 +42,30 @@
           "recommendation": "Ne collecter que les données réellement exploitées, définir des durées de rétention et purger l'obsolète.",
           "rgesn_ref": "1.6",
           "gr491_famille": "Stratégie",
-          "tags": ["donnees", "retention", "minimisation"]
+          "tags": [
+            "donnees",
+            "retention",
+            "minimisation"
+          ]
         },
         {
           "id": "ECO-STRAT-03",
           "title": "Technologies standard, ouvertes et interopérables",
           "description": "Les formats propriétaires imposent des logiciels lourds et créent une dépendance qui force au renouvellement de matériel et de licences.",
           "impact": "Moyen",
-          "patterns": ["\\.docx", "\\.xlsx", "\\.pptx"],
+          "patterns": [
+            "\\.docx",
+            "\\.xlsx",
+            "\\.pptx"
+          ],
           "recommendation": "Préférer les standards ouverts : ODF, CSV, JSON, Markdown, HTML — lisibles partout, y compris sur du matériel ancien.",
           "rgesn_ref": "1.8, 1.9",
           "gr491_famille": "Stratégie",
-          "tags": ["formats", "ouverture", "interoperabilite"]
+          "tags": [
+            "formats",
+            "ouverture",
+            "interoperabilite"
+          ]
         }
       ]
     },
@@ -66,7 +82,11 @@
           "recommendation": "Ajouter aux stories des critères mesurables : poids de page maximal, budget requêtes, seuil EcoIndex — et les vérifier en revue.",
           "rgesn_ref": "2.6",
           "gr491_famille": "Spécifications",
-          "tags": ["gouvernance", "processus", "agile"]
+          "tags": [
+            "gouvernance",
+            "processus",
+            "agile"
+          ]
         },
         {
           "id": "ECO-SPEC-02",
@@ -77,7 +97,11 @@
           "recommendation": "Définir la liste des profils matériels supportés, tester sur des terminaux de plus de 5 ans et d'anciennes versions de navigateurs.",
           "rgesn_ref": "2.1, 2.2, 2.4",
           "gr491_famille": "Spécifications",
-          "tags": ["compatibilite", "terminaux", "duree-de-vie"]
+          "tags": [
+            "compatibilite",
+            "terminaux",
+            "duree-de-vie"
+          ]
         },
         {
           "id": "ECO-SPEC-03",
@@ -88,7 +112,11 @@
           "recommendation": "Tester le service en connexion limitée (throttling 3G) ; viser un fonctionnement dégradé acceptable hors ligne quand c'est pertinent.",
           "rgesn_ref": "2.3",
           "gr491_famille": "Spécifications",
-          "tags": ["reseau", "bas-debit", "resilience"]
+          "tags": [
+            "reseau",
+            "bas-debit",
+            "resilience"
+          ]
         },
         {
           "id": "ECO-SPEC-04",
@@ -99,7 +127,11 @@
           "recommendation": "Avant d'intégrer un service tiers, mesurer son poids et ses requêtes ; préférer une intégration minimale ou une alternative sobre.",
           "rgesn_ref": "2.10",
           "gr491_famille": "Spécifications",
-          "tags": ["services-tiers", "dependances", "cadrage"]
+          "tags": [
+            "services-tiers",
+            "dependances",
+            "cadrage"
+          ]
         },
         {
           "id": "ECO-SPEC-05",
@@ -110,7 +142,11 @@
           "recommendation": "Supprimer ou ne pas développer les fonctionnalités utilisées par moins de 5 % des utilisateurs.",
           "rgesn_ref": "1.1, 2.9",
           "gr491_famille": "Spécifications",
-          "tags": ["mvp", "minimalisme", "yagni"]
+          "tags": [
+            "mvp",
+            "minimalisme",
+            "yagni"
+          ]
         }
       ]
     },
@@ -123,11 +159,20 @@
           "title": "Privilégier la solution la plus simple (low-tech)",
           "description": "Un framework lourd pour un site vitrine, c'est du JavaScript téléchargé, parsé et exécuté par chaque visiteur pour rien.",
           "impact": "Élevé",
-          "patterns": ["react", "angular", "vue", "next"],
+          "patterns": [
+            "react",
+            "angular",
+            "vue",
+            "next"
+          ],
           "recommendation": "Avant d'adopter un framework, évaluer si du HTML/CSS statique, du Vanilla JS ou HTMX suffisent au besoin réel.",
           "rgesn_ref": "3.1",
           "gr491_famille": "Architecture",
-          "tags": ["low-tech", "simplicite", "frameworks"]
+          "tags": [
+            "low-tech",
+            "simplicite",
+            "frameworks"
+          ]
         },
         {
           "id": "ECO-ARCH-02",
@@ -138,18 +183,29 @@
           "recommendation": "Mettre en place l'ajustement automatique des ressources (scale-to-zero, autoscaling) et éteindre ce qui ne sert pas.",
           "rgesn_ref": "3.2",
           "gr491_famille": "Architecture",
-          "tags": ["dimensionnement", "autoscaling", "serveurs"]
+          "tags": [
+            "dimensionnement",
+            "autoscaling",
+            "serveurs"
+          ]
         },
         {
           "id": "ECO-ARCH-03",
           "title": "Concevoir pour durer",
           "description": "Un service qui doit être refait tous les deux ans multiplie son empreinte ; des mises à jour monolithiques forcent des re-téléchargements complets.",
           "impact": "Moyen",
-          "patterns": ["deprecated", "TODO.*remove"],
+          "patterns": [
+            "deprecated",
+            "TODO.*remove"
+          ],
           "recommendation": "Séparer correctifs et évolutions, livrer des mises à jour incrémentielles, prévoir migrations de données et documentation long terme.",
           "rgesn_ref": "3.4, 3.5, 3.6",
           "gr491_famille": "Architecture",
-          "tags": ["durabilite", "maintenance", "mises-a-jour"]
+          "tags": [
+            "durabilite",
+            "maintenance",
+            "mises-a-jour"
+          ]
         },
         {
           "id": "ECO-ARCH-04",
@@ -160,7 +216,11 @@
           "recommendation": "Éteindre les environnements hors des heures d'usage, mutualiser, limiter la rétention des artefacts de build.",
           "rgesn_ref": "3.7",
           "gr491_famille": "Architecture",
-          "tags": ["ci-cd", "environnements", "mutualisation"]
+          "tags": [
+            "ci-cd",
+            "environnements",
+            "mutualisation"
+          ]
         }
       ]
     },
@@ -173,22 +233,34 @@
           "title": "Pas de lecture automatique",
           "description": "L'autoplay télécharge et décode de la vidéo, du son ou des animations que l'utilisateur n'a pas demandés — le pire ratio utilité/consommation du web.",
           "impact": "Élevé",
-          "patterns": ["autoplay"],
+          "patterns": [
+            "autoplay"
+          ],
           "recommendation": "Remplacer l'autoplay par une image de couverture cliquable (façade) ; ne charger le média qu'au clic.",
           "rgesn_ref": "4.1",
           "gr491_famille": "UX/UI",
-          "tags": ["video", "autoplay", "energie"]
+          "tags": [
+            "video",
+            "autoplay",
+            "energie"
+          ]
         },
         {
           "id": "ECO-UX-02",
           "title": "Pas de défilement infini",
           "description": "Le scroll infini charge du contenu sans fin ni demande explicite, et retient l'utilisateur au-delà de son besoin.",
           "impact": "Moyen",
-          "patterns": ["infinite-?scroll"],
+          "patterns": [
+            "infinite-?scroll"
+          ],
           "recommendation": "Préférer une pagination explicite ou un bouton « Voir plus » : l'utilisateur choisit ce qu'il charge.",
           "rgesn_ref": "4.2",
           "gr491_famille": "UX/UI",
-          "tags": ["scroll", "pagination", "attention"]
+          "tags": [
+            "scroll",
+            "pagination",
+            "attention"
+          ]
         },
         {
           "id": "ECO-UX-03",
@@ -199,29 +271,47 @@
           "recommendation": "Utiliser <details>/<summary>, <dialog>, <input type=\"date\">, :hover, :focus-within et les formulaires natifs avant d'écrire du JavaScript.",
           "rgesn_ref": "4.5",
           "gr491_famille": "UX/UI",
-          "tags": ["html", "css", "composants-natifs"]
+          "tags": [
+            "html",
+            "css",
+            "composants-natifs"
+          ]
         },
         {
           "id": "ECO-UX-04",
           "title": "Services tiers activés à la demande",
           "description": "Cartes, players, widgets sociaux et scripts de mesure s'exécutent chez chaque visiteur dès le chargement, qu'il s'en serve ou non.",
           "impact": "Élevé",
-          "patterns": ["googletagmanager", "gtag\\(", "facebook.*pixel"],
+          "patterns": [
+            "googletagmanager",
+            "gtag\\(",
+            "facebook.*pixel"
+          ],
           "recommendation": "Charger les services tiers uniquement sur action de l'utilisateur (façade) ; limiter la mesure d'audience à une solution légère (Matomo, Plausible).",
           "rgesn_ref": "4.4",
           "gr491_famille": "UX/UI",
-          "tags": ["services-tiers", "tracking", "facade"]
+          "tags": [
+            "services-tiers",
+            "tracking",
+            "facade"
+          ]
         },
         {
           "id": "ECO-UX-05",
           "title": "Limiter les polices téléchargées",
           "description": "Chaque police personnalisée est un téléchargement de plus, bloquant souvent l'affichage du texte.",
           "impact": "Faible",
-          "patterns": ["@font-face"],
+          "patterns": [
+            "@font-face"
+          ],
           "recommendation": "Utiliser la pile system-ui ; au maximum deux familles auto-hébergées, sous-ensemblées (subset), avec font-display: swap.",
           "rgesn_ref": "4.8",
           "gr491_famille": "UX/UI",
-          "tags": ["polices", "performance", "systeme"]
+          "tags": [
+            "polices",
+            "performance",
+            "systeme"
+          ]
         }
       ]
     },
@@ -234,11 +324,18 @@
           "title": "Optimiser les images",
           "description": "Les images représentent souvent 50 à 80 % du poids d'une page.",
           "impact": "Élevé",
-          "patterns": ["\\.png", "\\.jpe?g"],
+          "patterns": [
+            "\\.png",
+            "\\.jpe?g"
+          ],
           "recommendation": "Convertir en WebP/AVIF, servir des tailles adaptées via srcset, compresser systématiquement.",
           "rgesn_ref": "5.x",
           "gr491_famille": "Contenus",
-          "tags": ["images", "webp", "compression"]
+          "tags": [
+            "images",
+            "webp",
+            "compression"
+          ]
         },
         {
           "id": "ECO-CONT-02",
@@ -249,18 +346,28 @@
           "recommendation": "Hiérarchiser : texte > image > audio > vidéo. Réserver la vidéo aux contenus où elle apporte réellement.",
           "rgesn_ref": "4.6, 4.7",
           "gr491_famille": "Contenus",
-          "tags": ["media", "sobriete-editoriale", "video"]
+          "tags": [
+            "media",
+            "sobriete-editoriale",
+            "video"
+          ]
         },
         {
           "id": "ECO-CONT-03",
           "title": "Des icônes en SVG plutôt qu'en images bitmap",
           "description": "Un SVG inline de quelques centaines d'octets remplace un PNG de plusieurs Ko, et reste net à toutes les tailles.",
           "impact": "Faible",
-          "patterns": ["icon.*\\.png"],
+          "patterns": [
+            "icon.*\\.png"
+          ],
           "recommendation": "Utiliser des SVG inline ou un sprite SVG ; éviter les polices d'icônes complètes pour trois pictogrammes.",
           "rgesn_ref": "5.x",
           "gr491_famille": "Contenus",
-          "tags": ["icones", "svg", "poids"]
+          "tags": [
+            "icones",
+            "svg",
+            "poids"
+          ]
         }
       ]
     },
@@ -273,11 +380,19 @@
           "title": "Pas de bibliothèque lourde pour un besoin mineur",
           "description": "Importer lodash pour trois fonctions ou moment pour formater une date fait payer des centaines de Ko à chaque visiteur.",
           "impact": "Élevé",
-          "patterns": ["lodash", "moment", "jquery"],
+          "patterns": [
+            "lodash",
+            "moment",
+            "jquery"
+          ],
           "recommendation": "Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).",
           "rgesn_ref": "6.x",
           "gr491_famille": "Front-end",
-          "tags": ["javascript", "bundle", "poids"]
+          "tags": [
+            "javascript",
+            "bundle",
+            "poids"
+          ]
         },
         {
           "id": "ECO-FRONT-02",
@@ -288,7 +403,11 @@
           "recommendation": "Utiliser loading=\"lazy\" sur les images et iframes, et le découpage de code (dynamic import) pour les routes et composants.",
           "rgesn_ref": "6.x",
           "gr491_famille": "Front-end",
-          "tags": ["chargement", "performance", "a-la-demande"]
+          "tags": [
+            "chargement",
+            "performance",
+            "a-la-demande"
+          ]
         },
         {
           "id": "ECO-FRONT-03",
@@ -299,7 +418,11 @@
           "recommendation": "Activer la minification dans le build (esbuild, Terser, CSSNano) — c'est gratuit et systématique.",
           "rgesn_ref": "6.x",
           "gr491_famille": "Front-end",
-          "tags": ["build", "minification", "poids"]
+          "tags": [
+            "build",
+            "minification",
+            "poids"
+          ]
         },
         {
           "id": "ECO-FRONT-04",
@@ -310,7 +433,11 @@
           "recommendation": "Auditer régulièrement (npm prune, depcheck, bundle analyzer) et supprimer les dépendances inutilisées.",
           "rgesn_ref": "6.x",
           "gr491_famille": "Front-end",
-          "tags": ["dependances", "minimalisme", "maintenance"]
+          "tags": [
+            "dependances",
+            "minimalisme",
+            "maintenance"
+          ]
         }
       ]
     },
@@ -323,33 +450,56 @@
           "title": "Optimiser les requêtes SQL",
           "description": "SELECT *, fonctions dans les WHERE et tris aléatoires font travailler la base bien au-delà du besoin.",
           "impact": "Élevé",
-          "patterns": ["SELECT \\*", "WHERE 1=1", "ORDER BY.*RAND\\(\\)"],
+          "patterns": [
+            "SELECT \\*",
+            "WHERE 1=1",
+            "ORDER BY.*RAND\\(\\)"
+          ],
           "recommendation": "Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE et les requêtes N+1.",
           "rgesn_ref": "7.x",
           "gr491_famille": "Back-end",
-          "tags": ["sql", "performance", "base-de-donnees"]
+          "tags": [
+            "sql",
+            "performance",
+            "base-de-donnees"
+          ]
         },
         {
           "id": "ECO-BACK-02",
           "title": "Utiliser des pools de connexions",
           "description": "Ouvrir une connexion à la base à chaque requête est coûteux en CPU et en latence, côté application comme côté serveur.",
           "impact": "Élevé",
-          "patterns": ["new.*Connection", "createConnection"],
+          "patterns": [
+            "new.*Connection",
+            "createConnection"
+          ],
           "recommendation": "Configurer un pool de connexions (pg-pool, HikariCP, mysql2/promise).",
           "rgesn_ref": "7.x",
           "gr491_famille": "Back-end",
-          "tags": ["base-de-donnees", "connexions", "pool"]
+          "tags": [
+            "base-de-donnees",
+            "connexions",
+            "pool"
+          ]
         },
         {
           "id": "ECO-BACK-03",
           "title": "Maîtriser la complexité algorithmique",
           "description": "Deux boucles imbriquées sur n éléments = n² itérations : ce qui passe sur 100 éléments s'effondre sur 100 000.",
           "impact": "Élevé",
-          "patterns": ["for.*\\{.*for", "while.*\\{.*for", "\\.forEach.*\\.forEach"],
+          "patterns": [
+            "for.*\\{.*for",
+            "while.*\\{.*for",
+            "\\.forEach.*\\.forEach"
+          ],
           "recommendation": "Utiliser des structures adaptées (tables de hachage, ensembles) pour ramener la complexité à O(n).",
           "rgesn_ref": "7.x",
           "gr491_famille": "Back-end",
-          "tags": ["algorithmes", "complexite", "cpu"]
+          "tags": [
+            "algorithmes",
+            "complexite",
+            "cpu"
+          ]
         },
         {
           "id": "ECO-BACK-04",
@@ -360,7 +510,11 @@
           "recommendation": "Paginer les listes côté API, mettre en cache les résultats coûteux et stables, éviter les traitements synchrones longs.",
           "rgesn_ref": "7.x",
           "gr491_famille": "Back-end",
-          "tags": ["pagination", "cache", "api"]
+          "tags": [
+            "pagination",
+            "cache",
+            "api"
+          ]
         }
       ]
     },
@@ -377,7 +531,11 @@
           "recommendation": "Privilégier les hébergeurs transparents sur leur PUE et leur mix énergétique (certifications ISO 50001/14001, annuaire Green Web Foundation), avec des data centers proches de l'audience.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
-          "tags": ["hebergement", "energie", "datacenter"]
+          "tags": [
+            "hebergement",
+            "energie",
+            "datacenter"
+          ]
         },
         {
           "id": "ECO-HEB-02",
@@ -388,7 +546,11 @@
           "recommendation": "Activer Brotli (ou à défaut GZIP) sur le serveur web ou le reverse proxy.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
-          "tags": ["serveur", "compression", "reseau"]
+          "tags": [
+            "serveur",
+            "compression",
+            "reseau"
+          ]
         },
         {
           "id": "ECO-HEB-03",
@@ -399,7 +561,11 @@
           "recommendation": "Définir Cache-Control avec des durées longues pour les assets versionnés, plus ETag/Last-Modified pour le reste.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
-          "tags": ["cache", "http", "performance"]
+          "tags": [
+            "cache",
+            "http",
+            "performance"
+          ]
         }
       ]
     },
@@ -416,7 +582,11 @@
           "recommendation": "Avant chaque intégration d'IA : le besoin est-il réel, et un traitement déterministe classique peut-il le couvrir ? Documenter ce choix.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Back-end",
-          "tags": ["ia", "justification", "sobriete"]
+          "tags": [
+            "ia",
+            "justification",
+            "sobriete"
+          ]
         },
         {
           "id": "ECO-ALGO-02",
@@ -424,10 +594,14 @@
           "description": "Utiliser le plus grand modèle disponible pour une tâche simple, c'est le gaspillage de calcul le plus courant de l'IA générative.",
           "impact": "Élevé",
           "patterns": [],
-          "recommendation": "Choisir le plus petit modèle qui fait bien le travail (c'est exactement le rôle de green-claude --complexity), et ajuster le niveau d'effort de raisonnement à la tâche.",
+          "recommendation": "Choisir le plus petit modèle qui fait bien le travail pour la tâche donnée, et ajuster le niveau d'effort de raisonnement en conséquence (ex. /effort dans Claude Code).",
           "rgesn_ref": "9.x",
           "gr491_famille": "Back-end",
-          "tags": ["ia", "modeles", "proportionnalite"]
+          "tags": [
+            "ia",
+            "modeles",
+            "proportionnalite"
+          ]
         },
         {
           "id": "ECO-ALGO-03",
@@ -438,7 +612,11 @@
           "recommendation": "Suivre tokens consommés, nombre d'appels et taux de cache par usage ; fixer des budgets et des alertes.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Back-end",
-          "tags": ["ia", "mesure", "tokens"]
+          "tags": [
+            "ia",
+            "mesure",
+            "tokens"
+          ]
         },
         {
           "id": "ECO-ALGO-04",
@@ -449,7 +627,11 @@
           "recommendation": "Comparer régulièrement la solution en place à des alternatives moins consommatrices (cache, modèle plus petit, traitement différé) et être transparent sur les modèles utilisés.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Back-end",
-          "tags": ["ia", "alternatives", "transparence"]
+          "tags": [
+            "ia",
+            "alternatives",
+            "transparence"
+          ]
         }
       ]
     }
