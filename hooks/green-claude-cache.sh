@@ -14,15 +14,19 @@ OFFPEAK_START=22   # 22h UTC
 OFFPEAK_END=6       # 6h UTC
 mkdir -p "$CACHE_DIR"
 
-PROMPT="$(cat)"
+# Hasher le prompt seul, pas l'enveloppe : session_id & co. varieraient la clé
+# à chaque session et cache-save.sh n'en retrouverait aucune.
+PROMPT="$(jq -r '.prompt // empty')"
+[ -n "$PROMPT" ] || exit 0
 KEY="$(echo -n "$PROMPT" | shasum -a 256 | cut -d' ' -f1)"
 CACHE_FILE="$CACHE_DIR/$KEY"
 
 # 1. Cache : réponse déjà connue pour ce prompt exact -> zéro appel modèle
 if [ -f "$CACHE_FILE" ]; then
-    cat "$CACHE_FILE"
-    # decision "block" empêche l'envoi au modèle et affiche la sortie ci-dessus
-    echo '{"decision": "block", "reason": "Réponse servie depuis le cache local Green Claude (zéro appel modèle)."}'
+    # stdout doit être du JSON seul : la réponse passe par "reason", que
+    # decision "block" affiche à la place de l'appel au modèle.
+    jq -n --rawfile r "$CACHE_FILE" \
+      '{decision: "block", reason: ($r + "\n[Green Claude] Réponse servie depuis le cache local (zéro appel modèle).")}'
     exit 0
 fi
 
