@@ -4,22 +4,33 @@
 #   1. Cache local : une question déjà posée est resservie sans appeler l'API.
 #   2. Heures de pointe : avertit avant d'envoyer une requête lourde en journée.
 #
-# À déclarer dans ~/.claude/settings.json (voir install.sh) :
-#   "hooks": { "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "~/.claude/hooks/green-claude-cache.sh"}]}] }
+# Câblé automatiquement par install.sh dans ~/.claude/settings.json.
 
 set -euo pipefail
 
 CACHE_DIR="$HOME/.cache/green-claude"
 OFFPEAK_START=22   # 22h UTC
 OFFPEAK_END=6       # 6h UTC
-mkdir -p "$CACHE_DIR"
+TTL_DAYS=7
+mkdir -p "$CACHE_DIR/pending"
 
 # Hasher le prompt seul, pas l'enveloppe : session_id & co. varieraient la clé
 # à chaque session et cache-save.sh n'en retrouverait aucune.
-PROMPT="$(jq -r '.prompt // empty')"
+INPUT="$(cat)"
+PROMPT="$(printf '%s' "$INPUT" | jq -r '.prompt // empty')"
 [ -n "$PROMPT" ] || exit 0
-KEY="$(echo -n "$PROMPT" | shasum -a 256 | cut -d' ' -f1)"
+
+# Le cwd entre dans la clé : le même prompt posé dans deux projets différents
+# n'attend pas la même réponse.
+CWD="$(printf '%s' "$INPUT" | jq -r '.cwd // empty')"
+KEY="$(printf '%s\n%s' "$CWD" "$PROMPT" | shasum -a 256 | cut -d' ' -f1)"
 CACHE_FILE="$CACHE_DIR/$KEY"
+
+# Purge par date de fichier, pas d'index de TTL. Une réponse cachée
+# vieillit mal quand le code qu'elle décrit a changé depuis. La profondeur 2
+# couvre aussi pending/ : une session qui s'arrête sans passer par le hook Stop
+# y laisse une clé que plus personne ne viendra consommer.
+find "$CACHE_DIR" -mindepth 1 -maxdepth 2 -type f -mtime "+$TTL_DAYS" -delete 2>/dev/null || true
 
 # 1. Cache : réponse déjà connue pour ce prompt exact -> zéro appel modèle
 if [ -f "$CACHE_FILE" ]; then
@@ -28,6 +39,14 @@ if [ -f "$CACHE_FILE" ]; then
     jq -n --rawfile r "$CACHE_FILE" \
       '{decision: "block", reason: ($r + "\n[Green Claude] Réponse servie depuis le cache local (zéro appel modèle).")}'
     exit 0
+fi
+
+# Le payload du hook Stop ne porte ni le prompt ni la réponse : on lui laisse
+# la clé ici, plutôt que de la lui faire recalculer depuis le transcript (tout
+# écart de texte la ferait diverger et le cache ne se remplirait jamais).
+SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // empty')"
+if [ -n "$SESSION" ]; then
+    printf '%s' "$KEY" > "$CACHE_DIR/pending/$SESSION"
 fi
 
 # 2. Heures de pointe : simple avertissement, ne bloque jamais
