@@ -11,7 +11,7 @@ set -euo pipefail
 CACHE_DIR="$HOME/.cache/green-claude"
 OFFPEAK_START=22   # 22h UTC
 OFFPEAK_END=6       # 6h UTC
-TTL_DAYS=7
+TTL_MIN=60
 mkdir -p "$CACHE_DIR/pending"
 
 # Hasher le prompt seul, pas l'enveloppe : session_id & co. varieraient la clé
@@ -21,16 +21,19 @@ PROMPT="$(printf '%s' "$INPUT" | jq -r '.prompt // empty')"
 [ -n "$PROMPT" ] || exit 0
 
 # Le cwd entre dans la clé : le même prompt posé dans deux projets différents
-# n'attend pas la même réponse.
+# n'attend pas la même réponse. Le HEAD git aussi : sans lui, une réponse
+# décrivant le dépôt survit aux commits qui la rendent fausse. Hors dépôt git,
+# la clé retombe sur cwd + prompt.
 CWD="$(printf '%s' "$INPUT" | jq -r '.cwd // empty')"
-KEY="$(printf '%s\n%s' "$CWD" "$PROMPT" | shasum -a 256 | cut -d' ' -f1)"
+HEAD_SHA="$(git -C "${CWD:-.}" rev-parse HEAD 2>/dev/null || true)"
+KEY="$(printf '%s\n%s\n%s' "$CWD" "$HEAD_SHA" "$PROMPT" | shasum -a 256 | cut -d' ' -f1)"
 CACHE_FILE="$CACHE_DIR/$KEY"
 
-# Purge par date de fichier, pas d'index de TTL. Une réponse cachée
-# vieillit mal quand le code qu'elle décrit a changé depuis. La profondeur 2
-# couvre aussi pending/ : une session qui s'arrête sans passer par le hook Stop
-# y laisse une clé que plus personne ne viendra consommer.
-find "$CACHE_DIR" -mindepth 1 -maxdepth 2 -type f -mtime "+$TTL_DAYS" -delete 2>/dev/null || true
+# Purge par date de fichier, pas d'index de TTL : une heure, car une réponse
+# vieillit vite quand le code qu'elle décrit bouge. La profondeur 2 couvre
+# aussi pending/ : une session qui s'arrête sans passer par le hook Stop y
+# laisse une clé que plus personne ne viendra consommer.
+find "$CACHE_DIR" -mindepth 1 -maxdepth 2 -type f -mmin "+$TTL_MIN" -delete 2>/dev/null || true
 
 # 1. Cache : réponse déjà connue pour ce prompt exact -> zéro appel modèle
 if [ -f "$CACHE_FILE" ]; then

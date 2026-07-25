@@ -65,4 +65,23 @@ if [ -f "$CACHE/pending/vieux-orphelin" ]; then fail "purge: pending orphelin no
 N="$(find "$CACHE" -maxdepth 1 -type f | wc -l | tr -d ' ')"
 [ "$N" -eq 0 ] || fail "purge: entree perimee conservee ($N restante(s))"
 
-echo "OK - 6 verifications passees"
+# 7. Le dépôt bouge sous la réponse : même prompt, même projet, mais HEAD
+# différent -> miss. C'est le cas observé en vrai, une réponse decrivant l'état
+# du dépôt resservie après des commits qui la rendaient fausse.
+REPO="$TMP/repo"
+mkdir -p "$REPO"
+git -C "$REPO" init -q
+gitc() { git -C "$REPO" -c user.email=t@t -c user.name=t "$@"; }
+gitc commit -q --allow-empty -m un
+
+prompt_payload sess5 "$REPO" "etat du depot" | bash green-claude-cache.sh >/dev/null 2>&1
+stop_payload sess5 "$REPO" | bash green-claude-cache-save.sh
+OUT="$(prompt_payload sess6 "$REPO" "etat du depot" | bash green-claude-cache.sh 2>/dev/null)"
+printf '%s' "$OUT" | jq -e '.decision == "block"' >/dev/null \
+    || fail "depot inchange: le hit attendu n a pas eu lieu"
+
+gitc commit -q --allow-empty -m deux
+OUT="$(prompt_payload sess7 "$REPO" "etat du depot" | bash green-claude-cache.sh 2>/dev/null)"
+[ -z "$OUT" ] || fail "apres commit: la reponse perimee a ete resservie"
+
+echo "OK - 7 verifications passees"
