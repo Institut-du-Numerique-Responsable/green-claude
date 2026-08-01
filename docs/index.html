@@ -31,7 +31,7 @@
     "name": "Green Claude",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "macOS, Linux",
-    "softwareVersion": "1.2.0",
+    "softwareVersion": "1.2.1",
     "description": "Skill pour Claude Code : sobriété numérique du code produit (RGESN 2024, GR491, Green Software Foundation), installé une fois et appliqué automatiquement.",
     "license": "https://opensource.org/licenses/MIT",
     "url": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
@@ -130,9 +130,12 @@
   </div>
 
   <h2>En 30 secondes</h2>
+  <pre><code>/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
+/plugin install green-claude@green-claude</code></pre>
+  <p>Rien d'autre à faire : Claude Code charge le skill automatiquement dans les sessions suivantes et gère ses mises à jour. Tape <code>/green-claude</code> pour voir la checklist complète.</p>
+  <p>Alternative via <code>install.sh</code> (nécessaire pour câbler en plus le hook de cache local) :</p>
   <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
 cd green-claude && ./install.sh</code></pre>
-  <p>Le skill s'installe dans <code>~/.claude/skills/green-claude</code> et se charge automatiquement dans les sessions Claude Code suivantes. Rien à taper ensuite. Tape <code>/green-claude</code> pour voir la checklist complète.</p>
 
   <h2>Ce que contient le projet</h2>
   <ul>
@@ -150,7 +153,7 @@ cd green-claude && ./install.sh</code></pre>
 
   <footer>
     <p>Une production de l'<strong>Institut du Numérique Responsable</strong>, 2026, open source (MIT).<br>
-    Cette page applique les règles qu'elle promeut : zéro JavaScript, zéro requête externe, polices système, mode sombre natif, moins de 8 Ko au total.</p>
+    Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page. Seule exception : une mesure d'audience légère et auto-hébergée (Matomo).</p>
   </footer>
 </main>
 </body>
