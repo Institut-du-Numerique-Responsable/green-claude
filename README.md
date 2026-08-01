@@ -115,7 +115,7 @@ Un skill s'exécute *pendant* une session déjà lancée. Il ne peut donc pas d�
 - **Cache local** (`hooks/green-claude-cache.sh`) : une question déjà posée est resservie sans réappeler le modèle, zéro token consommé.
 - **Avertissement heures creuses** (même hook) : signale les heures de pointe (hors 22h-6h UTC) sans bloquer.
 
-Ces hooks se câblent dans `~/.claude/settings.json`. `install.sh` te guide, mais vérifie la doc hooks de ta version de Claude Code avant de coller la config.
+Ces hooks se câblent dans `~/.claude/settings.json`. Si on réponds « o », `install.sh` les y ajoute (les autres réglages sont préservés et une sauvegarde du fichier d'origine est laissée en `settings.json.green-claude.bak`). Sans `jq` il affiche la config à coller à la main. Pour les retirer : supprimer les deux entrées `green-claude-*` du fichier.
 
 ---
 
