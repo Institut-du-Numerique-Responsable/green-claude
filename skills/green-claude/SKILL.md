@@ -15,7 +15,7 @@ user-invocable: true
 
 # Green Claude
 
-Deux jeux de règles : `rules/ecoconception.json` (35 règles, RGESN 2024 / GR491 /
+Deux jeux de règles : `rules/ecoconception.json` (36 règles, RGESN 2024 / GR491 /
 Green Software Foundation) pendant que tu écris ou modifies du code, et
 `rules/boris.json` (14 pratiques d'usage) pendant la conversation elle-même. Un
 usage efficace de Claude Code est aussi un usage sobre.

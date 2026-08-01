@@ -74,7 +74,7 @@ L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe
 
 ---
 
-## Les règles : 35 règles alignées sur les 9 familles du RGESN 2024
+## Les règles : 36 règles alignées sur les 9 familles du RGESN 2024
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
 
@@ -82,7 +82,7 @@ L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe
 |---|---|---|
 | 1. Stratégie | 3 | Mesurer avant d'optimiser, données raisonnées, formats ouverts |
 | 2. Spécifications | 5 | Compatibilité anciens terminaux, bas débit, impact des services tiers |
-| 3. Architecture | 4 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres |
+| 3. Architecture | 5 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres, code testé et maintenable |
 | 4. UX/UI | 6 | Pas d'autoplay ni de scroll infini, composants natifs, polices limitées, média le plus sobre |
 | 5. Contenus | 2 | Images optimisées, SVG |
 | 6. Frontend | 4 | Pas de bibliothèque lourde, lazy loading, minification, dépendances |
