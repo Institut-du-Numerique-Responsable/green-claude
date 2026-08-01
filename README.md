@@ -23,7 +23,7 @@ développement ici : [regles-ecoconception-ia](https://github.com/Institut-du-Nu
 
 ## En une phrase
 
-Tu installes le skill une fois. Ensuite, quand Claude Code écrit ou revoit du code dans tes projets, il applique de lui-même les règles d'éco-conception (**RGESN 2024**, **GR491**, **Green Software Foundation**), sans que tu aies à le lui demander à chaque fois.
+Tu installes le skill une fois. Ensuite, quand Claude Code écrit ou revoit du code dans tes projets, il applique de lui-même les règles d'éco-conception (**RGESN 2024**, **GR491**, **Green Software Foundation**, **W3C Web Sustainability Guidelines**, plus des seuils repris de **YellowLabTools**), sans que tu aies à le lui demander à chaque fois.
 
 ## Pourquoi un skill plutôt qu'une simple liste de règles
 
@@ -147,6 +147,8 @@ Ajoute un fichier JSON dans `skills/green-claude/rules/`, structuré comme `ecoc
 - `patterns` : expressions régulières `grep -E` détectant le problème. **Liste vide = pratique** (checklist, ignorée par l'audit).
 - `impact` : `Élevé`, `Moyen` ou `Faible`.
 - `rgesn_ref` / `gr491_famille` (optionnels) : renvoi vers les référentiels officiels.
+- `detector` / `enrich` (optionnels) : pour les cas qu'un pattern seul ne peut pas voir (imbrication multi-lignes, comptage, poids réel d'un fichier référencé...), un script dédié dans `scripts/`. Détail complet dans [CONTRIBUTING.md](CONTRIBUTING.md).
+- `note` (optionnel) : mise en garde affichée dans le résultat de l'audit (faux positif connu, seuil, portée limitée) — l'endroit où documenter les pièges d'interprétation d'une règle, pas dans le skill lui-même.
 
 Relance ensuite `./install.sh` pour republier le skill mis à jour.
 
@@ -159,7 +161,7 @@ Relance ensuite `./install.sh` pour republier le skill mis à jour.
 3. Ajoutez vos règles ou améliorations (`jq empty skills/green-claude/rules/*.json` pour valider le JSON)
 4. Ouvrez une **Pull Request**
 
-Les contributions les plus utiles : nouvelles règles d'audit sourcées (RGESN, GR491, GSF) avec leur `rgesn_ref`, corrections de patterns (faux positifs), traductions.
+Les contributions les plus utiles : nouvelles règles d'audit sourcées (RGESN, GR491, GSF, WSG, ou une autre référence publique reconnue) avec leur `rgesn_ref`, corrections de patterns (faux positifs), traductions.
 
 Détail complet du format des règles et du processus de PR : [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -170,6 +172,8 @@ Détail complet du format des règles et du processus de PR : [CONTRIBUTING.md](
 - [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) : Référentiel Général d'Écoconception de Services Numériques (78 critères, 9 familles)
 - [GR491](https://gr491.isit-europe.org/) : Guide de référence de conception responsable de services numériques (61 recommandations, 516 critères)
 - [Green Software Foundation](https://greensoftware.foundation/) : patterns d'éco-conception logicielle
+- [W3C Web Sustainability Guidelines](https://w3c.github.io/sustainableweb-wsg/) : recommandations de durabilité web (UX, développement, hébergement, stratégie)
+- [YellowLabTools](https://github.com/YellowLabTools/YellowLabTools) : outil open source d'audit de qualité front-end, source de plusieurs seuils (DOM, CSS, polices)
 - [How Boris uses Claude Code](https://howborisusesclaudecode.com/) : les pratiques de Boris Cherny, créateur de Claude Code
 - [Anthropic](https://www.anthropic.com/) : Claude et Claude Code
 
