@@ -168,4 +168,28 @@ echo "$OUT" | grep -q 'gestion erreur' && fail "code mort : faux positif (catch 
 N=$(echo "$OUT" | grep -c 'ECO-FRONT-05')
 [ "$N" -eq 1 ] || fail "code mort : attendu 1 seul hit sur ce fichier, trouvé $N"
 
-echo "OK - 9 verifications passees"
+# 10. ECO-FRONT-06 (globales implicites) : détecte var/affectation nue au
+# niveau racine d'un script, silencieux dans une IIFE/fonction, et ne
+# confond pas une affectation de propriété ("window.foo =", "obj.bar =")
+# avec une nouvelle globale.
+cat > "$TMP/globals.js" <<'EOF'
+var leaked = 1;
+foo = 2;
+window.bar = 3;
+(function() {
+  var scoped = 1;
+})();
+function helper() {
+  var localVar = 1;
+}
+obj.prop = 5;
+EOF
+OUT="$(bash eco-audit.sh "$TMP/globals.js")"
+echo "$OUT" | grep -q 'var leaked' || fail "globales : var au niveau racine non détecté"
+echo "$OUT" | grep -q 'foo = 2' || fail "globales : affectation nue au niveau racine non détectée"
+echo "$OUT" | grep -q 'window.bar' && fail "globales : faux positif sur une affectation de propriété (window.bar)"
+echo "$OUT" | grep -q 'var scoped' && fail "globales : faux positif sur une var dans une IIFE"
+echo "$OUT" | grep -q 'localVar' && fail "globales : faux positif sur une var dans une fonction"
+echo "$OUT" | grep -q 'obj.prop' && fail "globales : faux positif sur une affectation de propriété (obj.prop)"
+
+echo "OK - 10 verifications passees"

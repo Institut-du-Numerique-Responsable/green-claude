@@ -15,7 +15,7 @@ user-invocable: true
 
 # Green Claude
 
-Deux jeux de règles : `rules/ecoconception.json` (37 règles, RGESN 2024 / GR491 /
+Deux jeux de règles : `rules/ecoconception.json` (38 règles, RGESN 2024 / GR491 /
 Green Software Foundation) pendant que tu écris ou modifies du code, et
 `rules/boris.json` (14 pratiques d'usage) pendant la conversation elle-même. Un
 usage efficace de Claude Code est aussi un usage sobre.
@@ -87,6 +87,10 @@ le contexte avant de le signaler.
   return/throw/break/continue non conditionnel dans le même bloc — pas un code
   mort à l'exécution runtime en général (un bloc jamais atteint par ailleurs
   n'est pas détectable statiquement).
+- Un hit ECO-FRONT-06 (`implicit_globals`) signale une déclaration/affectation
+  au niveau racine d'un script — un candidat à vérifier, pas forcément une
+  erreur : une globale imposée par un script tiers (Matomo, etc.) en est un
+  exemple légitime, à confirmer plutôt qu'à corriger d'office.
 - Un hit ECO-CONT-01 signale la simple mention d'un `.png`/`.jpg` dans le code, pas
   un défaut de compression ou de dimension : le pattern seul ne peut pas lire le
   fichier binaire réel. Quand le chemin référencé est résolvable sur disque (pas

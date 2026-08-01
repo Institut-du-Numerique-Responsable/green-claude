@@ -1,15 +1,15 @@
 {
   "metadata": {
     "name": "Éco-conception de services numériques — RGESN 2024 / GR491 / GSF",
-    "description": "37 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
+    "description": "38 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
     "version": "3.0.0",
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/",
       "https://greensoftware.foundation/"
     ],
-    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 37 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
-    "count": 37,
+    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 38 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
+    "count": 38,
     "type": "code_audit",
     "type_note": "Les règles avec 'patterns' sont détectées dans le code par l'audit (grep). Les règles avec 'detector' utilisent un détecteur dédié multi-lignes (scripts/detect-*.awk) quand grep ligne-par-ligne ne suffit pas. Celles sans pattern ni detector sont des règles de conception/processus : elles servent de checklist via --list-rules."
   },
@@ -479,6 +479,23 @@
           "tags": [
             "code-mort",
             "javascript",
+            "maintenance"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-06",
+          "title": "Éviter les variables globales implicites",
+          "description": "Une variable déclarée (ou affectée sans mot-clé) au premier niveau d'un script classique reste en vie pour toute la durée de la page et est visible de tout autre script — retenue en mémoire plus longtemps que nécessaire, avec un risque de collision.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "implicit_globals",
+          "detector_note": "scripts/detect-implicit-globals.awk signale toute déclaration var/let/const ou affectation nue au niveau racine (profondeur d'accolades 0) d'un fichier ; rien à l'intérieur d'une fonction ou d'une IIFE. Limite assumée : un <script type=\"module\"> n'a pas cette sémantique de portée globale au premier niveau, mais le détecteur ne reçoit que le contenu du script, pas son attribut type — un hit reste un candidat à vérifier, pas une preuve (ex. une globale imposée par un script tiers comme Matomo est un candidat légitime, pas une erreur).",
+          "recommendation": "Envelopper le code dans une IIFE ou un module, ou scoper la variable dans la fonction qui l'utilise. Si la globale est nécessaire (script tiers), l'assigner explicitement en propriété d'un objet global existant plutôt qu'en variable nue.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "tags": [
+            "javascript",
+            "portee",
             "maintenance"
           ]
         }
