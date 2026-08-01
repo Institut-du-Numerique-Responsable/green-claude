@@ -9,7 +9,7 @@
     {
       "name": "green-claude",
       "source": "./",
-      "description": "Applique les règles d'éco-conception RGESN/GR491 pendant que Claude Code écrit du code, avec audit et checklist."
+      "description": "Applique les règles d'éco-conception RGESN/GR491 pendant que Claude Code écrit du code, avec audit et checklist. Présentation : https://institut-du-numerique-responsable.github.io/green-claude/"
     }
   ]
 }
