@@ -1,15 +1,15 @@
 {
   "metadata": {
     "name": "Éco-conception de services numériques — RGESN 2024 / GR491 / GSF",
-    "description": "35 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
+    "description": "36 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
     "version": "3.0.0",
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/",
       "https://greensoftware.foundation/"
     ],
-    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 35 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
-    "count": 35,
+    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 36 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
+    "count": 36,
     "type": "code_audit",
     "type_note": "Les règles avec 'patterns' sont détectées dans le code par l'audit (grep). Les règles avec 'detector' utilisent un détecteur dédié multi-lignes (scripts/detect-*.awk) quand grep ligne-par-ligne ne suffit pas. Celles sans pattern ni detector sont des règles de conception/processus : elles servent de checklist via --list-rules."
   },
@@ -220,6 +220,23 @@
             "ci-cd",
             "environnements",
             "mutualisation"
+          ]
+        },
+        {
+          "id": "ECO-ARCH-05",
+          "title": "Écrire du code de qualité : testé, robuste, performant et maintenable",
+          "description": "Un code mal testé, fragile ou mal structuré génère plus de correctifs, de redéploiements et de recalculs après coup — chaque bug corrigé une fois le service en production coûte plus de ressources que d'écrire juste du premier coup.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Teste le code avant de le livrer, gère les erreurs et les cas limites, mesure la performance des chemins critiques, garde une structure simple pour qu'elle reste maintenable sans réécriture complète.",
+          "rgesn_ref": "GSF",
+          "gr491_famille": "Architecture",
+          "source_note": "Principe proposé par Guillaume G. (Institut du Numérique Responsable), à partir de la thèse générale de la Green Software Foundation reliant qualité du code et sobriété numérique (greensoftware.foundation/articles/green-coding-is-a-matter-of-code-quality) : pas un critère RGESN numéroté, d'où rgesn_ref = \"GSF\" plutôt qu'un format N.x.",
+          "tags": [
+            "qualite",
+            "tests",
+            "maintenabilite",
+            "robustesse"
           ]
         }
       ]
