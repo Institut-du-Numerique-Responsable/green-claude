@@ -8,7 +8,7 @@ description: |
   "RGESN", "GR491", "écoconception", "green IT"), ou quand invoqué via
   /green-claude pour parcourir la checklist des règles.
 author: Institut du Numérique Responsable
-version: 1.2.1
+version: 1.3.0
 license: MIT
 user-invocable: true
 ---
