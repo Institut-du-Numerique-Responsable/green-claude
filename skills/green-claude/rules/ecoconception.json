@@ -1,15 +1,15 @@
 {
   "metadata": {
     "name": "Éco-conception de services numériques — RGESN 2024 / GR491 / GSF",
-    "description": "44 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
+    "description": "52 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
     "version": "3.0.0",
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/",
       "https://greensoftware.foundation/"
     ],
-    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 44 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
-    "count": 44,
+    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 52 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
+    "count": 52,
     "type": "code_audit",
     "type_note": "Les règles avec 'patterns' sont détectées dans le code par l'audit (grep). Les règles avec 'detector' utilisent un détecteur dédié multi-lignes (scripts/detect-*.awk) quand grep ligne-par-ligne ne suffit pas. Celles sans pattern ni detector sont des règles de conception/processus : elles servent de checklist via --list-rules."
   },
@@ -65,6 +65,54 @@
             "formats",
             "ouverture",
             "interoperabilite"
+          ]
+        },
+        {
+          "id": "ECO-STRAT-04",
+          "title": "Désigner un référent sobriété numérique",
+          "description": "Sans personne identifiée pour porter le sujet, la sobriété numérique reste une intention collective que personne ne pousse concrètement au quotidien.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Désigner une personne ou un petit groupe référent, avec le mandat de suivre les objectifs de sobriété et d'arbitrer les compromis.",
+          "rgesn_ref": "1.x",
+          "gr491_famille": "Stratégie",
+          "source_note": "WSG (W3C Web Sustainability Guidelines) — Business Strategy and Product Management > \"Assign a sustainability advocate\".",
+          "tags": [
+            "gouvernance",
+            "organisation",
+            "demarche"
+          ]
+        },
+        {
+          "id": "ECO-STRAT-05",
+          "title": "Former et sensibiliser l'équipe à la sobriété numérique",
+          "description": "Une équipe qui ne connaît pas les enjeux ni les leviers de la sobriété numérique ne peut pas les appliquer, même avec les meilleures règles écrites.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Prévoir une sensibilisation initiale et des points réguliers ; partager les mesures et les progrès pour maintenir l'attention sur le sujet.",
+          "rgesn_ref": "1.x",
+          "gr491_famille": "Stratégie",
+          "source_note": "WSG (W3C Web Sustainability Guidelines) — Business Strategy and Product Management > \"Inform, raise awareness, and train for sustainability\".",
+          "tags": [
+            "formation",
+            "sensibilisation",
+            "demarche"
+          ]
+        },
+        {
+          "id": "ECO-STRAT-06",
+          "title": "Communiquer l'impact environnemental des choix aux utilisateurs",
+          "description": "Un utilisateur qui ne sait pas qu'une action a un coût (lancer une vidéo en haute qualité, télécharger un gros fichier) ne peut pas faire de choix éclairé.",
+          "impact": "Faible",
+          "patterns": [],
+          "recommendation": "Afficher le poids ou la qualité avant une action coûteuse (taille d'un téléchargement, résolution vidéo par défaut) et laisser le choix à l'utilisateur.",
+          "rgesn_ref": "1.x",
+          "gr491_famille": "Stratégie",
+          "source_note": "WSG (W3C Web Sustainability Guidelines) — Business Strategy and Product Management > \"Communicate the environmental impact of user choices\".",
+          "tags": [
+            "transparence",
+            "ux",
+            "demarche"
           ]
         }
       ]
@@ -350,6 +398,24 @@
             "sobriete-editoriale",
             "video"
           ]
+        },
+        {
+          "id": "ECO-UX-07",
+          "title": "Respecter prefers-reduced-motion pour les animations",
+          "description": "Forcer une animation à un visiteur qui a explicitement demandé d'en avoir moins (réglage système, souvent lié à une contrainte matérielle, de confort ou de consommation) gaspille du CPU/GPU pour un rendu que personne ne veut voir.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "reduced_motion",
+          "detector_note": "scripts/detect-reduced-motion.awk signale un fichier avec @keyframes ou animation: mais sans aucune media query prefers-reduced-motion nulle part dans le même fichier. Faux négatif possible si la media query vit dans un autre fichier CSS du projet — l'audit ne voit qu'un fichier à la fois.",
+          "recommendation": "Envelopper ou désactiver les animations non essentielles dans @media (prefers-reduced-motion: reduce).",
+          "rgesn_ref": "4.x",
+          "gr491_famille": "UX/UI",
+          "source_note": "WSG (W3C Web Sustainability Guidelines) — UX Design > \"Ensure animation is proportionate and easy to control\" > \"Control animation\".",
+          "tags": [
+            "css",
+            "animation",
+            "accessibilite"
+          ]
         }
       ]
     },
@@ -604,6 +670,24 @@
             "legacy",
             "compatibilite"
           ]
+        },
+        {
+          "id": "ECO-FRONT-13",
+          "title": "Différer le chargement des scripts non critiques",
+          "description": "Un <script src=\"...\"> sans async ni defer bloque le parsing HTML le temps de télécharger et d'exécuter le script, retardant l'affichage de tout ce qui suit dans le document.",
+          "impact": "Moyen",
+          "patterns": [],
+          "detector": "blocking_scripts",
+          "detector_note": "scripts/detect-blocking-scripts.awk reconnaît la balise <script ...> sur une seule ligne (le cas quasi systématique) ; une balise étalée sur plusieurs lignes n'est pas suivie. Les scripts type=\"module\" sont exclus (différés par défaut selon la spécification HTML).",
+          "recommendation": "Ajouter async (script indépendant du DOM et de l'ordre d'exécution) ou defer (script qui doit s'exécuter après le parsing, dans l'ordre) selon le besoin.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "WSG (W3C Web Sustainability Guidelines) — Web Development > \"Defer the loading of non-critical resources\" > \"Asynchronous code\".",
+          "tags": [
+            "javascript",
+            "chargement",
+            "performance"
+          ]
         }
       ]
     },
@@ -617,13 +701,14 @@
           "description": "SELECT *, fonctions dans les WHERE et tris aléatoires font travailler la base bien au-delà du besoin.",
           "impact": "Élevé",
           "patterns": [
-            "SELECT \\*",
-            "WHERE 1=1",
-            "ORDER BY.*RAND\\(\\)"
+            "SELECT\\s+\\*",
+            "WHERE\\s+1\\s*=\\s*1",
+            "ORDER BY.*RAND(OM)?\\(\\)"
           ],
           "recommendation": "Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE et les requêtes N+1.",
           "rgesn_ref": "7.x",
           "gr491_famille": "Back-end",
+          "detector_note": "Les patterns sont ligne-par-ligne : un SELECT * étalé sur plusieurs lignes (SELECT\\n  *\\nFROM ...) n'est pas détecté, seule la forme sur une ligne l'est.",
           "tags": [
             "sql",
             "performance",
@@ -729,6 +814,65 @@
             "cache",
             "http",
             "performance"
+          ]
+        },
+        {
+          "id": "ECO-HEB-04",
+          "title": "Utiliser HTTPS plutôt que HTTP",
+          "description": "Une requête en clair ne bénéficie pas de la compression et du multiplexage de HTTP/2 (qui exige TLS en pratique dans tous les navigateurs), et expose à une interception qui peut forcer un retéléchargement.",
+          "impact": "Moyen",
+          "patterns": [],
+          "detector": "insecure_links",
+          "detector_note": "scripts/detect-insecure-links.awk exclut ce qui n'est pas une vraie requête réseau : espaces de noms XML/SVG (http://www.w3.org/, http://schema.org/) et localhost/127.0.0.1 (développement local).",
+          "recommendation": "Utiliser https:// systématiquement, y compris pour les ressources tierces et les liens sortants.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "https",
+            "tls",
+            "securite"
+          ]
+        },
+        {
+          "id": "ECO-HEB-05",
+          "title": "Pas de protocole TLS/SSL obsolète",
+          "description": "SSLv2/v3 et TLS 1.0/1.1 sont dépréciés (vulnérabilités connues) et moins efficaces que TLS 1.2+, qui bénéficie d'un chiffrement plus rapide et de meilleures performances de connexion.",
+          "impact": "Moyen",
+          "patterns": [
+            "TLSv1\\.0",
+            "TLSv1\\.1",
+            "TLSv1_method",
+            "TLSv1_1_method",
+            "SSLv2_method",
+            "SSLv3_method",
+            "SSLv23_method",
+            "TLSv1([^.0-9]|$)"
+          ],
+          "recommendation": "Configurer un minimum TLS 1.2 (idéalement 1.3) côté serveur ou dans les options de connexion sortante.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "source_note": "Recoupe YellowLabTools (policies.js : oldTlsProtocol, non repris tel quel car mesuré au runtime par YLT — ici détecté statiquement sur les protocoles explicitement configurés dans le code).",
+          "tags": [
+            "tls",
+            "ssl",
+            "securite"
+          ]
+        },
+        {
+          "id": "ECO-HEB-06",
+          "title": "Pas de liens ou ressources locales cassés",
+          "description": "Un href/src qui pointe vers un fichier du projet qui n'existe pas devient un 404 dès la mise en ligne — un aller-retour réseau et un rendu dégradé pour rien.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "broken_links",
+          "detector_note": "scripts/detect-broken-links.awk ne vérifie que les chemins locaux/relatifs résolvables sur disque. Les URLs externes (http/https) ne sont pas vérifiées : un vrai lien externe mort ne peut être détecté qu'en le requêtant réellement, hors de portée d'un audit statique sans réseau (comme notFound de YellowLabTools, mesuré au runtime).",
+          "recommendation": "Corriger le chemin ou retirer la référence si le fichier n'existe plus.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "liens",
+            "404",
+            "maintenance"
           ]
         }
       ]
