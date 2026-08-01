@@ -68,4 +68,30 @@ echo "$OUT" | grep -q 'ECO-STRAT-01' || fail "--list-rules omet une règle de d�
 bash eco-audit.sh "$TMP/n-existe-pas.js" >/dev/null 2>&1 \
     || fail "l'audit échoue sur un fichier inexistant au lieu de l'ignorer"
 
-echo "OK - 6 verifications passees"
+# 7. Enrichissement image (ECO-CONT-01) : dimensions/poids réels si le
+# fichier est résolvable sur disque, silence sur une URL distante ou un
+# chemin invalide (rien à affirmer sans pouvoir vérifier).
+python3 -c "
+import struct, zlib
+def chunk(tag, data):
+    return struct.pack('>I', len(data)) + tag + data + struct.pack('>I', zlib.crc32(tag+data))
+sig = b'\x89PNG\r\n\x1a\n'
+ihdr = chunk(b'IHDR', struct.pack('>IIBBBBB', 200, 100, 8, 2, 0, 0, 0))
+raw = b''.join(b'\x00' + b'\xff\x00\x00' * 200 for _ in range(100))
+idat = chunk(b'IDAT', zlib.compress(raw))
+iend = chunk(b'IEND', b'')
+open('$TMP/photo.png','wb').write(sig+ihdr+idat+iend)
+" 2>/dev/null || fail "impossible de générer le PNG de test (python3 requis)"
+
+cat > "$TMP/gallery.html" <<EOF
+<img src="photo.png" alt="reel">
+<img src="https://example.com/remote.png" alt="distant">
+<img src="n-existe-pas.png" alt="invalide">
+EOF
+OUT="$(bash eco-audit.sh "$TMP/gallery.html")"
+echo "$OUT" | grep -q '200x100px' || fail "enrichissement image : dimensions réelles non détectées"
+echo "$OUT" | grep -q 'remote.png' && fail "enrichissement image : ne doit rien affirmer sur une URL distante"
+echo "$OUT" | grep -q 'n-existe-pas.png' && fail "enrichissement image : ne doit rien affirmer sur un fichier absent"
+true
+
+echo "OK - 7 verifications passees"

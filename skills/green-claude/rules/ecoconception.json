@@ -343,6 +343,8 @@
             "\\.png",
             "\\.jpe?g"
           ],
+          "enrich": "image",
+          "enrich_note": "Un pattern ne peut pas dire si l'image est déjà compressée ou correctement dimensionnée. scripts/inspect-image.sh résout le fichier réel quand c'est possible (pas une URL distante) et ajoute son poids/dimensions réels au rapport, sans rien affirmer quand le fichier n'est pas résolvable.",
           "recommendation": "Convertir en WebP/AVIF, servir des tailles adaptées via srcset, compresser systématiquement.",
           "rgesn_ref": "5.x",
           "gr491_famille": "Contenus",

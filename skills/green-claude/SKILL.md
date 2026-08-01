@@ -81,6 +81,12 @@ le contexte avant de le signaler.
 - Un hit ECO-BACK-03 (`nested_loops`) est une boucle imbriquée candidate à O(n²),
   pas une preuve : confirme qu'elle dépend de la taille des données avant de
   recommander un refactor.
+- Un hit ECO-CONT-01 signale la simple mention d'un `.png`/`.jpg` dans le code, pas
+  un défaut de compression ou de dimension : le pattern seul ne peut pas lire le
+  fichier binaire réel. Quand le chemin référencé est résolvable sur disque (pas
+  une URL distante), le rapport ajoute son poids et ses dimensions réels
+  (`scripts/inspect-image.sh`) — vérifie ces chiffres avant de conclure, et ne dis
+  rien de plus que ce que le rapport donne quand le fichier n'est pas résolvable.
 
 ## Ce que ce skill ne fait PAS
 
