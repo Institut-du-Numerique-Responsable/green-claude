@@ -21,7 +21,7 @@ if [ "${1:-}" = "--list-rules" ]; then
     jq -r '
         [.categories[] as $c | $c.rules[] | . + {category: $c.name}]
         | .[]
-        | select((.patterns // []) | length == 0)
+        | select(((.patterns // []) | length == 0) and ((.detector // "") == ""))
         | "[\(.impact)] \(.id) — \(.title)\n  \(.recommendation)\n"' "$RULES_FILE"
     echo "=== Pratiques d'usage Boris Cherny (contexte, brief, mémoire, vérification, compute) ==="
     jq -r '
@@ -48,14 +48,28 @@ while IFS= read -r rule_json; do
     title=$(jq -r '.title' <<<"$rule_json")
     impact=$(jq -r '.impact' <<<"$rule_json")
     patterns=$(jq -r '.patterns | join("|")' <<<"$rule_json")
+    detector=$(jq -r '.detector // ""' <<<"$rule_json")
     recommendation=$(jq -r '.recommendation' <<<"$rule_json")
     rgesn_ref=$(jq -r '.rgesn_ref' <<<"$rule_json")
 
     for file in "$@"; do
         [ -f "$file" ] || continue
-        if grep -qiE "$patterns" "$file" 2>/dev/null; then
+        matches=""
+        if [ -n "$detector" ]; then
+            # Détecteur dédié multi-lignes (grep ligne-par-ligne ne sait pas
+            # voir une imbrication répartie sur plusieurs lignes).
+            detector_script="$SCRIPT_DIR/detect-$(echo "$detector" | tr '_' '-').awk"
+            [ -f "$detector_script" ] || continue
+            matches=$(awk -f "$detector_script" "$file" 2>/dev/null || true)
+        elif [ -n "$patterns" ]; then
+            matches=$(grep -qiE "$patterns" "$file" 2>/dev/null && echo "match" || true)
+        fi
+        if [ -n "$matches" ]; then
             echo "[$impact] $id — $title"
             echo "  Fichier        : $file"
+            if [ "$matches" != "match" ]; then
+                echo "$matches" | head -5 | sed 's/^/  Ligne          : /'
+            fi
             echo "  Catégorie      : $category"
             echo "  RGESN          : $rgesn_ref"
             echo "  Recommandation : $recommendation"
@@ -66,7 +80,7 @@ while IFS= read -r rule_json; do
 done < <(jq -c '
     [.categories[] as $c | $c.rules[] | . + {category: $c.name}]
     | .[]
-    | select((.patterns // []) | length > 0)' "$RULES_FILE")
+    | select(((.patterns // []) | length > 0) or ((.detector // "") != ""))' "$RULES_FILE")
 
 if [ "$issues_found" -eq 0 ]; then
     echo "Aucune issue d'éco-conception détectée sur les fichiers analysés."
