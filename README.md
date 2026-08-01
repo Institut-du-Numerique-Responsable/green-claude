@@ -74,7 +74,7 @@ L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe
 
 ---
 
-## Les règles : 36 règles alignées sur les 9 familles du RGESN 2024
+## Les règles : 37 règles alignées sur les 9 familles du RGESN 2024
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
 
@@ -85,7 +85,7 @@ L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe
 | 3. Architecture | 5 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres, code testé et maintenable |
 | 4. UX/UI | 6 | Pas d'autoplay ni de scroll infini, composants natifs, polices limitées, média le plus sobre |
 | 5. Contenus | 2 | Images optimisées, SVG |
-| 6. Frontend | 4 | Pas de bibliothèque lourde, lazy loading, minification, dépendances |
+| 6. Frontend | 5 | Pas de bibliothèque lourde, lazy loading, minification, dépendances, pas de code mort |
 | 7. Backend | 4 | SQL optimisé, pools de connexions, complexité, pagination + cache |
 | 8. Hébergement | 3 | Hébergeur sobre, compression HTTP, cache HTTP |
 | 9. **Algorithmie (dont IA)** | 4 | **Justifier l'IA, dimensionner le modèle, mesurer, alternatives sobres** |

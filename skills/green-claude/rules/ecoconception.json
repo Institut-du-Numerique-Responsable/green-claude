@@ -1,15 +1,15 @@
 {
   "metadata": {
     "name": "Éco-conception de services numériques — RGESN 2024 / GR491 / GSF",
-    "description": "36 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
+    "description": "37 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
     "version": "3.0.0",
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/",
       "https://greensoftware.foundation/"
     ],
-    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 36 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
-    "count": 36,
+    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 37 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
+    "count": 37,
     "type": "code_audit",
     "type_note": "Les règles avec 'patterns' sont détectées dans le code par l'audit (grep). Les règles avec 'detector' utilisent un détecteur dédié multi-lignes (scripts/detect-*.awk) quand grep ligne-par-ligne ne suffit pas. Celles sans pattern ni detector sont des règles de conception/processus : elles servent de checklist via --list-rules."
   },
@@ -462,6 +462,23 @@
           "tags": [
             "dependances",
             "minimalisme",
+            "maintenance"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-05",
+          "title": "Pas de code mort",
+          "description": "Du code inatteignable (après un return/throw non conditionnel) est quand même téléchargé et parsé par chaque visiteur, pour un bénéfice nul.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "dead_code",
+          "detector_note": "Un grep ligne-par-ligne ne peut pas suivre les blocs : scripts/detect-dead-code.awk suit la profondeur des accolades pour ne signaler que le code inatteignable dans le MÊME bloc qu'un return/throw/break/continue, en ignorant les limites de case/default et les blocs qui referment le bloc surveillé sur la même ligne (\"} catch {\", \"} else {\").",
+          "recommendation": "Supprimer le code mort repéré ; s'il s'agit d'un early-return de débogage temporaire, le retirer avant de livrer.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "tags": [
+            "code-mort",
+            "javascript",
             "maintenance"
           ]
         }
