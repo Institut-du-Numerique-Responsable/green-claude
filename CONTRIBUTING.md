@@ -10,7 +10,7 @@ Merci de l'intérêt porté à ce projet. Les contributions les plus utiles sont
 
 ## Ajouter une règle d'éco-conception
 
-Les règles vivent dans `skill/green-claude/rules/ecoconception.json`, organisées par catégorie (une des 9 familles du RGESN 2024). Chaque règle suit ce format :
+Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organisées par catégorie (une des 9 familles du RGESN 2024). Chaque règle suit ce format :
 
 ```json
 {
@@ -34,7 +34,7 @@ Les règles vivent dans `skill/green-claude/rules/ecoconception.json`, organisé
 
 ## Ajouter une pratique Boris
 
-Les pratiques d'usage sobre de Claude Code vivent dans `skill/green-claude/rules/boris.json`, sur le même principe. Si vous citez un outil tiers en exemple, vérifiez qu'il est open source et sous une licence permissive avant de l'ajouter.
+Les pratiques d'usage sobre de Claude Code vivent dans `skills/green-claude/rules/boris.json`, sur le même principe. Si vous citez un outil tiers en exemple, vérifiez qu'il est open source et sous une licence permissive avant de l'ajouter.
 
 ## Corriger un faux positif
 
@@ -45,13 +45,13 @@ Si un pattern regex déclenche l'audit à tort, ouvrez une PR qui resserre l'exp
 Avant d'ouvrir une PR :
 
 ```bash
-jq empty skill/green-claude/rules/*.json
+jq empty skills/green-claude/rules/*.json
 ```
 
 Ça valide que le JSON reste bien formé. Testez aussi le script d'audit sur un fichier contenant le motif que vous ciblez :
 
 ```bash
-./skill/green-claude/scripts/eco-audit.sh chemin/vers/un/fichier
+./skills/green-claude/scripts/eco-audit.sh chemin/vers/un/fichier
 ```
 
 ## Ouvrir la Pull Request

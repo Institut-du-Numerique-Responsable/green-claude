@@ -35,7 +35,7 @@ fi
 # =============================================================================
 print_info "Installation du skill dans $SKILLS_DIR..."
 mkdir -p "$SKILLS_DIR"
-cp -r "$SCRIPT_DIR/skill/green-claude/." "$SKILLS_DIR/"
+cp -r "$SCRIPT_DIR/skills/green-claude/." "$SKILLS_DIR/"
 chmod +x "$SKILLS_DIR/scripts/"*.sh
 print_success "Skill installé"
 
