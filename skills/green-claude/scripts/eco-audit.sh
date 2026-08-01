@@ -49,6 +49,7 @@ while IFS= read -r rule_json; do
     impact=$(jq -r '.impact' <<<"$rule_json")
     patterns=$(jq -r '.patterns | join("|")' <<<"$rule_json")
     detector=$(jq -r '.detector // ""' <<<"$rule_json")
+    enrich=$(jq -r '.enrich // ""' <<<"$rule_json")
     recommendation=$(jq -r '.recommendation' <<<"$rule_json")
     rgesn_ref=$(jq -r '.rgesn_ref' <<<"$rule_json")
 
@@ -69,6 +70,19 @@ while IFS= read -r rule_json; do
             echo "  Fichier        : $file"
             if [ "$matches" != "match" ]; then
                 echo "$matches" | head -5 | sed 's/^/  Ligne          : /'
+            fi
+            if [ -n "$enrich" ]; then
+                # Best-effort : inspecte les fichiers réels référencés (image,
+                # etc.) quand c'est possible. Un pattern seul ne peut pas dire
+                # si une image est déjà compressée ou correctement dimensionnée
+                # — ceci ajoute l'info réelle quand le fichier est résolvable
+                # sur disque, sans rien affirmer quand il ne l'est pas (URL
+                # distante, chemin construit dynamiquement...).
+                enrich_script="$SCRIPT_DIR/inspect-$(echo "$enrich" | tr '_' '-').sh"
+                if [ -f "$enrich_script" ]; then
+                    enrich_out=$(bash "$enrich_script" "$file" 2>/dev/null || true)
+                    [ -n "$enrich_out" ] && echo "$enrich_out" | sed 's/^/  Image          : /'
+                fi
             fi
             echo "  Catégorie      : $category"
             echo "  RGESN          : $rgesn_ref"

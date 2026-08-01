@@ -28,6 +28,7 @@ Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organis�
 
 - `patterns` : expressions régulières `grep -E` qui détectent le problème dans le code. Une liste vide fait de la règle une checklist de démarche/gouvernance, ignorée par l'audit automatique — sauf si un `detector` est défini (voir ci-dessous).
 - `detector` (optionnel) : nom d'un détecteur dédié dans `scripts/detect-<nom>.awk`, pour les cas que grep ne peut pas voir car répartis sur plusieurs lignes (ex. `nested_loops` pour les boucles imbriquées). N'utilisez ce mécanisme que si `patterns` ne peut vraiment pas suffire.
+- `enrich` (optionnel) : nom d'un script `scripts/inspect-<nom>.sh`, exécuté en plus de `patterns` (pas à la place) quand la règle a matché, pour ajouter une information réelle qu'un pattern texte ne peut pas donner (ex. `image` pour lire le poids/dimensions réels d'un fichier référencé). Doit rester best-effort : ne rien afficher plutôt que d'affirmer quelque chose de non vérifiable (fichier non résolvable, URL distante).
 - `impact` : `Élevé`, `Moyen` ou `Faible`.
 - `rgesn_ref` renvoie au critère officiel du [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) ; utilisez le format `N.x` si la règle relève d'une famille sans correspondre à un critère unique.
 - `gr491_famille` relie la règle au [GR491](https://gr491.isit-europe.org/).
