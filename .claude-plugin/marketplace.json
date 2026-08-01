@@ -1,0 +1,15 @@
+{
+  "name": "green-claude",
+  "owner": {
+    "name": "Institut du Numérique Responsable",
+    "url": "https://institutnr.org/"
+  },
+  "description": "Éco-conception de services numériques avec Claude Code (RGESN 2024 / GR491 / Green Software Foundation).",
+  "plugins": [
+    {
+      "name": "green-claude",
+      "source": "./",
+      "description": "Applique les règles d'éco-conception RGESN/GR491 pendant que Claude Code écrit du code, avec audit et checklist."
+    }
+  ]
+}

@@ -39,15 +39,26 @@ La checklist reste un document qu'on consulte. Le skill s'exécute au moment où
 
 ## Installation
 
+### Via le gestionnaire de plugins de Claude Code (recommandé)
+
+```
+/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
+/plugin install green-claude@green-claude
+```
+
+Claude Code gère alors les mises à jour (`/plugin update green-claude`) sans repasser par un `git pull` manuel.
+
+### Via install.sh
+
 ```bash
 git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
 cd green-claude
 ./install.sh
 ```
 
-Ça installe le skill dans `~/.claude/skills/green-claude`. Rien d'autre à faire : Claude Code le charge automatiquement dans tes sessions suivantes.
+Ça installe le skill dans `~/.claude/skills/green-claude`. Rien d'autre à faire : Claude Code le charge automatiquement dans tes sessions suivantes. Cette méthode reste utile pour câbler en plus les hooks de cache (voir plus bas), que le gestionnaire de plugins ne pose pas automatiquement.
 
-Prérequis : `jq`, pour le script d'audit (`brew install jq` / `sudo apt install jq`).
+Prérequis : `jq`, pour le script d'audit et les hooks (`brew install jq` / `sudo apt install jq`).
 
 ## Utilisation
 
@@ -59,13 +70,13 @@ Rien à taper. Trois façons de s'en servir :
 | Auditer un fichier existant | Demande simplement : *« audit éco-conception de ce fichier »* |
 | Voir la checklist complète | Tape `/green-claude` |
 
-L'audit (`skill/green-claude/scripts/eco-audit.sh`) est un script déterministe (grep sur les règles) : il ne coûte pas de raisonnement au modèle, juste la lecture du résultat.
+L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe (grep sur les règles) : il ne coûte pas de raisonnement au modèle, juste la lecture du résultat.
 
 ---
 
 ## Les règles : 35 règles alignées sur les 9 familles du RGESN 2024
 
-[`skill/green-claude/rules/ecoconception.json`](skill/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
+[`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
 
 | Famille RGESN | Règles | Exemples |
 |---|---|---|
@@ -87,7 +98,7 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête consomme de l'énergie. [Boris Cherny](https://howborisusesclaudecode.com/), créateur de Claude Code, documente des pratiques d'usage efficace. Un usage efficace est aussi un usage sobre : chaque aller-retour évité économise des tokens, chaque contexte allégé aussi.
 
-[`skill/green-claude/rules/boris.json`](skill/green-claude/rules/boris.json) en reprend 14, dont deux ajoutées avec des exemples d'outils open source vérifiés :
+[`skills/green-claude/rules/boris.json`](skills/green-claude/rules/boris.json) en reprend 14, dont deux ajoutées avec des exemples d'outils open source vérifiés :
 
 | Pratique | Le geste |
 |---|---|
@@ -102,7 +113,7 @@ Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête
 | Adapter le niveau d'effort | `/effort low/high/max` selon la tâche, jamais par défaut au maximum |
 | `--bare` pour les scripts | Démarrage sans contexte projet, pour l'automatisation |
 
-Détail complet : [`skill/green-claude/rules/boris.json`](skill/green-claude/rules/boris.json).
+Détail complet : [`skills/green-claude/rules/boris.json`](skills/green-claude/rules/boris.json).
 
 > Les outils tiers cités (graphify, caveman) sont des exemples illustratifs vérifiés (open source, licence MIT). Le projet ne les audite pas et n'en dépend pas.
 
@@ -121,7 +132,7 @@ Ces hooks se câblent dans `~/.claude/settings.json`. Si on réponds « o », `i
 
 ## Écrire ses propres règles
 
-Ajoute un fichier JSON dans `skill/green-claude/rules/`, structuré comme `ecoconception.json` (catégories → règles) :
+Ajoute un fichier JSON dans `skills/green-claude/rules/`, structuré comme `ecoconception.json` (catégories → règles) :
 
 ```json
 {
@@ -145,7 +156,7 @@ Relance ensuite `./install.sh` pour republier le skill mis à jour.
 
 1. **Fork** ce dépôt
 2. Créez une branche (`git checkout -b feature/ma-regle`)
-3. Ajoutez vos règles ou améliorations (`jq empty skill/green-claude/rules/*.json` pour valider le JSON)
+3. Ajoutez vos règles ou améliorations (`jq empty skills/green-claude/rules/*.json` pour valider le JSON)
 4. Ouvrez une **Pull Request**
 
 Les contributions les plus utiles : nouvelles règles d'audit sourcées (RGESN, GR491, GSF) avec leur `rgesn_ref`, corrections de patterns (faux positifs), traductions.
