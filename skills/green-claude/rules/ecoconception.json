@@ -312,6 +312,21 @@
             "performance",
             "systeme"
           ]
+        },
+        {
+          "id": "ECO-UX-06",
+          "title": "Choisir le média le plus sobre porteur de l'information",
+          "description": "Une vidéo pour dire ce qu'un paragraphe explique, c'est des Mo à la place de Ko.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Hiérarchiser : texte > image > audio > vidéo. Réserver la vidéo aux contenus où elle apporte réellement.",
+          "rgesn_ref": "4.6, 4.7",
+          "gr491_famille": "UX/UI",
+          "tags": [
+            "media",
+            "sobriete-editoriale",
+            "video"
+          ]
         }
       ]
     },
@@ -335,21 +350,6 @@
             "images",
             "webp",
             "compression"
-          ]
-        },
-        {
-          "id": "ECO-CONT-02",
-          "title": "Choisir le média le plus sobre porteur de l'information",
-          "description": "Une vidéo pour dire ce qu'un paragraphe explique, c'est des Mo à la place de Ko.",
-          "impact": "Moyen",
-          "patterns": [],
-          "recommendation": "Hiérarchiser : texte > image > audio > vidéo. Réserver la vidéo aux contenus où elle apporte réellement.",
-          "rgesn_ref": "4.6, 4.7",
-          "gr491_famille": "Contenus",
-          "tags": [
-            "media",
-            "sobriete-editoriale",
-            "video"
           ]
         },
         {
