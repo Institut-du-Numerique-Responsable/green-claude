@@ -130,4 +130,42 @@ OUT="$(bash eco-audit.sh "$TMP/google-fonts.html")"
 echo "$OUT" | grep -q 'ECO-UX-05' || fail "polices : Google Fonts (CDN tiers) non détecté du tout"
 echo "$OUT" | grep -q 'non mesurables sans requête réseau' || fail "polices : absence de la mise en garde sur le CDN tiers"
 
-echo "OK - 8 verifications passees"
+# 9. ECO-FRONT-05 (code mort) : détecte le vrai code inatteignable après un
+# return/throw, sans se faire piéger par les cas très courants où le bloc
+# surveillé se referme sur la même ligne que la suite du code (try/catch,
+# if/else) ni par le fallthrough syntaxique d'un switch/case.
+cat > "$TMP/dead.js" <<'EOF'
+function foo() {
+  return 42;
+  console.log("mort");
+}
+function bar(x) {
+  if (x) {
+    return 1;
+  }
+  console.log("atteignable, hors du if");
+}
+function classify(x) {
+  switch (x) {
+    case 1:
+      return "un";
+    default:
+      return "autre";
+  }
+}
+function safe() {
+  try {
+    return risky();
+  } catch (e) {
+    console.log("gestion erreur, atteignable");
+  }
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/dead.js")"
+echo "$OUT" | grep -q 'mort");' || fail "code mort : vrai positif (après return) non détecté"
+echo "$OUT" | grep -q 'hors du if' && fail "code mort : faux positif (code après un if contenant un return)"
+echo "$OUT" | grep -q 'gestion erreur' && fail "code mort : faux positif (catch après un return dans le try)"
+N=$(echo "$OUT" | grep -c 'ECO-FRONT-05')
+[ "$N" -eq 1 ] || fail "code mort : attendu 1 seul hit sur ce fichier, trouvé $N"
+
+echo "OK - 9 verifications passees"

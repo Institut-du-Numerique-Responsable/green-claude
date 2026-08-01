@@ -15,7 +15,7 @@ user-invocable: true
 
 # Green Claude
 
-Deux jeux de règles : `rules/ecoconception.json` (36 règles, RGESN 2024 / GR491 /
+Deux jeux de règles : `rules/ecoconception.json` (37 règles, RGESN 2024 / GR491 /
 Green Software Foundation) pendant que tu écris ou modifies du code, et
 `rules/boris.json` (14 pratiques d'usage) pendant la conversation elle-même. Un
 usage efficace de Claude Code est aussi un usage sobre.
@@ -83,6 +83,10 @@ le contexte avant de le signaler.
 - Un hit ECO-BACK-03 (`nested_loops`) est une boucle imbriquée candidate à O(n²),
   pas une preuve : confirme qu'elle dépend de la taille des données avant de
   recommander un refactor.
+- Un hit ECO-FRONT-05 (`dead_code`) signale du code après un
+  return/throw/break/continue non conditionnel dans le même bloc — pas un code
+  mort à l'exécution runtime en général (un bloc jamais atteint par ailleurs
+  n'est pas détectable statiquement).
 - Un hit ECO-CONT-01 signale la simple mention d'un `.png`/`.jpg` dans le code, pas
   un défaut de compression ou de dimension : le pattern seul ne peut pas lire le
   fichier binaire réel. Quand le chemin référencé est résolvable sur disque (pas
