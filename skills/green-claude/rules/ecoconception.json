@@ -298,13 +298,19 @@
         },
         {
           "id": "ECO-UX-05",
-          "title": "Limiter les polices téléchargées",
-          "description": "Chaque police personnalisée est un téléchargement de plus, bloquant souvent l'affichage du texte.",
+          "title": "Limiter le nombre et le poids des polices téléchargées",
+          "description": "RGESN 4.8 : au maximum 2 polices et 4 variantes au total par page (ou 400 Ko de polices téléchargées au total), avec vérification de la compression. Chaque police est un téléchargement de plus, souvent bloquant pour l'affichage du texte.",
           "impact": "Faible",
           "patterns": [
-            "@font-face"
+            "@font-face",
+            "fonts\\.googleapis\\.com",
+            "fonts\\.gstatic\\.com",
+            "use\\.typekit\\.net",
+            "new FontFace\\("
           ],
-          "recommendation": "Utiliser la pile system-ui ; au maximum deux familles auto-hébergées, sous-ensemblées (subset), avec font-display: swap.",
+          "enrich": "fonts",
+          "enrich_note": "Un pattern ne peut ni compter les polices/variantes ni sommer leur poids réel. scripts/inspect-fonts.sh le fait pour les polices auto-hébergées résolvables sur disque (nombre de familles, variantes, poids total contre 400 Ko, format WOFF2 vs TTF/OTF/EOT) ; les polices tierces (CDN) sont détectées mais leur poids réel n'est pas mesurable sans requête réseau.",
+          "recommendation": "Utiliser la pile system-ui d'abord. Si une police est nécessaire : au maximum 2 familles et 4 variantes au total (ou 400 Ko téléchargés au total), auto-hébergées, sous-ensemblées (subset), en WOFF2, avec font-display: swap.",
           "rgesn_ref": "4.8",
           "gr491_famille": "UX/UI",
           "tags": [

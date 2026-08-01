@@ -71,9 +71,11 @@ recommandation de chaque règle. Utile pour une revue de conception en amont du 
 Un hit du script d'audit est un **candidat**, pas une violation confirmée : vérifie
 le contexte avant de le signaler.
 
-- Une `@font-face` auto-hébergée, sous-ensemblée, avec `font-display: swap` suit
-  déjà la recommandation ECO-UX-05 : le pattern matche sans distinguer bon et
-  mauvais usage.
+- ECO-UX-05 (polices) déclenche sur toute mention de police, y compris déjà
+  conforme : si le rapport n'a pas de ligne `Détail`, les polices auto-hébergées
+  résolvables respectent déjà les seuils RGESN 4.8 (2 familles, 4 variantes, 400 Ko,
+  format WOFF2) — inutile de resignaler. Une police tierce (CDN) est toujours
+  signalée sans pouvoir être mesurée : à vérifier manuellement.
 - `deprecated` en commentaire (ECO-ARCH-03) signale souvent une dépréciation
   documentée — une bonne pratique, pas un défaut.
 - ECO-ARCH-01 (react/vue/angular/next) vise le choix initial d'architecture ; ne le

@@ -94,4 +94,40 @@ echo "$OUT" | grep -q 'remote.png' && fail "enrichissement image : ne doit rien 
 echo "$OUT" | grep -q 'n-existe-pas.png' && fail "enrichissement image : ne doit rien affirmer sur un fichier absent"
 true
 
-echo "OK - 7 verifications passees"
+# 8. ECO-UX-05 (polices) : détection élargie aux CDN tiers, comptage des
+# familles/variantes auto-hébergées et poids réel contre le seuil RGESN 4.8
+# (40 Ko d'excès par police, 400 Ko au total), format non compressé signalé.
+python3 -c "open('$TMP/small.woff2','wb').write(b'\x00' * 20000)"
+python3 -c "open('$TMP/big.woff2','wb').write(b'\x00' * 60000)"
+python3 -c "open('$TMP/legacy.ttf','wb').write(b'\x00' * 15000)"
+
+cat > "$TMP/fonts.css" <<EOF
+@font-face {
+  font-family: "Inter";
+  src: url("small.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  src: url("big.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Legacy";
+  src: url("legacy.ttf") format("truetype");
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/fonts.css")"
+echo "$OUT" | grep -q '2 famille(s)' || fail "polices : comptage des familles distinctes incorrect"
+echo "$OUT" | grep -q '3 variante(s)' || fail "polices : comptage des variantes incorrect"
+echo "$OUT" | grep -q 'big.woff2.*40 Ko' || fail "polices : excès au-delà de 40 Ko non détecté"
+echo "$OUT" | grep -q 'legacy.ttf.*non compressé' || fail "polices : format TTF non signalé"
+echo "$OUT" | grep -q 'small.woff2' && fail "polices : ne doit rien signaler sur une police déjà conforme (woff2, < 40 Ko)"
+true
+
+cat > "$TMP/google-fonts.html" <<EOF
+<link href="https://fonts.googleapis.com/css2?family=Roboto" rel="stylesheet">
+EOF
+OUT="$(bash eco-audit.sh "$TMP/google-fonts.html")"
+echo "$OUT" | grep -q 'ECO-UX-05' || fail "polices : Google Fonts (CDN tiers) non détecté du tout"
+echo "$OUT" | grep -q 'non mesurables sans requête réseau' || fail "polices : absence de la mise en garde sur le CDN tiers"
+
+echo "OK - 8 verifications passees"

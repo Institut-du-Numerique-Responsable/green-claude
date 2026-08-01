@@ -81,7 +81,7 @@ while IFS= read -r rule_json; do
                 enrich_script="$SCRIPT_DIR/inspect-$(echo "$enrich" | tr '_' '-').sh"
                 if [ -f "$enrich_script" ]; then
                     enrich_out=$(bash "$enrich_script" "$file" 2>/dev/null || true)
-                    [ -n "$enrich_out" ] && echo "$enrich_out" | sed 's/^/  Image          : /'
+                    [ -n "$enrich_out" ] && echo "$enrich_out" | sed 's/^/  Détail         : /'
                 fi
             fi
             echo "  Catégorie      : $category"
