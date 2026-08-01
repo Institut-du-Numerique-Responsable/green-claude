@@ -214,6 +214,7 @@
             "\\bnext\\b"
           ],
           "recommendation": "Avant d'adopter un framework, évaluer si du HTML/CSS statique, du Vanilla JS ou HTMX suffisent au besoin réel.",
+          "note": "Vise le choix initial d'architecture pour un besoin simple, pas un projet déjà construit sur un de ces frameworks : ne resignale pas à chaque audit d'un projet existant.",
           "rgesn_ref": "3.1",
           "gr491_famille": "Architecture",
           "tags": [
@@ -247,6 +248,7 @@
             "TODO.*remove"
           ],
           "recommendation": "Séparer correctifs et évolutions, livrer des mises à jour incrémentielles, prévoir migrations de données et documentation long terme.",
+          "note": "\"deprecated\" en commentaire signale souvent une dépréciation documentée — une bonne pratique, pas un défaut à corriger.",
           "rgesn_ref": "3.4, 3.5, 3.6",
           "gr491_famille": "Architecture",
           "tags": [

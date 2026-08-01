@@ -68,44 +68,12 @@ recommandation de chaque règle. Utile pour une revue de conception en amont du 
 
 ## Erreurs courantes
 
-Un hit du script d'audit est un **candidat**, pas une violation confirmée : vérifie
-le contexte avant de le signaler.
-
-- ECO-UX-05 (polices) déclenche sur toute mention de police, y compris déjà
-  conforme : si le rapport n'a pas de ligne `Détail`, les polices auto-hébergées
-  résolvables respectent déjà les seuils RGESN 4.8 (2 familles, 4 variantes, 400 Ko,
-  format WOFF2) — inutile de resignaler. Une police tierce (CDN) est toujours
-  signalée sans pouvoir être mesurée : à vérifier manuellement.
-- `deprecated` en commentaire (ECO-ARCH-03) signale souvent une dépréciation
-  documentée — une bonne pratique, pas un défaut.
-- ECO-ARCH-01 (react/vue/angular/next) vise le choix initial d'architecture ; ne le
-  resignale pas à chaque audit d'un projet déjà construit dessus.
-- Un hit ECO-BACK-03 (`nested_loops`) est une boucle imbriquée candidate à O(n²),
-  pas une preuve : confirme qu'elle dépend de la taille des données avant de
-  recommander un refactor.
-- Un hit ECO-FRONT-05 (`dead_code`) signale du code après un
-  return/throw/break/continue non conditionnel dans le même bloc — pas un code
-  mort à l'exécution runtime en général (un bloc jamais atteint par ailleurs
-  n'est pas détectable statiquement).
-- Un hit ECO-FRONT-06 (`implicit_globals`) signale une déclaration/affectation
-  au niveau racine d'un script — un candidat à vérifier, pas forcément une
-  erreur : une globale imposée par un script tiers (Matomo, etc.) en est un
-  exemple légitime, à confirmer plutôt qu'à corriger d'office.
-- ECO-FRONT-08/10/11 (`dom_size`, `css_importants`, `css_duplicates`) sont à
-  seuil (repris de YellowLabTools) : ils ne se déclenchent qu'au-delà d'une
-  valeur, pas dès la première occurrence — un résultat proche du seuil
-  mérite une vérification, pas une confiance aveugle sur l'heuristique
-  ligne par ligne qui les calcule.
-- Un hit ECO-CONT-01 signale la simple mention d'un `.png`/`.jpg` dans le code, pas
-  un défaut de compression ou de dimension : le pattern seul ne peut pas lire le
-  fichier binaire réel. Quand le chemin référencé est résolvable sur disque (pas
-  une URL distante), le rapport ajoute son poids et ses dimensions réels
-  (`scripts/inspect-image.sh`) — vérifie ces chiffres avant de conclure, et ne dis
-  rien de plus que ce que le rapport donne quand le fichier n'est pas résolvable.
-- ECO-HEB-06 (liens cassés) scanne tout `href`/`src` du fichier, y compris ceux
-  qui n'ont rien à voir avec l'objet de l'audit : sur un fichier de test ou un
-  extrait contenant des chemins fictifs, il signalera ces chemins comme cassés
-  en plus des vraies règles ciblées — normal, pas un bug du détecteur.
+Un hit du script d'audit est un **candidat**, pas une violation confirmée. Quand
+une ligne `Note` accompagne un résultat, lis-la avant de relayer quoi que ce
+soit à l'utilisateur : elle explique la limite précise du pattern ou du
+détecteur pour cette règle (faux positif connu, seuil, portée...) — c'est
+l'information à jour, plutôt qu'une liste séparée ici qui se périmerait à
+chaque nouvelle règle.
 
 ## Ce que ce skill ne fait PAS
 
