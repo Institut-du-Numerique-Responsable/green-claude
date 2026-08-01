@@ -1,15 +1,15 @@
 {
   "metadata": {
     "name": "Éco-conception de services numériques — RGESN 2024 / GR491 / GSF",
-    "description": "38 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
+    "description": "44 règles d'éco-conception couvrant les 9 familles du RGESN 2024 (Référentiel Général d'Écoconception de Services Numériques, 78 critères). Chaque règle référence le ou les critères RGESN correspondants (champ rgesn_ref) et la famille GR491 (champ gr491_famille).",
     "version": "3.0.0",
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/",
       "https://greensoftware.foundation/"
     ],
-    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 38 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
-    "count": 38,
+    "coverage_note": "Le RGESN 2024 compte 78 critères en 9 familles ; le GR491 compte 61 recommandations et 516 critères en 8 familles. Ce fichier sélectionne 44 règles actionnables sans reproduire le référentiel complet : chaque famille RGESN est représentée, et le champ rgesn_ref renvoie au critère officiel pour approfondir. rgesn_ref au format 'N.x' signifie que la règle relève de la famille N sans correspondre à un critère unique.",
+    "count": 44,
     "type": "code_audit",
     "type_note": "Les règles avec 'patterns' sont détectées dans le code par l'audit (grep). Les règles avec 'detector' utilisent un détecteur dédié multi-lignes (scripts/detect-*.awk) quand grep ligne-par-ligne ne suffit pas. Celles sans pattern ni detector sont des règles de conception/processus : elles servent de checklist via --list-rules."
   },
@@ -497,6 +497,112 @@
             "javascript",
             "portee",
             "maintenance"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-07",
+          "title": "Pas de requête XHR synchrone",
+          "description": "Une XMLHttpRequest synchrone (3ᵉ argument de .open() à false) gèle le thread principal jusqu'à la réponse réseau : rien d'autre ne s'exécute, y compris le rendu de la page.",
+          "impact": "Élevé",
+          "patterns": [
+            "\\.open\\([^,]+,[^,]+,\\s*false\\s*\\)"
+          ],
+          "recommendation": "Utiliser fetch() ou XHR asynchrone (true, la valeur par défaut). Aucun cas d'usage légitime en frontend aujourd'hui.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Seuil et existence de la règle repris de YellowLabTools (policies.js : synchronousXHR, tout occurrence dès la première est classée \"bad\"). Recoupe aussi le WSG (Web Development > \"Use sustainable JavaScript and APIs\").",
+          "tags": [
+            "javascript",
+            "reseau",
+            "blocage"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-08",
+          "title": "DOM pas trop volumineux ni trop profond",
+          "description": "Un DOM avec beaucoup d'éléments ou très imbriqué ralentit le rendu, le CSS matching et toute manipulation JavaScript ultérieure.",
+          "impact": "Moyen",
+          "patterns": [],
+          "detector": "dom_size",
+          "detector_note": "scripts/detect-dom-size.awk compte les éléments et la profondeur d'imbrication (heuristique ligne par ligne, sans vrai parseur HTML ; les éléments vides comme img/br ne comptent pas dans la profondeur). Seuils repris de YellowLabTools (policies.js, isBadThreshold) : >3000 éléments ou >25 niveaux.",
+          "recommendation": "Simplifier la structure HTML, paginer les listes longues, aplatir l'imbrication de conteneurs superflus (divitis).",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "tags": [
+            "dom",
+            "html",
+            "complexite"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-09",
+          "title": "Pas d'IDs HTML dupliqués",
+          "description": "Un id doit être unique dans tout le document. Un doublon casse getElementById/querySelector (qui ne renvoient que le premier), poussant à des contournements JavaScript plus coûteux que nécessaire.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "duplicate_ids",
+          "detector_note": "scripts/detect-duplicate-ids.awk extrait chaque id=\"...\" ligne par ligne et signale tout id vu plus d'une fois. Règle et existence du problème documentées par YellowLabTools (policies.js : DOMidDuplicated).",
+          "recommendation": "Renommer les doublons ; utiliser une classe si plusieurs éléments doivent partager le même style/comportement.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "tags": [
+            "dom",
+            "html",
+            "accessibilite"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-10",
+          "title": "Pas d'usage excessif de !important",
+          "description": "Chaque !important supplémentaire force les suivants à en ajouter encore plus pour prendre le dessus dans la cascade CSS, gonflant le fichier sans fin utile — symptôme d'une spécificité hors de contrôle.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "css_importants",
+          "detector_note": "scripts/detect-css-importants.awk compte les occurrences de !important dans le fichier. Seuil repris de YellowLabTools (policies.js, isBadThreshold) : 200.",
+          "recommendation": "Réduire la spécificité des sélecteurs plutôt que la forcer avec !important ; réserver son usage aux cas exceptionnels et documentés (surcharge d'une librairie tierce, par exemple).",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "tags": [
+            "css",
+            "specificite",
+            "maintenance"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-11",
+          "title": "Pas de sélecteurs ou propriétés CSS dupliqués",
+          "description": "Un sélecteur redéfini plusieurs fois ou une propriété répétée dans un même bloc (la dernière écrase les précédentes) est du poids CSS téléchargé et parsé pour rien.",
+          "impact": "Faible",
+          "patterns": [],
+          "detector": "css_duplicates",
+          "detector_note": "scripts/detect-css-duplicates.awk compte les sélecteurs redéfinis (fonctionne sur du CSS étalé ou en une ligne) et les propriétés répétées dans un même bloc (style étalé uniquement — limite assumée). Seuils repris de YellowLabTools (policies.js, isBadThreshold) : 100 pour chaque.",
+          "recommendation": "Fusionner les sélecteurs identiques, supprimer les propriétés redondantes au sein d'un même bloc.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Recoupe le WSG (Web Development > \"Minify and remove unused code\" > \"Remove redundancy\").",
+          "tags": [
+            "css",
+            "code-mort",
+            "maintenance"
+          ]
+        },
+        {
+          "id": "ECO-FRONT-12",
+          "title": "Pas de hacks CSS legacy pour navigateurs obsolètes",
+          "description": "Les hacks ciblant d'anciennes versions d'Internet Explorer (star html, échappement \\9) ajoutent du poids CSS pour des navigateurs qui ne représentent plus qu'une part infime, voire nulle, du trafic aujourd'hui.",
+          "impact": "Faible",
+          "patterns": [
+            "\\*\\s+html\\b",
+            "\\\\9\\s*;"
+          ],
+          "recommendation": "Vérifier les statistiques d'audience réelles avant de garder ces hacks ; les retirer si le support IE6/7/8 n'est plus un besoin justifié.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Existence de la règle documentée par YellowLabTools (policies.js : cssOldIEFixes).",
+          "tags": [
+            "css",
+            "legacy",
+            "compatibilite"
           ]
         }
       ]

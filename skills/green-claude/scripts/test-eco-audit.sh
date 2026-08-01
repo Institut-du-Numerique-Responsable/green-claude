@@ -192,4 +192,87 @@ echo "$OUT" | grep -q 'var scoped' && fail "globales : faux positif sur une var 
 echo "$OUT" | grep -q 'localVar' && fail "globales : faux positif sur une var dans une fonction"
 echo "$OUT" | grep -q 'obj.prop' && fail "globales : faux positif sur une affectation de propriété (obj.prop)"
 
-echo "OK - 10 verifications passees"
+# 11. ECO-FRONT-07 (XHR synchrone) : détecte le 3e argument false, pas true.
+cat > "$TMP/sync.js" <<'EOF'
+xhr.open('GET', '/api', false);
+EOF
+cat > "$TMP/async.js" <<'EOF'
+xhr.open('GET', '/api', true);
+EOF
+OUT="$(bash eco-audit.sh "$TMP/sync.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-07' || fail "XHR synchrone non détecté"
+OUT="$(bash eco-audit.sh "$TMP/async.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-07' && fail "faux positif : XHR asynchrone (true) signalé comme synchrone"
+true
+
+# 12. ECO-FRONT-08 (taille DOM) : seuils YellowLabTools (3000 éléments,
+# 25 niveaux), silencieux sous les seuils, éléments vides (img) sans effet
+# sur la profondeur.
+python3 -c "
+html = '<div>'
+for i in range(30): html += '<div>'
+html += 'x'
+for i in range(30): html += '</div>'
+html += '</div>'
+open('$TMP/deep.html', 'w').write(html)
+"
+cat > "$TMP/shallow.html" <<'EOF'
+<div><p>ok</p><img src="x.jpg"></div>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/deep.html")"
+echo "$OUT" | grep -q 'ECO-FRONT-08' || fail "profondeur DOM excessive non détectée"
+OUT="$(bash eco-audit.sh "$TMP/shallow.html")"
+echo "$OUT" | grep -q 'ECO-FRONT-08' && fail "faux positif sur un DOM simple"
+true
+
+# 13. ECO-FRONT-09 (IDs dupliqués) : détecte le doublon, pas de faux positif
+# sur valid=/grid= qui contiennent "id" sans être des id.
+cat > "$TMP/dupid.html" <<'EOF'
+<div id="a">1</div>
+<div id="a">2</div>
+EOF
+cat > "$TMP/novalidfp.html" <<'EOF'
+<div valid="a">1</div>
+<div grid="a">2</div>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/dupid.html")"
+echo "$OUT" | grep -q 'ECO-FRONT-09' || fail "id dupliqué non détecté"
+OUT="$(bash eco-audit.sh "$TMP/novalidfp.html")"
+echo "$OUT" | grep -q 'ECO-FRONT-09' && fail "faux positif : valid=/grid= pris pour un id"
+true
+
+# 14. ECO-FRONT-10 (!important) : seuil 200, silencieux en dessous.
+python3 -c "
+open('$TMP/manyimp.css', 'w').write('.a { color: red !important; }\n' * 250)
+"
+cat > "$TMP/fewimp.css" <<'EOF'
+.a { color: red !important; }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/manyimp.css")"
+echo "$OUT" | grep -q 'ECO-FRONT-10' || fail "usage excessif de !important non détecté"
+OUT="$(bash eco-audit.sh "$TMP/fewimp.css")"
+echo "$OUT" | grep -q 'ECO-FRONT-10' && fail "faux positif sur un usage ponctuel de !important"
+true
+
+# 15. ECO-FRONT-11 (CSS dupliqué) : sélecteurs en un-liner ET propriétés en
+# style étalé, seuil 100 pour chacun.
+python3 -c "
+open('$TMP/dupsel.css', 'w').write('.dup { color: red; }\n' * 105)
+"
+OUT="$(bash eco-audit.sh "$TMP/dupsel.css")"
+echo "$OUT" | grep -q 'ECO-FRONT-11' || fail "sélecteurs CSS dupliqués non détectés"
+
+# 16. ECO-FRONT-12 (hacks IE) : détecte, pas de faux positif sur du CSS propre.
+cat > "$TMP/iehack.css" <<'EOF'
+* html .foo { color: red; }
+EOF
+cat > "$TMP/cleanhack.css" <<'EOF'
+.foo { color: red; }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/iehack.css")"
+echo "$OUT" | grep -q 'ECO-FRONT-12' || fail "hack IE (star html) non détecté"
+OUT="$(bash eco-audit.sh "$TMP/cleanhack.css")"
+echo "$OUT" | grep -q 'ECO-FRONT-12' && fail "faux positif hack IE sur CSS propre"
+true
+
+echo "OK - 16 verifications passees"
