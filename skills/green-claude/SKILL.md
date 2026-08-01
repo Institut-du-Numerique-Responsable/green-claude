@@ -15,7 +15,7 @@ user-invocable: true
 
 # Green Claude
 
-Deux jeux de règles : `rules/ecoconception.json` (44 règles, RGESN 2024 / GR491 /
+Deux jeux de règles : `rules/ecoconception.json` (52 règles, RGESN 2024 / GR491 /
 Green Software Foundation) pendant que tu écris ou modifies du code, et
 `rules/boris.json` (14 pratiques d'usage) pendant la conversation elle-même. Un
 usage efficace de Claude Code est aussi un usage sobre.
@@ -102,6 +102,10 @@ le contexte avant de le signaler.
   une URL distante), le rapport ajoute son poids et ses dimensions réels
   (`scripts/inspect-image.sh`) — vérifie ces chiffres avant de conclure, et ne dis
   rien de plus que ce que le rapport donne quand le fichier n'est pas résolvable.
+- ECO-HEB-06 (liens cassés) scanne tout `href`/`src` du fichier, y compris ceux
+  qui n'ont rien à voir avec l'objet de l'audit : sur un fichier de test ou un
+  extrait contenant des chemins fictifs, il signalera ces chemins comme cassés
+  en plus des vraies règles ciblées — normal, pas un bug du détecteur.
 
 ## Ce que ce skill ne fait PAS
 

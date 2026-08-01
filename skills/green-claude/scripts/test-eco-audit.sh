@@ -90,8 +90,13 @@ cat > "$TMP/gallery.html" <<EOF
 EOF
 OUT="$(bash eco-audit.sh "$TMP/gallery.html")"
 echo "$OUT" | grep -q '200x100px' || fail "enrichissement image : dimensions réelles non détectées"
-echo "$OUT" | grep -q 'remote.png' && fail "enrichissement image : ne doit rien affirmer sur une URL distante"
-echo "$OUT" | grep -q 'n-existe-pas.png' && fail "enrichissement image : ne doit rien affirmer sur un fichier absent"
+# Le fichier contient aussi un lien mort (n-existe-pas.png) et une image
+# distante, légitimement signalés par ECO-HEB-06 (liens cassés) : on vérifie
+# ici que c'est bien ECO-CONT-01 (enrichissement image) qui ne dit rien sur
+# ces deux-là, pas que la sortie entière les tait (une autre règle le fait).
+CONT01_BLOCK="$(echo "$OUT" | awk '/ECO-CONT-01/{p=1} p&&/^$/{p=0} p')"
+echo "$CONT01_BLOCK" | grep -q 'remote.png' && fail "enrichissement image : ne doit rien affirmer sur une URL distante"
+echo "$CONT01_BLOCK" | grep -q 'n-existe-pas.png' && fail "enrichissement image : ne doit rien affirmer sur un fichier absent"
 true
 
 # 8. ECO-UX-05 (polices) : détection élargie aux CDN tiers, comptage des
@@ -275,4 +280,89 @@ OUT="$(bash eco-audit.sh "$TMP/cleanhack.css")"
 echo "$OUT" | grep -q 'ECO-FRONT-12' && fail "faux positif hack IE sur CSS propre"
 true
 
-echo "OK - 16 verifications passees"
+# 17. ECO-FRONT-13 (script bloquant) : détecte l'absence d'async/defer,
+# silencieux avec async ou type="module".
+cat > "$TMP/blocking.html" <<'EOF'
+<script src="app.js"></script>
+<script src="tracker.js" async></script>
+<script src="mod.js" type="module"></script>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/blocking.html")"
+# Ces 3 fichiers .js n'existent pas non plus sur disque : ECO-HEB-06 (liens
+# cassés) les signale aussi, légitimement, pour une autre raison. On scope
+# la vérification au bloc ECO-FRONT-13 pour ne pas confondre les deux.
+FRONT13_BLOCK="$(echo "$OUT" | awk '/ECO-FRONT-13/{p=1} p&&/^$/{p=0} p')"
+echo "$FRONT13_BLOCK" | grep -q 'app.js' || fail "script bloquant non détecté"
+echo "$FRONT13_BLOCK" | grep -q 'tracker.js' && fail "faux positif : script async signalé comme bloquant"
+echo "$FRONT13_BLOCK" | grep -q 'mod.js' && fail "faux positif : script type=module signalé comme bloquant"
+
+# 18. ECO-UX-07 (prefers-reduced-motion) : détecte une animation sans la
+# media query, silencieux si elle est présente ou s'il n'y a pas d'animation.
+cat > "$TMP/animnoquery.css" <<'EOF'
+.spin { animation: spin 2s linear infinite; }
+EOF
+cat > "$TMP/animwithquery.css" <<'EOF'
+.spin { animation: spin 2s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/animnoquery.css")"
+echo "$OUT" | grep -q 'ECO-UX-07' || fail "animation sans prefers-reduced-motion non détectée"
+OUT="$(bash eco-audit.sh "$TMP/animwithquery.css")"
+echo "$OUT" | grep -q 'ECO-UX-07' && fail "faux positif : prefers-reduced-motion déjà présent"
+true
+
+# 19. ECO-HEB-04 (HTTP non sécurisé) : détecte http://, silencieux sur
+# https://, localhost et les espaces de noms XML (w3.org).
+cat > "$TMP/insecure.js" <<'EOF'
+fetch('http://api.example.com/data');
+EOF
+cat > "$TMP/secure.js" <<'EOF'
+fetch('https://api.example.com/data');
+fetch('http://localhost:3000/api');
+EOF
+cat > "$TMP/svgns.html" <<'EOF'
+<svg xmlns="http://www.w3.org/2000/svg"></svg>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/insecure.js")"
+echo "$OUT" | grep -q 'ECO-HEB-04' || fail "lien http:// non détecté"
+OUT="$(bash eco-audit.sh "$TMP/secure.js")"
+echo "$OUT" | grep -q 'ECO-HEB-04' && fail "faux positif sur https:// ou localhost"
+OUT="$(bash eco-audit.sh "$TMP/svgns.html")"
+echo "$OUT" | grep -q 'ECO-HEB-04' && fail "faux positif sur l'espace de noms SVG w3.org"
+true
+
+# 20. ECO-HEB-05 (TLS/SSL obsolète) : détecte TLSv1/1.1 et les méthodes
+# legacy, silencieux sur TLSv1.2/1.3 (le piège du \b qui matche un préfixe).
+cat > "$TMP/oldtls.js" <<'EOF'
+const o = { secureProtocol: 'TLSv1_method' };
+EOF
+cat > "$TMP/newtls.js" <<'EOF'
+const o = { minVersion: 'TLSv1.2' };
+EOF
+OUT="$(bash eco-audit.sh "$TMP/oldtls.js")"
+echo "$OUT" | grep -q 'ECO-HEB-05' || fail "protocole TLS obsolète non détecté"
+OUT="$(bash eco-audit.sh "$TMP/newtls.js")"
+echo "$OUT" | grep -q 'ECO-HEB-05' && fail "faux positif : TLSv1.2 pris pour TLSv1 obsolète"
+true
+
+# 21. ECO-HEB-06 (liens locaux cassés) : détecte un fichier référencé
+# absent, silencieux sur un fichier présent, une URL externe ou une ancre.
+# Test volontairement lancé alors que le cwd (scripts/) diffère du
+# répertoire du fichier audité ($TMP) : c'est exactement le cas qui avait
+# fait échouer la première version du détecteur (FILENAME non fiable dans
+# BEGIN, "dir" retombait sur "." qui n'était correct que par coïncidence).
+mkdir -p "$TMP/assets"
+echo "ok" > "$TMP/assets/real.css"
+cat > "$TMP/links.html" <<'EOF'
+<link rel="stylesheet" href="assets/real.css">
+<link rel="stylesheet" href="assets/ghost.css">
+<a href="https://example.com/external">externe</a>
+<a href="#section">ancre</a>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/links.html")"
+echo "$OUT" | grep -q 'ghost.css' || fail "lien local cassé non détecté"
+echo "$OUT" | grep -q 'real.css' && fail "faux positif sur un fichier local qui existe bien"
+echo "$OUT" | grep -q 'external' && fail "faux positif sur une URL externe (non vérifiable sans réseau)"
+true
+
+echo "OK - 21 verifications passees"
