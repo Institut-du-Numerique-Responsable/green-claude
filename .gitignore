@@ -1,0 +1,12 @@
+# Artefacts locaux Claude Code (worktrees d'agents, cache de session)
+.claude/
+
+# Système
+.DS_Store
+*.log
+
+# Node (au cas où un test ou un exemple en dépendrait localement)
+node_modules/
+
+# Secrets locaux
+.env

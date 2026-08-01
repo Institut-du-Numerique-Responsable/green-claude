@@ -26,7 +26,8 @@ Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organis�
 }
 ```
 
-- `patterns` : expressions régulières `grep -E` qui détectent le problème dans le code. Une liste vide fait de la règle une checklist de démarche/gouvernance, ignorée par l'audit automatique.
+- `patterns` : expressions régulières `grep -E` qui détectent le problème dans le code. Une liste vide fait de la règle une checklist de démarche/gouvernance, ignorée par l'audit automatique — sauf si un `detector` est défini (voir ci-dessous).
+- `detector` (optionnel) : nom d'un détecteur dédié dans `scripts/detect-<nom>.awk`, pour les cas que grep ne peut pas voir car répartis sur plusieurs lignes (ex. `nested_loops` pour les boucles imbriquées). N'utilisez ce mécanisme que si `patterns` ne peut vraiment pas suffire.
 - `impact` : `Élevé`, `Moyen` ou `Faible`.
 - `rgesn_ref` renvoie au critère officiel du [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) ; utilisez le format `N.x` si la règle relève d'une famille sans correspondre à un critère unique.
 - `gr491_famille` relie la règle au [GR491](https://gr491.isit-europe.org/).
@@ -54,6 +55,22 @@ jq empty skills/green-claude/rules/*.json
 ./skills/green-claude/scripts/eco-audit.sh chemin/vers/un/fichier
 ```
 
+Si vous touchez à `eco-audit.sh`, `detect-nested-loops.awk` ou aux règles avec pattern/detector, faites aussi tourner la suite de tests dédiée — elle vérifie les cas positifs, les faux positifs à éviter, et la cohérence de `--list-rules` :
+
+```bash
+bash skills/green-claude/scripts/test-eco-audit.sh
+```
+
 ## Ouvrir la Pull Request
 
 Décrivez la source de la règle (lien vers le référentiel), l'impact attendu, et un exemple de code qui déclenche (ou corrige) le motif. Une PR par sujet plutôt qu'un gros lot de changements non liés.
+
+## Publier une release
+
+Les tags suivent la convention `green-claude--v<version>`, posée via la commande officielle du CLI plutôt qu'à la main :
+
+```bash
+claude plugin tag --push
+```
+
+Elle valide que `version` dans `.claude-plugin/plugin.json` et l'entrée correspondante dans `.claude-plugin/marketplace.json` sont cohérentes avant de créer et pousser le tag. Les tags `v1.0.0`/`v1.0.1`, antérieurs à la restructuration en plugin, ne suivent pas cette convention — ne pas la reprendre pour les prochaines releases.

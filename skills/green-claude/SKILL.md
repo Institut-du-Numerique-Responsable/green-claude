@@ -44,9 +44,11 @@ Si une contrainte de sobriété entre en tension avec une demande explicite du u
 (perf, deadline, lisibilité), signale le compromis en une phrase, sans jamais
 bloquer silencieusement le travail demandé.
 
-Pour la conversation, applique les réflexes Boris : prompt minimal, ne pas
-précharger des fichiers entiers si tu peux les lire toi-même à la demande,
-rembobiner (double Échap) plutôt qu'empiler des corrections dans le contexte.
+Pour la conversation, applique ce qui dépend de toi parmi les réflexes Boris :
+garde le contexte minimal, ne précharge pas des fichiers entiers si tu peux les
+lire toi-même à la demande. Si une correction en cascade s'annonce, suggère
+plutôt à l'utilisateur de rembobiner (double Échap) : c'est son geste, pas le
+tien, mais le lui rappeler évite d'empiler les tentatives ratées dans le contexte.
 
 ## Mode audit
 
