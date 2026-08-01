@@ -52,6 +52,7 @@ while IFS= read -r rule_json; do
     enrich=$(jq -r '.enrich // ""' <<<"$rule_json")
     recommendation=$(jq -r '.recommendation' <<<"$rule_json")
     rgesn_ref=$(jq -r '.rgesn_ref' <<<"$rule_json")
+    note=$(jq -r '.note // .detector_note // .enrich_note // ""' <<<"$rule_json")
 
     for file in "$@"; do
         [ -f "$file" ] || continue
@@ -87,6 +88,11 @@ while IFS= read -r rule_json; do
             echo "  Catégorie      : $category"
             echo "  RGESN          : $rgesn_ref"
             echo "  Recommandation : $recommendation"
+            # Candidat, pas preuve : un hit ici est ce que le pattern/détecteur
+            # peut voir, pas un verdict. Cette mise en garde vit dans la règle
+            # elle-même (note/detector_note/enrich_note du JSON) plutôt que
+            # dans une liste séparée que Claude devrait se rappeler par cœur.
+            [ -n "$note" ] && echo "  Note           : $note"
             echo ""
             issues_found=$((issues_found + 1))
         fi
