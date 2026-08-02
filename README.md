@@ -205,6 +205,10 @@ Full detail on the rule format and PR process: [CONTRIBUTING.md](CONTRIBUTING.md
 - [How Boris uses Claude Code](https://howborisusesclaudecode.com/): Boris Cherny's practices, Claude Code's creator
 - [Anthropic](https://www.anthropic.com/): Claude and Claude Code
 
+## Maintainers
+
+- [Guillaume Gallon](https://github.com/gridboy) ([LinkedIn](https://www.linkedin.com/in/ggallon/)) — [Institut du Numérique Responsable](https://institutnr.org)
+
 ## 📄 License
 
 [MIT](LICENSE), © 2026 Institut du Numérique Responsable

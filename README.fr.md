@@ -207,6 +207,10 @@ Détail complet du format des règles et du processus de PR : [CONTRIBUTING.md](
 - [How Boris uses Claude Code](https://howborisusesclaudecode.com/) : les pratiques de Boris Cherny, créateur de Claude Code
 - [Anthropic](https://www.anthropic.com/) : Claude et Claude Code
 
+## Mainteneurs
+
+- [Guillaume Gallon](https://github.com/gridboy) ([LinkedIn](https://www.linkedin.com/in/ggallon/)) — [Institut du Numérique Responsable](https://institutnr.org)
+
 ## 📄 Licence
 
 [MIT](LICENSE), © 2026 Institut du Numérique Responsable
