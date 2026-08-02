@@ -72,6 +72,34 @@ Rien à taper. Trois façons de s'en servir :
 
 L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe (grep sur les règles) : il ne coûte pas de raisonnement au modèle, juste la lecture du résultat.
 
+## Exemple concret
+
+Ce code, tout à fait banal :
+
+```js
+import _ from 'lodash';
+
+app.get('/api/users', (req, res) => {
+  db.query('SELECT * FROM users', (err, rows) => {
+    res.json(rows);
+  });
+});
+```
+
+`eco-audit.sh api.js` (sortie réelle, non retouchée) :
+
+```
+[Élevé] ECO-FRONT-01 — Pas de bibliothèque lourde pour un besoin mineur
+  Recommandation : Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).
+
+[Élevé] ECO-BACK-01 — Optimiser les requêtes SQL
+  Recommandation : Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE et les requêtes N+1.
+
+2 issue(s) d'éco-conception détectée(s).
+```
+
+En pratique, tu n'as pas besoin de lancer l'audit toi-même sur ce genre de code : en mode proactif, Claude évite `lodash` pour une seule fonction et `SELECT *` dès l'écriture, avant même qu'un audit ait lieu.
+
 ---
 
 ## Les règles : 52 règles alignées sur les 9 familles du RGESN 2024
