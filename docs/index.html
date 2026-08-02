@@ -117,7 +117,7 @@
     <a class="cta secondary" href="https://github.com/Institut-du-Numerique-Responsable/green-claude#installation">Installer</a>
   </p>
 
-  <h2>Ce que le skill fait pour toi</h2>
+  <h2>Comment ça marche</h2>
   <div class="duo">
     <div class="card">
       <h3>Pendant que Claude code</h3>
@@ -128,6 +128,25 @@
       <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep sur les règles), zéro coût de raisonnement, qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</p>
     </div>
   </div>
+
+  <h2>Exemple concret</h2>
+  <p>Ce code, tout à fait banal :</p>
+  <pre><code>import _ from 'lodash';
+
+app.get('/api/users', (req, res) => {
+  db.query('SELECT * FROM users', (err, rows) => {
+    res.json(rows);
+  });
+});</code></pre>
+  <p><code>eco-audit.sh api.js</code> (sortie réelle, non retouchée) :</p>
+  <pre><code>[Élevé] ECO-FRONT-01 — Pas de bibliothèque lourde pour un besoin mineur
+  Recommandation : Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).
+
+[Élevé] ECO-BACK-01 — Optimiser les requêtes SQL
+  Recommandation : Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE et les requêtes N+1.
+
+2 issue(s) d'éco-conception détectée(s).</code></pre>
+  <p>En pratique, pas besoin de lancer l'audit toi-même sur ce genre de code : en mode proactif, Claude évite <code>lodash</code> pour une seule fonction et <code>SELECT *</code> dès l'écriture, avant même qu'un audit ait lieu.</p>
 
   <h2>En 30 secondes</h2>
   <pre><code>/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
