@@ -1,0 +1,39 @@
+name: Éco-conception
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    name: Suite de tests de l'audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer jq
+        run: sudo apt-get install -y jq
+      - name: Valider le JSON des règles
+        run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
+      - name: Lancer la suite de tests
+        run: bash skills/green-claude/scripts/test-eco-audit.sh
+
+  score:
+    name: Densité d'issues
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Installer jq
+        run: sudo apt-get install -y jq
+      # Informatif, jamais bloquant : un audit qui fait échouer la CI sur un
+      # candidat non confirmé apprend surtout à ignorer la CI.
+      - name: Mesurer la densité du dépôt
+        run: |
+          bash skills/green-claude/scripts/eco-score.sh | tee score.txt
+          {
+            echo '### Densité d'"'"'issues d'"'"'éco-conception'
+            echo ''
+            echo '```'
+            cat score.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

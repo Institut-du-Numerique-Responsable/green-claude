@@ -152,6 +152,22 @@ eco-audit.sh --list-rules python    # checklist complète d'un langage
 
 ---
 
+## Mesurer, plutôt que supposer
+
+`eco-score.sh` compte les motifs détectés dans un dépôt, les pondère par impact et les rapporte au volume de code :
+
+```bash
+skills/green-claude/scripts/eco-score.sh          # lisible
+skills/green-claude/scripts/eco-score.sh --json   # une ligne par mesure, à historiser
+```
+
+Ce score compte des motifs connus, pas des joules. Une densité qui baisse dit que le code contient moins de motifs repérables, pas qu'il consomme moins. Comparez-la à celle du mois dernier plutôt qu'à zéro, et confrontez-la à une mesure d'exécution réelle (nombre de requêtes, octets transférés, temps CPU, EcoIndex sur une page) : c'est elle qui tranche.
+
+Deux autres points de contrôle, tous deux optionnels :
+
+- `hooks/green-claude-pre-commit.sh` audite les fichiers mis en index. Là où le hook Claude Code ne voit que ce que Claude écrit, celui-ci voit aussi ce que vous écrivez. Il signale sans bloquer, sauf si vous passez `GREEN_CLAUDE_STRICT=1`.
+- `.github/workflows/eco-audit.yml` fait tourner la suite de tests des règles sur chaque PR, et publie la densité du dépôt dans le résumé du job.
+
 ## Les pratiques Boris : utiliser Claude sobrement et avec bon sens
 
 Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête consomme de l'énergie. [Boris Cherny](https://howborisusesclaudecode.com/), créateur de Claude Code, documente des pratiques d'usage efficace. Un usage efficace est aussi un usage sobre : chaque aller-retour évité économise des tokens, chaque contexte allégé aussi.
