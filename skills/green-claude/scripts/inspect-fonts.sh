@@ -28,6 +28,8 @@ fi
 # extraire famille et src, sans dépendre d'un vrai parseur CSS (heuristique
 # ligne à ligne, suffisante pour du CSS formaté normalement).
 families=""
+families_autres=""
+pending_family=""
 variants=0
 total_bytes=0
 family=""
@@ -37,17 +39,32 @@ while IFS= read -r line; do
     if [[ "$line" == *"@font-face"* ]]; then
         in_block=1
         family=""
+        script="latin"
         continue
     fi
     if [ "$in_block" -eq 1 ]; then
         if [[ "$line" =~ font-family[[:space:]]*:[[:space:]]*[\'\"]?([^\'\";]+) ]]; then
             family="${BASH_REMATCH[1]}"
         fi
+        # Une famille restreinte par unicode-range à une écriture non latine
+        # (arabe, cyrillique, CJK...) n'est pas téléchargée en même temps que les
+        # latines : le navigateur ne va chercher le fichier que si la page affiche
+        # un glyphe de sa plage. La compter dans le même budget ferait échouer
+        # tout site multilingue qui fait pourtant exactement ce qu'il faut.
+        if [[ "$line" =~ unicode-range ]]; then
+            case "$line" in
+                *U+0600*|*U+0750*|*U+FB50*|*U+FE70*) script="non-latin" ;;  # arabe
+                *U+0400*|*U+0500*)                   script="non-latin" ;;  # cyrillique
+                *U+0370*|*U+1F00*)                   script="non-latin" ;;  # grec
+                *U+4E00*|*U+3040*|*U+AC00*)          script="non-latin" ;;  # CJK
+                *U+0590*|*U+FB1D*)                   script="non-latin" ;;  # hébreu
+                *U+0900*|*U+0E00*)                   script="non-latin" ;;  # devanagari, thaï
+            esac
+        fi
         if [[ "$line" =~ url\([\'\"]?([^\'\"\)]+)[\'\"]?\) ]]; then
             ref="${BASH_REMATCH[1]}"
             variants=$((variants + 1))
-            [ -n "$family" ] && families="$families
-$family"
+            pending_family="$family"
 
             if [[ ! "$ref" =~ ^https?:// ]]; then
                 candidate="$ref"
@@ -68,13 +85,35 @@ $family"
                 fi
             fi
         fi
-        [[ "$line" == *"}"* ]] && in_block=0
+        if [[ "$line" == *"}"* ]]; then
+            in_block=0
+            # Classement à la fermeture du bloc : dans un @font-face,
+            # `unicode-range` est déclaré après `src`, l'écriture n'est connue
+            # qu'ici.
+            if [ -n "${pending_family:-}" ]; then
+                if [ "${script:-latin}" = "non-latin" ]; then
+                    families_autres="$families_autres
+$pending_family"
+                else
+                    families="$families
+$pending_family"
+                fi
+            fi
+            pending_family=""
+        fi
     fi
 done < "$FILE"
 
 nb_familles=$(printf '%s\n' "$families" | sort -u | grep -c . || true)
-if [ "$nb_familles" -gt 0 ]; then
-    echo "$nb_familles famille(s) auto-hébergée(s) distincte(s), $variants variante(s) au total — seuil RGESN 4.8 : max 2 / 4"
+nb_autres=$(printf '%s\n' "$families_autres" | sort -u | grep -c . || true)
+# Ne signaler que le dépassement. Rester sous le seuil n'est pas une remarque à
+# faire : émettre le décompte dans tous les cas rendait la règle impossible à
+# satisfaire pour tout site chargeant la moindre police.
+if [ "$nb_familles" -gt 2 ] || [ "$variants" -gt 4 ]; then
+    echo "$nb_familles famille(s) latine(s) auto-hébergée(s), $variants variante(s) au total — dépasse le seuil RGESN 4.8 (max 2 / 4)"
+fi
+if [ "$nb_autres" -gt 0 ] && { [ "$nb_familles" -gt 2 ] || [ "$variants" -gt 4 ]; }; then
+    echo "note : $nb_autres famille(s) restreinte(s) par unicode-range à une écriture non latine, hors budget latin (téléchargée(s) seulement si la page affiche cette écriture)"
 fi
 if [ "$total_bytes" -gt "$SEUIL_TOTAL_OCTETS" ]; then
     echo "poids total des polices auto-hébergées résolvables : $((total_bytes / 1024)) Ko — dépasse le seuil RGESN 4.8 de 400 Ko"

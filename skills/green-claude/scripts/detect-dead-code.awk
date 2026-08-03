@@ -18,8 +18,41 @@
 
 BEGIN { depth = 0; dead_depth = -1; flagged_this_zone = 0 }
 
+# Vide le contenu des chaînes littérales en gardant les guillemets, pour que ni
+# les accolades ni les mots-clés qu'elles contiennent ne soient lus comme du
+# code. Sans ça, un dictionnaire de traductions contenant "Formation continue
+# du personnel" ouvre une zone morte sur le `continue` d'une phrase française.
+function blank_strings(s,   out, i, n, c, q, esc) {
+    out = ""; n = length(s); q = ""; esc = 0
+    for (i = 1; i <= n; i++) {
+        c = substr(s, i, 1)
+        if (q != "") {
+            if (esc) { esc = 0; continue }
+            if (c == "\\") { esc = 1; continue }
+            if (c == q) { q = ""; out = out c }
+            continue
+        }
+        if (c == "\"" || c == "'" || c == "`") { q = c; out = out c; continue }
+        out = out c
+    }
+    return out
+}
+
 {
-    line = $0
+    orig = $0
+    line = blank_strings($0)
+    # Les commentaires ne sont pas du code : leurs accolades ne doivent pas
+    # décaler la profondeur. `let x = null; // [{ node, original }]` refermait
+    # un bloc qui n'avait jamais été ouvert.
+    if (inblockcomment) {
+        if (match(line, /\*\//)) { line = substr(line, RSTART + 2); inblockcomment = 0 }
+        else { line = "" }
+    }
+    while (match(line, /\/\*.*\*\//)) {
+        line = substr(line, 1, RSTART - 1) " " substr(line, RSTART + RLENGTH)
+    }
+    if (match(line, /\/\*/)) { line = substr(line, 1, RSTART - 1); inblockcomment = 1 }
+    if (match(line, /\/\//)) { line = substr(line, 1, RSTART - 1) }
     trimmed = line
     gsub(/^[ \t]+/, "", trimmed)
     gsub(/[ \t]+$/, "", trimmed)
@@ -44,14 +77,14 @@ BEGIN { depth = 0; dead_depth = -1; flagged_this_zone = 0 }
             before = substr(line, 1, close_pos - 1)
             gsub(/^[ \t]+/, "", before); gsub(/[ \t]+$/, "", before)
             if (before != "" && !flagged_this_zone) {
-                printf "%d:%s\n", NR, line
+                printf "%d:%s\n", NR, orig
                 flagged_this_zone = 1
             }
             dead_depth = -1  # bloc refermé : fin de la zone surveillée
         } else if (trimmed ~ /^(case[ \t(]|default[ \t]*:)/) {
             dead_depth = -1  # nouveau case : pas mort, juste une autre entrée
         } else if (trimmed !~ /^(\/\/|\*|\/\*)/ && trimmed != "" && !flagged_this_zone) {
-            printf "%d:%s\n", NR, line
+            printf "%d:%s\n", NR, orig
             flagged_this_zone = 1  # une seule ligne signalée par zone morte
         }
     }
@@ -59,7 +92,18 @@ BEGIN { depth = 0; dead_depth = -1; flagged_this_zone = 0 }
     # Un return/throw/break/continue (mot entier, pour ne pas matcher un
     # identifiant du genre "returnValue") ouvre une nouvelle zone surveillée,
     # à la profondeur constatée après cette ligne.
-    if (dead_depth < 0 && trimmed ~ /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/) {
+    # `if (cond) return;` sur une seule ligne, sans accolade : le return est
+    # conditionnel, la suite du bloc reste atteignable. C'est la forme la plus
+    # répandue de garde en début de fonction — la signaler discrédite le
+    # détecteur sur presque tout code réel.
+    guarded = (trimmed ~ /(^|[^[:alnum:]_.])(if|else)[ \t]*\(/ && trimmed !~ /\{[ \t]*$/)
+    # Bloc refermé après le return, sur la ligne même : `function f() { return x; }`.
+    # Il ne reste aucun bloc où du code pourrait devenir inatteignable.
+    closed_here = 0
+    if (match(line, /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/)) {
+        if (index(substr(line, RSTART + RLENGTH), "}") > 0) closed_here = 1
+    }
+    if (dead_depth < 0 && !guarded && !closed_here && trimmed ~ /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/) {
         dead_depth = depth
         flagged_this_zone = 0
     }
