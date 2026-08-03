@@ -9,7 +9,7 @@ description: |
   code", "écoconception"), or when invoked via /green-claude to walk through the
   rule checklist.
 author: Institut du Numérique Responsable
-version: 1.3.0
+version: 1.4.0
 license: MIT
 user-invocable: true
 ---
