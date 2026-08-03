@@ -104,6 +104,33 @@ En pratique, tu n'as pas besoin de lancer l'audit toi-même sur ce genre de code
 
 ---
 
+## Installer nativement dans Claude
+
+Trois canaux, trois formats. Claude Code n'a besoin de rien d'autre que le dépôt :
+
+```bash
+/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
+/plugin install green-claude
+```
+
+Les deux autres attendent une archive zip, que `package-skill.sh` fabrique :
+
+```bash
+bash skills/green-claude/scripts/package-skill.sh    # écrit dans dist/
+```
+
+| Canal | Archive | Installation |
+|---|---|---|
+| Claude Code | aucune | la commande ci-dessus, ou `npx skills add Institut-du-Numerique-Responsable/green-claude` |
+| Claude.ai | `dist/green-claude-claude-ai.zip` | Réglages → Fonctionnalités → Skills → Téléverser (l'exécution de code doit être activée) |
+| API Claude | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-claude"))` |
+
+Les deux archives contiennent le même skill et ne diffèrent que par la description : Claude.ai la plafonne à 200 caractères là où l'API en autorise 1024. Le dépôt garde la longue, celle qui fait charger le skill au bon moment dans Claude Code ; le script d'empaquetage lui substitue une version courte plutôt que de tronquer en plein milieu, une phrase coupée se déclenchant mal.
+
+Le script d'audit a besoin de `bash` et de `jq`. Là où `jq` manque, les règles continuent de s'appliquer pendant que Claude écrit du code : seul `eco-audit.sh` cesse de fonctionner.
+
+---
+
 ## Les règles : 52 règles alignées sur les 9 familles du RGESN 2024
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :

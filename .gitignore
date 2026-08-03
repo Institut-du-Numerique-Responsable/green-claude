@@ -10,3 +10,6 @@ node_modules/
 
 # Secrets locaux
 .env
+
+# Archives générées par scripts/package-skill.sh
+dist/
