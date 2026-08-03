@@ -35,6 +35,29 @@ Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organis�
 - `gr491_famille` relie la règle au [GR491](https://gr491.isit-europe.org/).
 - Sourcez toujours la règle : citez le RGESN, le GR491, le Green Software Foundation, ou une autre référence publique reconnue. Les règles maison sans source ne sont pas acceptées.
 
+## Ajouter une règle propre à un langage
+
+Les règles qui ne valent que pour un langage vivent dans `skills/green-claude/rules/langages/`, un fichier par langage (`python.json`, `sql.json`, `java.json`…). Même format de règle que ci-dessus, avec un bloc `metadata` qui déclare le périmètre :
+
+```json
+{
+  "metadata": {
+    "name": "Éco-conception Go",
+    "description": "Ce que couvre le fichier.",
+    "version": "1.0.0",
+    "globs": "**/*.go",
+    "extensions": ["go"],
+    "count": 6,
+    "type": "code_audit"
+  },
+  "categories": { }
+}
+```
+
+Pour un nouveau langage, associez aussi l'extension dans `lang_file_for_ext()` (`skills/green-claude/scripts/eco-audit.sh`), sinon l'audit ne chargera jamais le fichier.
+
+Ces règles ne sont testées que sur les fichiers de leur langage, ce qui autorise des motifs précis (`\\.iterrows\\(\\)`, `\\.parallelStream\\(\\)`) sans risque pour les autres. Écrivez-les pour ce langage seulement.
+
 ## Ajouter une pratique Boris
 
 Les pratiques d'usage sobre de Claude Code vivent dans `skills/green-claude/rules/boris.json`, sur le même principe. Si vous citez un outil tiers en exemple, vérifiez qu'il est open source et sous une licence permissive avant de l'ajouter.
@@ -48,7 +71,7 @@ Si un pattern regex déclenche l'audit à tort, ouvrez une PR qui resserre l'exp
 Avant d'ouvrir une PR :
 
 ```bash
-jq empty skills/green-claude/rules/*.json
+jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
 ```
 
 Ça valide que le JSON reste bien formé. Testez aussi le script d'audit sur un fichier contenant le motif que vous ciblez :

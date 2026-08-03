@@ -1,0 +1,113 @@
+{
+  "metadata": {
+    "name": "Éco-conception Ruby / Rails",
+    "description": "Règles d'écoconception pour le code Ruby/Rails : ActiveRecord sobre, parcours par lots, énumérateurs paresseux, caches expirants.",
+    "version": "1.0.0",
+    "globs": "**/*.rb",
+    "extensions": ["rb"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 7,
+    "type": "code_audit"
+  },
+  "categories": {
+    "donnees": {
+      "name": "Ruby — accès aux données (ActiveRecord)",
+      "description": "Ne charger que les colonnes et les lignes réellement utilisées (RGESN Backend, GR491_Backend_2/3).",
+      "rules": [
+        {
+          "id": "ECO-RB-01",
+          "title": "Table entière parcourue en mémoire",
+          "description": ".all.each / .all.map instancie un objet ActiveRecord par ligne : mémoire et CPU proportionnels au volume de la table.",
+          "impact": "Élevé",
+          "patterns": ["\\.all\\.(each|map|select)", "\\.all\\b"],
+          "recommendation": "find_each/in_batches pour les gros volumes ; paginer toute liste exposée (pagy, kaminari).",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "activerecord", "pagination"]
+        },
+        {
+          "id": "ECO-RB-02",
+          "title": "Objets complets chargés pour une seule colonne",
+          "description": "map(&:col) instancie tous les objets alors que seule une colonne est lue.",
+          "impact": "Moyen",
+          "patterns": ["\\.map\\(&:"],
+          "recommendation": "pluck(:col) ou select(:col1, :col2) ; includes/preload/eager_load sur les associations parcourues pour éviter le N+1.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "activerecord", "projection"]
+        },
+        {
+          "id": "ECO-RB-03",
+          "title": "Comptage là où un test d'existence suffit",
+          "description": "count > 0 (ou any? sur une relation) exécute un comptage complet quand la base peut s'arrêter à la première ligne.",
+          "impact": "Faible",
+          "patterns": ["\\.count\\s*>\\s*0"],
+          "recommendation": "exists? pour un test d'existence ; update_all/insert_all pour les écritures en masse, pas de save en boucle.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "activerecord"]
+        }
+      ]
+    },
+    "memoire": {
+      "name": "Ruby — mémoire et CPU",
+      "description": "Éviter les tableaux intermédiaires et les recherches linéaires (RGESN Algorithmie).",
+      "rules": [
+        {
+          "id": "ECO-RB-04",
+          "title": "Recherche linéaire sur un grand tableau",
+          "description": "include? parcourt tout le tableau ; répété en boucle, le traitement devient quadratique.",
+          "impact": "Moyen",
+          "patterns": ["\\.include\\?"],
+          "recommendation": "Indexer dans un Set ou un Hash avant la boucle.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "algorithmie"]
+        },
+        {
+          "id": "ECO-RB-05",
+          "title": "Concaténation de chaînes en boucle",
+          "description": "`s += ...` alloue une nouvelle chaîne à chaque tour, là où la mutation réutilise le buffer.",
+          "impact": "Faible",
+          "patterns": ["\\+=\\s*['\"]"],
+          "recommendation": "Construire avec << (mutation) ; énumérateurs paresseux (.lazy) et each_slice pour les longues chaînes de transformations.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "memoire", "chaines"]
+        }
+      ]
+    },
+    "taches": {
+      "name": "Ruby — cache, jobs et I/O",
+      "description": "Borner les caches, ne pas scruter, réutiliser les connexions (RGESN Backend/Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-RB-06",
+          "title": "Entrée de cache sans expiration",
+          "description": "Un Rails.cache.fetch/write sans expires_in retient l'entrée indéfiniment, y compris quand la donnée n'est plus lue.",
+          "impact": "Moyen",
+          "patterns": ["Rails\\.cache\\.(fetch|write)\\("],
+          "exclude_patterns": ["expires_in"],
+          "recommendation": "Toujours passer expires_in ; jamais de constante ou variable de classe qui accumule sans limite.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "cache"]
+        },
+        {
+          "id": "ECO-RB-07",
+          "title": "Job planifié à haute fréquence",
+          "description": "Un job périodique qui surveille un état consomme CPU et base en continu pour détecter un changement rare.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Jobs idempotents et par lots ; déclenchement événementiel plutôt que scrutation ; connexions HTTP sortantes et pool base réutilisés.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["ruby", "jobs", "polling"]
+        }
+      ]
+    }
+  }
+}

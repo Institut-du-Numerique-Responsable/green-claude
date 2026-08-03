@@ -365,4 +365,37 @@ echo "$OUT" | grep -q 'real.css' && fail "faux positif sur un fichier local qui 
 echo "$OUT" | grep -q 'external' && fail "faux positif sur une URL externe (non vérifiable sans réseau)"
 true
 
-echo "OK - 21 verifications passees"
+# 22. Règles propres à un langage : un motif Python se déclenche sur du Python.
+cat > "$TMP/n_plus_un.py" <<'EOF'
+for a in Article.objects.filter(actif=True):
+    print(a.auteur.nom)
+EOF
+OUT="$(bash eco-audit.sh "$TMP/n_plus_un.py")"
+echo "$OUT" | grep -q 'ECO-PY-01' || fail "règle Python non appliquée à un fichier .py"
+
+# 23. Et sur lui seul : les motifs Python parlent d'ORM Django, ils n'ont aucun
+# sens sur du Ruby ou du Java, où `.all()` et `save()` désignent autre chose.
+cat > "$TMP/modele.rb" <<'EOF'
+Article.all.each { |a| puts a.auteur.nom }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/modele.rb")"
+echo "$OUT" | grep -q 'ECO-RB-01' || fail "règle Ruby non appliquée à un fichier .rb"
+echo "$OUT" | grep -q 'ECO-PY-' && fail "fuite : une règle Python signalée sur un fichier Ruby"
+true
+
+# 24. Code déjà sobre dans un langage couvert : aucune règle de ce langage.
+cat > "$TMP/propre.py" <<'EOF'
+def liste(session, url):
+    return session.get(url).json()
+EOF
+OUT="$(bash eco-audit.sh "$TMP/propre.py")"
+echo "$OUT" | grep -q 'ECO-PY-' && fail "faux positif : code Python déjà sobre signalé"
+true
+
+# 25. Les langages sont annonçables et consultables sans auditer de fichier.
+OUT="$(bash eco-audit.sh --list-langs)"
+echo "$OUT" | grep -q 'Éco-conception Python' || fail "--list-langs ne liste pas les langages"
+OUT="$(bash eco-audit.sh --list-rules python)"
+echo "$OUT" | grep -q 'ECO-PY-01' || fail "--list-rules python ne sort pas la checklist du langage"
+
+echo "OK - 25 verifications passees"

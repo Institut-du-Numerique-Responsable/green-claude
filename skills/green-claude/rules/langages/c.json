@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "name": "Éco-conception C",
+    "description": "Règles d'écoconception pour le code C : mémoire maîtrisée, pas de motif quadratique caché, I/O bufferisées, pas d'attente active.",
+    "version": "1.0.0",
+    "globs": "**/*.{c,h}",
+    "extensions": ["c", "h"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 6,
+    "type": "code_audit"
+  },
+  "categories": {
+    "memoire": {
+      "name": "C — mémoire",
+      "description": "Allouer au besoin réel, libérer sur tous les chemins (RGESN Algorithmie, GR491_Backend_4).",
+      "rules": [
+        {
+          "id": "ECO-C-01",
+          "title": "Allocation dynamique à vérifier",
+          "description": "Chaque allocation sans chemin de libération identifié (y compris en cas d'erreur) fuit : mémoire retenue jusqu'à la fin du process.",
+          "impact": "Moyen",
+          "patterns": ["\\bmalloc\\(", "\\bcalloc\\(", "\\brealloc\\("],
+          "recommendation": "Un free identifié pour chaque allocation, y compris sur les chemins d'erreur ; réutiliser les buffers dans les boucles au lieu de réallouer.",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["c", "memoire"]
+        },
+        {
+          "id": "ECO-C-02",
+          "title": "Copie de grande zone mémoire",
+          "description": "Copier un bloc quand un pointeur ou un index suffit double la bande passante mémoire consommée.",
+          "impact": "Faible",
+          "patterns": [],
+          "recommendation": "Passer par pointeur/index ; structures compactes (types dimensionnés au besoin, attention au padding sur les structures massivement instanciées).",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["c", "memoire"]
+        }
+      ]
+    },
+    "cpu": {
+      "name": "C — CPU et algorithmie",
+      "description": "Éviter les motifs quadratiques cachés (RGESN 9.1).",
+      "rules": [
+        {
+          "id": "ECO-C-03",
+          "title": "strlen() dans une condition de boucle",
+          "description": "strlen réévalué à chaque tour reparcourt toute la chaîne : boucle quadratique invisible à la lecture.",
+          "impact": "Élevé",
+          "patterns": ["for\\s*\\([^;]*;[^;]*strlen\\s*\\("],
+          "recommendation": "Calculer la longueur une fois avant la boucle.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["c", "cpu", "algorithmie"]
+        },
+        {
+          "id": "ECO-C-04",
+          "title": "strcat() répété",
+          "description": "Chaque strcat reparcourt la chaîne depuis le début pour trouver le terminateur : concaténation quadratique.",
+          "impact": "Moyen",
+          "patterns": ["\\bstrcat\\("],
+          "recommendation": "Garder un pointeur de fin ou utiliser memcpy avec offset ; structures adaptées au volume (hachage, dichotomie) plutôt qu'un balayage linéaire répété.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["c", "cpu", "chaines"]
+        }
+      ]
+    },
+    "io": {
+      "name": "C — I/O et attente",
+      "description": "Grouper les I/O, ne jamais attendre activement (RGESN Backend/Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-C-05",
+          "title": "I/O octet par octet",
+          "description": "Un appel système par petite unité multiplie les bascules noyau : CPU consommé pour du transfert, pas pour du calcul utile.",
+          "impact": "Moyen",
+          "patterns": ["\\bfgetc\\(", "\\bfputc\\(", "\\bgetchar\\(", "\\bputchar\\("],
+          "recommendation": "I/O bufferisées et par blocs (fread/fwrite, writev) ; fermer et libérer systématiquement les ressources.",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["c", "io"]
+        },
+        {
+          "id": "ECO-C-06",
+          "title": "Attente active",
+          "description": "Une boucle de scrutation ou un sleep court maintient le cœur CPU occupé et empêche les états de basse consommation.",
+          "impact": "Élevé",
+          "patterns": ["while\\s*\\(\\s*1\\s*\\)", "\\busleep\\(", "\\bsleep\\("],
+          "recommendation": "Bloquer sur poll/epoll/select ou une variable de condition ; compiler la production avec -O2 et mesurer avant d'optimiser à la main.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["c", "cpu", "attente"]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "metadata": {
+    "name": "Éco-conception JavaScript / TypeScript",
+    "description": "Règles d'écoconception pour JS/TS, côté navigateur comme côté Node.js : dépendances, thread principal, flux, caches bornés.",
+    "version": "1.0.0",
+    "globs": "**/*.{js,jsx,ts,tsx,mjs,cjs}",
+    "extensions": ["js", "jsx", "ts", "tsx", "mjs", "cjs"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 9,
+    "type": "code_audit"
+  },
+  "categories": {
+    "dependances": {
+      "name": "JS/TS — dépendances et poids",
+      "description": "Chaque kilo-octet embarqué est téléchargé, parsé et exécuté sur tous les terminaux (RGESN Frontend, GR491_Frontend_9/10).",
+      "rules": [
+        {
+          "id": "ECO-JS-01",
+          "title": "Import global d'une librairie",
+          "description": "`import * as x` ou l'import d'une librairie monolithique (lodash, moment) neutralise le tree-shaking : tout le paquet finit dans le bundle.",
+          "impact": "Élevé",
+          "patterns": ["import\\s+\\*\\s+as\\s+\\w+\\s+from", "from\\s+['\"](lodash|moment)['\"]", "require\\(['\"](lodash|moment)['\"]\\)"],
+          "recommendation": "Imports ciblés (import { x } from 'lib/x') ; API natives d'abord (fetch, Intl, URL, structuredClone, Date/Temporal) avant d'ajouter une dépendance.",
+          "rgesn_ref": "6.1, 6.2",
+          "gr491_famille": "Frontend",
+          "tags": ["javascript", "bundle", "dependances"]
+        }
+      ]
+    },
+    "execution": {
+      "name": "JS/TS — exécution",
+      "description": "Ne pas bloquer le thread principal ni l'event loop, ne pas brûler du CPU pour rien (RGESN Frontend/Algorithmie).",
+      "rules": [
+        {
+          "id": "ECO-JS-02",
+          "title": "API synchrone bloquante",
+          "description": "Un appel *Sync sur un chemin de requête bloque l'event loop : toutes les requêtes concurrentes attendent, la machine reste allumée à ne rien faire.",
+          "impact": "Élevé",
+          "patterns": ["fs\\.[a-zA-Z]+Sync\\("],
+          "recommendation": "Utiliser les variantes asynchrones ; déporter le calcul lourd (worker_threads, Web Worker).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["javascript", "node", "eventloop"]
+        },
+        {
+          "id": "ECO-JS-03",
+          "title": "Scrutation périodique (polling)",
+          "description": "setInterval + requête consomme réseau, CPU et batterie en continu, y compris quand rien ne change et que l'onglet est en arrière-plan.",
+          "impact": "Élevé",
+          "patterns": ["setInterval\\("],
+          "recommendation": "SSE/WebSocket si le rafraîchissement est réellement nécessaire, sinon rafraîchir sur action utilisateur ; suspendre quand le document est caché.",
+          "rgesn_ref": "6.3, 7.2",
+          "gr491_famille": "Frontend",
+          "tags": ["javascript", "polling", "reseau"]
+        },
+        {
+          "id": "ECO-JS-04",
+          "title": "Événement à haute fréquence sans debounce",
+          "description": "scroll, resize, mousemove et input se déclenchent des dizaines de fois par seconde : un handler coûteux y monopolise le CPU du terminal.",
+          "impact": "Moyen",
+          "patterns": ["addEventListener\\(\\s*['\"](scroll|resize|mousemove|input|pointermove)['\"]"],
+          "recommendation": "Débouncer/throttler le handler, ou utiliser IntersectionObserver / ResizeObserver selon le besoin.",
+          "rgesn_ref": "6.3",
+          "gr491_famille": "Frontend",
+          "tags": ["javascript", "frontend", "cpu"]
+        },
+        {
+          "id": "ECO-JS-05",
+          "title": "Recherche linéaire répétée dans une boucle",
+          "description": "includes/indexOf/find dans une boucle donne un traitement quadratique sur des collections non bornées.",
+          "impact": "Moyen",
+          "patterns": ["for\\s*\\(.*\\)\\s*\\{?.*\\.(includes|indexOf|find)\\("],
+          "recommendation": "Indexer dans une Map ou un Set avant la boucle.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["javascript", "algorithmie"]
+        }
+      ]
+    },
+    "donnees": {
+      "name": "JS/TS — données, flux et mémoire",
+      "description": "Streamer, paginer, mettre en cache avec une politique explicite, éviter les fuites (RGESN Backend/Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-JS-06",
+          "title": "Fichier ou payload chargé entièrement en mémoire",
+          "description": "readFileSync/readFile sur un gros fichier retient tout en mémoire au lieu de le traiter en flux : mémoire proportionnelle au volume traité.",
+          "impact": "Moyen",
+          "patterns": ["readFileSync\\(", "fs\\.readFile\\("],
+          "recommendation": "stream/pipeline côté Node, ReadableStream côté navigateur ; traiter par morceaux.",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["javascript", "node", "flux"]
+        },
+        {
+          "id": "ECO-JS-07",
+          "title": "Client HTTP instancié par appel",
+          "description": "Un client créé à chaque requête refait la résolution DNS et la poignée de main TLS : latence et CPU répétés.",
+          "impact": "Moyen",
+          "patterns": ["new\\s+(HttpClient|XMLHttpRequest)\\(", "axios\\.create\\("],
+          "recommendation": "Client HTTP partagé avec agent keep-alive ; pool de connexions base de données réutilisé.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["javascript", "reseau", "connexions"]
+        },
+        {
+          "id": "ECO-JS-08",
+          "title": "Listener jamais détaché",
+          "description": "Un addEventListener sans removeEventListener retient l'objet écouté et ses closures : fuite mémoire qui grossit à chaque montage/démontage.",
+          "impact": "Moyen",
+          "patterns": ["addEventListener\\("],
+          "recommendation": "Détacher le listener au démontage (cleanup d'effet, AbortController via l'option signal) ; WeakMap pour les associations à des objets.",
+          "rgesn_ref": "6.3",
+          "gr491_famille": "Frontend",
+          "tags": ["javascript", "memoire", "fuite"]
+        },
+        {
+          "id": "ECO-JS-09",
+          "title": "Cache sans borne ni politique",
+          "description": "Un cache applicatif sans taille max ni expiration retient indéfiniment des entrées jamais réutilisées.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Borner (taille max) et faire expirer (TTL) tout cache ; expliciter la stratégie d'invalidation ; paginer les réponses d'API.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["javascript", "cache"]
+        }
+      ]
+    }
+  }
+}

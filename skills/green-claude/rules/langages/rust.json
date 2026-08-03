@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "name": "Éco-conception Rust",
+    "description": "Règles d'écoconception pour le code Rust : allocations maîtrisées, itérateurs sans matérialisation, async non bloquant, dépendances sobres.",
+    "version": "1.0.0",
+    "globs": "**/*.rs",
+    "extensions": ["rs"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 7,
+    "type": "code_audit"
+  },
+  "categories": {
+    "allocations": {
+      "name": "Rust — allocations et copies",
+      "description": "Rust est sobre par conception ; l'enjeu est de ne pas gaspiller cet avantage (RGESN Algorithmie, GR491_Backend_4).",
+      "rules": [
+        {
+          "id": "ECO-RS-01",
+          "title": "clone() de confort",
+          "description": "Cloner pour contourner l'emprunteur alloue et copie des données que l'on aurait pu emprunter.",
+          "impact": "Moyen",
+          "patterns": ["\\.clone\\(\\)", "\\.to_owned\\(\\)"],
+          "recommendation": "Emprunter (&) quand la possession n'est pas nécessaire ; Cow<str> pour les cas « parfois possédé » ; exposer &str/&[T] dans les signatures.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["rust", "allocations"]
+        },
+        {
+          "id": "ECO-RS-02",
+          "title": "collect() intermédiaire dans une chaîne d'itérateurs",
+          "description": "Chaque collect matérialise un Vec temporaire : allocation et copie pour une valeur immédiatement reconsommée.",
+          "impact": "Moyen",
+          "patterns": ["\\.collect::<Vec"],
+          "recommendation": "Chaîner les itérateurs sans collect intermédiaire ; ne matérialiser que le résultat final, avec with_capacity si la taille est connue.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["rust", "iterateurs"]
+        },
+        {
+          "id": "ECO-RS-03",
+          "title": "Vec sans capacité pré-réservée",
+          "description": "Un Vec qui grossit par réallocations successives recopie son contenu à chaque doublement.",
+          "impact": "Faible",
+          "patterns": ["Vec::new\\(\\)"],
+          "recommendation": "Vec::with_capacity(n) quand la taille est prévisible ; réutiliser les buffers dans les boucles chaudes (clear() conserve la capacité).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["rust", "allocations"]
+        }
+      ]
+    },
+    "async": {
+      "name": "Rust — async et I/O",
+      "description": "Ne pas bloquer l'exécuteur, réutiliser les clients, borner les files (RGESN Backend).",
+      "rules": [
+        {
+          "id": "ECO-RS-04",
+          "title": "Appel bloquant dans une tâche async",
+          "description": "Un sleep ou un calcul long dans une tâche async bloque un worker de l'exécuteur et fige les autres tâches.",
+          "impact": "Élevé",
+          "patterns": ["std::thread::sleep", "\\.block_on\\("],
+          "recommendation": "spawn_blocking ou thread dédié pour le CPU long ; tokio::time::sleep côté async ; I/O bufferisées (BufReader/BufWriter) et streaming pour les gros volumes.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["rust", "async"]
+        },
+        {
+          "id": "ECO-RS-05",
+          "title": "Client réseau créé par requête",
+          "description": "reqwest::Client::new() par appel refait la poignée de main TLS et perd le pool de connexions.",
+          "impact": "Moyen",
+          "patterns": ["Client::new\\(\\)"],
+          "recommendation": "Créer un client une fois et le cloner (le pool est partagé) ; canaux et caches bornés pour éviter toute croissance mémoire non maîtrisée.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["rust", "reseau", "connexions"]
+        }
+      ]
+    },
+    "build": {
+      "name": "Rust — dépendances et build",
+      "description": "Alléger le graphe de dépendances et éviter les redémarrages inutiles (RGESN Architecture/Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-RS-06",
+          "title": "unwrap() sur un chemin d'erreur attendu",
+          "description": "Une panique sur une erreur prévisible fait redémarrer le service : reprise, cache froid et calcul refait à chaque incident.",
+          "impact": "Moyen",
+          "patterns": ["\\.unwrap\\(\\)", "\\.expect\\("],
+          "recommendation": "Gérer l'erreur (Result, ?) sur les chemins attendus ; réserver unwrap aux invariants réellement garantis.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["rust", "robustesse"]
+        },
+        {
+          "id": "ECO-RS-07",
+          "title": "Graphe de dépendances non justifié",
+          "description": "Chaque crate et chaque feature activée par défaut alourdit compilation, binaire et surface de maintenance.",
+          "impact": "Faible",
+          "patterns": [],
+          "recommendation": "Justifier chaque crate, désactiver les features inutiles (default-features = false), vérifier avec cargo tree ; compiler la production en --release.",
+          "rgesn_ref": "3.1",
+          "gr491_famille": "Architecture",
+          "tags": ["rust", "dependances", "build"]
+        }
+      ]
+    }
+  }
+}

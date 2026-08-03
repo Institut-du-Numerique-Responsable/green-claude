@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "name": "Éco-conception C++",
+    "description": "Règles d'écoconception pour le code C++ : copies évitées, conteneurs adaptés, RAII, I/O bufferisées, pas d'attente active.",
+    "version": "1.0.0",
+    "globs": "**/*.{cpp,cc,cxx,hpp,hh}",
+    "extensions": ["cpp", "cc", "cxx", "hpp", "hh"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 6,
+    "type": "code_audit"
+  },
+  "categories": {
+    "copies": {
+      "name": "C++ — copies et allocations",
+      "description": "Ne copier que ce qui doit l'être (RGESN Algorithmie, GR491_Backend_4).",
+      "rules": [
+        {
+          "id": "ECO-CPP-01",
+          "title": "Objet non trivial passé par valeur",
+          "description": "Passer une string ou un vector par valeur copie l'intégralité du contenu à chaque appel.",
+          "impact": "Moyen",
+          "patterns": ["\\(\\s*std::string\\s+\\w+\\s*[,)]", "\\(\\s*std::vector<[^>]*>\\s+\\w+\\s*[,)]"],
+          "recommendation": "Passer par const& ; std::move pour transférer la possession ; vues non possédantes (std::string_view, std::span) pour lire sans copier.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["cpp", "copies"]
+        },
+        {
+          "id": "ECO-CPP-02",
+          "title": "vector sans reserve() ni emplace",
+          "description": "Un vector qui grossit par réallocations recopie tout son contenu à chaque doublement ; push_back d'un temporaire ajoute une copie.",
+          "impact": "Faible",
+          "patterns": ["\\.push_back\\("],
+          "recommendation": "reserve() quand la taille est prévisible, emplace_back plutôt que push_back d'un temporaire ; réutiliser les buffers (clear() conserve la capacité).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["cpp", "allocations"]
+        },
+        {
+          "id": "ECO-CPP-03",
+          "title": "shared_ptr par défaut",
+          "description": "Le compteur de références atomique de shared_ptr a un coût à chaque copie, souvent pour une possession en réalité unique.",
+          "impact": "Faible",
+          "patterns": ["std::shared_ptr"],
+          "recommendation": "unique_ptr par défaut, shared_ptr uniquement quand la possession est réellement partagée ; RAII partout.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["cpp", "memoire"]
+        }
+      ]
+    },
+    "conteneurs": {
+      "name": "C++ — conteneurs et algorithmie",
+      "description": "Choisir la structure adaptée à l'accès réel (RGESN 9.1).",
+      "rules": [
+        {
+          "id": "ECO-CPP-04",
+          "title": "Recherche linéaire répétée",
+          "description": "std::find sur un grand vector est linéaire ; répété, le traitement devient quadratique.",
+          "impact": "Moyen",
+          "patterns": ["std::find\\("],
+          "recommendation": "unordered_map/unordered_set pour les recherches fréquentes ; algorithmes STL/ranges plutôt que des copies successives.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["cpp", "algorithmie"]
+        }
+      ]
+    },
+    "io": {
+      "name": "C++ — I/O et attente",
+      "description": "Streamer, ne jamais attendre activement (RGESN Backend).",
+      "rules": [
+        {
+          "id": "ECO-CPP-05",
+          "title": "Fichier chargé entièrement en mémoire",
+          "description": "Lire tout un fichier dans une string consomme une mémoire proportionnelle à sa taille, là où un flux traite par blocs.",
+          "impact": "Moyen",
+          "patterns": ["std::istreambuf_iterator"],
+          "recommendation": "I/O bufferisées et par blocs, streaming pour les gros volumes.",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["cpp", "io", "flux"]
+        },
+        {
+          "id": "ECO-CPP-06",
+          "title": "Attente active",
+          "description": "Une boucle de scrutation maintient un cœur CPU occupé et empêche les états de basse consommation.",
+          "impact": "Élevé",
+          "patterns": ["while\\s*\\(\\s*true\\s*\\)", "while\\s*\\(\\s*1\\s*\\)"],
+          "recommendation": "condition_variable, poll/epoll ou primitives async ; compiler la production avec optimisations et profiler avant toute optimisation manuelle.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["cpp", "cpu", "attente"]
+        }
+      ]
+    }
+  }
+}

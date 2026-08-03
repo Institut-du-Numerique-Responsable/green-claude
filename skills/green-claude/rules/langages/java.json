@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "name": "Éco-conception Java",
+    "description": "Règles d'écoconception pour le code Java : JPA/Hibernate sobre, mémoire, batch, sérialisation, logs.",
+    "version": "1.0.0",
+    "globs": "**/*.java",
+    "extensions": ["java"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 8,
+    "type": "code_audit"
+  },
+  "categories": {
+    "donnees": {
+      "name": "Java — accès aux données (JPA / Hibernate / JDBC)",
+      "description": "Ne charger que le nécessaire, en un minimum d'allers-retours (RGESN Backend, GR491_Backend_2/3).",
+      "rules": [
+        {
+          "id": "ECO-JAVA-01",
+          "title": "findAll() sur une table non bornée",
+          "description": "Charge toutes les lignes et les gère comme entités managées : mémoire, CPU et réseau proportionnels au volume de la table.",
+          "impact": "Élevé",
+          "patterns": ["\\.findAll\\(\\s*\\)"],
+          "recommendation": "Paginer systématiquement (Pageable, setMaxResults) ; traiter les gros volumes par chunks.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["java", "jpa", "pagination"]
+        },
+        {
+          "id": "ECO-JAVA-02",
+          "title": "Association lazy parcourue en boucle (N+1)",
+          "description": "Une collection @OneToMany/@ManyToMany parcourue en lazy déclenche une requête par élément parent.",
+          "impact": "Élevé",
+          "patterns": ["@OneToMany", "@ManyToMany"],
+          "recommendation": "Charger explicitement les associations parcourues avec JOIN FETCH ou @EntityGraph ; projeter en DTO pour la lecture seule.",
+          "rgesn_ref": "7.1, 9.1",
+          "gr491_famille": "Backend",
+          "tags": ["java", "jpa", "n+1"]
+        },
+        {
+          "id": "ECO-JAVA-03",
+          "title": "Écritures entité par entité",
+          "description": "Un save() par entité génère un aller-retour base par ligne, sans batch JDBC.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Batch JDBC (hibernate.jdbc.batch_size, saveAll par tranches), Spring Batch pour les traitements longs ; dimensionner le pool HikariCP au besoin réel.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["java", "jpa", "batch"]
+        }
+      ]
+    },
+    "memoire": {
+      "name": "Java — mémoire et CPU",
+      "description": "Limiter allocations, parallélisme non mesuré et caches non bornés (RGESN Algorithmie, GR491_Backend_4).",
+      "rules": [
+        {
+          "id": "ECO-JAVA-04",
+          "title": "parallelStream() par défaut",
+          "description": "parallelStream mobilise tous les cœurs du ForkJoinPool commun pour un gain rarement mesuré, et dégrade les traitements concurrents.",
+          "impact": "Moyen",
+          "patterns": ["\\.parallelStream\\(\\)"],
+          "recommendation": "Rester en stream séquentiel par défaut ; ne paralléliser qu'après mesure, sur un pool dédié.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["java", "cpu", "parallelisme"]
+        },
+        {
+          "id": "ECO-JAVA-05",
+          "title": "Concaténation de chaînes en boucle",
+          "description": "`s += ...` alloue une nouvelle String à chaque tour : pression mémoire et GC inutiles dans les boucles chaudes.",
+          "impact": "Faible",
+          "patterns": ["\\+=\\s*\""],
+          "recommendation": "StringBuilder pour les concaténations répétées ; éviter le boxing dans les pipelines (IntStream plutôt que Stream<Integer>).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["java", "memoire", "chaines"]
+        },
+        {
+          "id": "ECO-JAVA-06",
+          "title": "Cache statique non borné",
+          "description": "Une Map statique utilisée comme cache grossit sans limite : mémoire retenue jusqu'au redémarrage, voire OOM.",
+          "impact": "Moyen",
+          "patterns": ["static\\s+(final\\s+)?(Map|HashMap|ConcurrentHashMap)"],
+          "recommendation": "Caffeine avec maximumSize + expireAfterWrite, ou cache externe avec TTL.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["java", "cache", "memoire"]
+        }
+      ]
+    },
+    "logs_taches": {
+      "name": "Java — API, logs et tâches",
+      "description": "Sérialiser peu, journaliser sobrement, ne pas scruter (RGESN Backend/Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-JAVA-07",
+          "title": "Log concaténé au lieu de paramétré",
+          "description": "Une concaténation dans un appel de log est évaluée même si le niveau est désactivé : CPU et allocations pour une ligne jamais écrite.",
+          "impact": "Faible",
+          "patterns": ["log(ger)?\\.(debug|info|trace)\\([^,)]*\\+"],
+          "recommendation": "Logging paramétré (log.debug(\"x={}\", x)) ; pas de log dans les boucles serrées ; niveaux de production sobres.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["java", "logs"]
+        },
+        {
+          "id": "ECO-JAVA-08",
+          "title": "Tâche planifiée à haute fréquence",
+          "description": "Un @Scheduled qui interroge un état en boucle consomme CPU et base en continu pour détecter un changement rare.",
+          "impact": "Moyen",
+          "patterns": ["@Scheduled"],
+          "recommendation": "Déclenchement événementiel (listener, message) quand c'est possible ; sinon espacer l'intervalle et sérialiser les exécutions.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["java", "polling", "taches"]
+        }
+      ]
+    }
+  }
+}
