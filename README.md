@@ -177,12 +177,13 @@ Full detail: [`skills/green-claude/rules/boris.json`](skills/green-claude/rules/
 
 ## What a skill can't do (and how it's covered anyway)
 
-A skill runs *during* a session that's already started. It can't decide which model to start with, nor prevent a model call before it happens. Two levers therefore live outside the skill, in [`hooks/`](hooks/), optional and offered at install time:
+A skill runs *during* a session that's already started, and the model decides whether to apply it. So it can't pick the starting model, can't intercept a call before it leaves, and can't guarantee a rule gets checked every single time. Three levers therefore live outside the skill, in [`hooks/`](hooks/), optional and offered at install time:
 
+- **Systematic audit** (`hooks/green-claude-audit.sh`): wired as `PostToolUse` on `Write|Edit|MultiEdit`. Claude Code runs it after every code file written, without asking the model. It audits what was just added and hands the findings back to Claude, who fixes them before moving on.
 - **Local cache** (`hooks/green-claude-cache.sh`): a question already asked gets served again without calling the model — zero tokens spent.
 - **Off-peak warning** (same hook): flags peak hours (outside 22:00-06:00 UTC) without ever blocking.
 
-These hooks wire into `~/.claude/settings.json`. If you answer "y", `install.sh` adds them there (other settings are preserved, and a backup of the original file is left at `settings.json.green-claude.bak`). Without `jq`, it prints the config to paste in by hand. To remove them: delete the two `green-claude-*` entries from the file.
+These hooks wire into `~/.claude/settings.json`. If you answer "y", `install.sh` adds them there (other settings are preserved, and a backup of the original file is left at `settings.json.green-claude.bak`). Without `jq`, it prints the config to paste in by hand. To remove them: delete the `green-claude-*` entries from the file.
 
 ---
 

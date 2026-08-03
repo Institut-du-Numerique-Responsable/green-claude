@@ -20,6 +20,21 @@ HOOKS_DIR="$HOME/.claude/hooks"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 CACHE_HOOK="~/.claude/hooks/green-claude-cache.sh"
 SAVE_HOOK="~/.claude/hooks/green-claude-cache-save.sh"
+AUDIT_HOOK="~/.claude/hooks/green-claude-audit.sh"
+
+# Idempotent : un hook déjà déclaré, sous n'importe quelle forme de chemin,
+# n'est pas réajouté. Les hooks existants sont préservés. $4 (facultatif) est
+# le matcher, requis pour les événements liés à un outil comme PostToolUse.
+wire_hook() { # $1 = événement, $2 = commande, $3 = fichier source, $4 = matcher
+    jq --arg e "$1" --arg c "$2" --arg s "/${2##*/}" --arg m "${4:-}" '
+      if [.. | objects | .command? // empty] | any(. == $c or endswith($s)) then .
+      else
+        (if $m == "" then {hooks: [{type: "command", command: $c}]}
+         else {matcher: $m, hooks: [{type: "command", command: $c}]}
+         end) as $entry
+        | .hooks[$e] = ((.hooks[$e] // []) + [$entry])
+      end' "$3"
+}
 
 print_error()   { echo -e "${RED}[ERREUR]${NC} $1"; }
 print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -63,15 +78,6 @@ if [[ $REPLY =~ ^[OoYy]$ ]]; then
     chmod +x "$HOOKS_DIR/green-claude-cache.sh" "$HOOKS_DIR/green-claude-cache-save.sh"
     print_success "Scripts de hook copiés dans $HOOKS_DIR"
 
-    # Idempotent : un hook déjà déclaré, sous n'importe quelle forme de chemin,
-    # n'est pas réajouté. Les hooks existants sont préservés.
-    wire_hook() { # $1 = événement, $2 = commande, $3 = fichier source
-        jq --arg e "$1" --arg c "$2" --arg s "/${2##*/}" '
-          if [.. | objects | .command? // empty] | any(. == $c or endswith($s)) then .
-          else .hooks[$e] = ((.hooks[$e] // []) + [{hooks: [{type: "command", command: $c}]}])
-          end' "$3"
-    }
-
     WIRED=0
     if command -v jq >/dev/null 2>&1; then
         [ -s "$SETTINGS_FILE" ] || echo '{}' > "$SETTINGS_FILE"
@@ -98,6 +104,46 @@ if [[ $REPLY =~ ^[OoYy]$ ]]; then
     fi
 else
     print_info "Hook ignoré — installable plus tard depuis $SCRIPT_DIR/hooks/"
+fi
+
+# =============================================================================
+# Étape 3 : hook d'audit (PostToolUse)
+# Le skill est chargé sur décision du modèle, donc appliqué souvent mais jamais
+# garanti. Ce hook, lui, est exécuté par Claude Code après chaque écriture de
+# fichier de code, sans passer par cette décision.
+# =============================================================================
+print_info ""
+read -p "Installer le hook d'audit après chaque écriture de code (PostToolUse) ? (o/n) : " -n 1 -r
+echo
+if [[ $REPLY =~ ^[OoYy]$ ]]; then
+    mkdir -p "$HOOKS_DIR"
+    cp "$SCRIPT_DIR/hooks/green-claude-audit.sh" "$HOOKS_DIR/"
+    chmod +x "$HOOKS_DIR/green-claude-audit.sh"
+    print_success "Script d'audit copié dans $HOOKS_DIR"
+
+    AUDIT_WIRED=0
+    if command -v jq >/dev/null 2>&1; then
+        [ -s "$SETTINGS_FILE" ] || echo '{}' > "$SETTINGS_FILE"
+        TMP="$(mktemp)"
+        if wire_hook "PostToolUse" "$AUDIT_HOOK" "$SETTINGS_FILE" "Write|Edit|MultiEdit" > "$TMP" \
+           && [ -s "$TMP" ]; then
+            [ -f "$SETTINGS_FILE.green-claude.bak" ] || cp "$SETTINGS_FILE" "$SETTINGS_FILE.green-claude.bak"
+            mv "$TMP" "$SETTINGS_FILE"
+            AUDIT_WIRED=1
+            print_success "Hook d'audit câblé dans $SETTINGS_FILE"
+            print_info "Redémarre Claude Code pour l'activer."
+        else
+            print_error "jq n'a pas pu traiter $SETTINGS_FILE, fichier laissé intact."
+        fi
+        rm -f "$TMP"
+    fi
+
+    if [ "$AUDIT_WIRED" -eq 0 ]; then
+        print_warning "Câblage à faire à la main dans $SETTINGS_FILE :"
+        printf '\n  {\n    "hooks": {\n      "PostToolUse": [\n        {\n          "matcher": "Write|Edit|MultiEdit",\n          "hooks": [{ "type": "command", "command": "%s" }]\n        }\n      ]\n    }\n  }\n\n' "$AUDIT_HOOK"
+    fi
+else
+    print_info "Hook d'audit ignoré — installable plus tard depuis $SCRIPT_DIR/hooks/"
 fi
 
 # =============================================================================
