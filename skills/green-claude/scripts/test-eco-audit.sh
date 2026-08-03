@@ -398,4 +398,19 @@ echo "$OUT" | grep -q 'Éco-conception Python' || fail "--list-langs ne liste pa
 OUT="$(bash eco-audit.sh --list-rules python)"
 echo "$OUT" | grep -q 'ECO-PY-01' || fail "--list-rules python ne sort pas la checklist du langage"
 
-echo "OK - 25 verifications passees"
+# 26. exclude_patterns : une ligne qui matche le motif mais applique déjà la
+# bonne pratique n'est pas signalée (ECO-RB-06 : Rails.cache.fetch a besoin
+# d'un expires_in, la version qui en a un est correcte).
+cat > "$TMP/cache_ko.rb" <<'EOF'
+Rails.cache.fetch("k") { calcul }
+EOF
+cat > "$TMP/cache_ok.rb" <<'EOF'
+Rails.cache.fetch("k", expires_in: 5.minutes) { calcul }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/cache_ko.rb")"
+echo "$OUT" | grep -q 'ECO-RB-06' || fail "cache sans expiration non détecté"
+OUT="$(bash eco-audit.sh "$TMP/cache_ok.rb")"
+echo "$OUT" | grep -q 'ECO-RB-06' && fail "exclude_patterns ignoré : cache avec expires_in signalé à tort"
+true
+
+echo "OK - 26 verifications passees"

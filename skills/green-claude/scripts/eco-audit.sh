@@ -123,6 +123,11 @@ while IFS= read -r rule_json; do
     title=$(jq -r '.title' <<<"$rule_json")
     impact=$(jq -r '.impact' <<<"$rule_json")
     patterns=$(jq -r '.patterns | join("|")' <<<"$rule_json")
+    # exclude_patterns (facultatif) : lignes qui matchent le motif tout en
+    # appliquant déjà la bonne pratique. La règle ne se déclenche que s'il reste
+    # une ligne non exclue — Rails.cache.fetch pose problème sans expires_in,
+    # pas avec.
+    excludes=$(jq -r '(.exclude_patterns // []) | join("|")' <<<"$rule_json")
     detector=$(jq -r '.detector // ""' <<<"$rule_json")
     enrich=$(jq -r '.enrich // ""' <<<"$rule_json")
     recommendation=$(jq -r '.recommendation' <<<"$rule_json")
@@ -148,6 +153,8 @@ while IFS= read -r rule_json; do
             detector_script="$SCRIPT_DIR/detect-$(echo "$detector" | tr '_' '-').awk"
             [ -f "$detector_script" ] || continue
             matches=$(awk -f "$detector_script" "$file" 2>/dev/null || true)
+        elif [ -n "$patterns" ] && [ -n "$excludes" ]; then
+            matches=$(grep -iE "$patterns" "$file" 2>/dev/null | grep -qvE "$excludes" && echo "match" || true)
         elif [ -n "$patterns" ]; then
             matches=$(grep -qiE "$patterns" "$file" 2>/dev/null && echo "match" || true)
         fi
