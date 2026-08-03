@@ -120,12 +120,59 @@ cat > "$TMP/fonts.css" <<EOF
   src: url("legacy.ttf") format("truetype");
 }
 EOF
+cat >> "$TMP/fonts.css" <<EOF
+@font-face {
+  font-family: "Extra";
+  src: url("small.woff2") format("woff2");
+}
+EOF
 OUT="$(bash eco-audit.sh "$TMP/fonts.css")"
-echo "$OUT" | grep -q '2 famille(s)' || fail "polices : comptage des familles distinctes incorrect"
-echo "$OUT" | grep -q '3 variante(s)' || fail "polices : comptage des variantes incorrect"
+echo "$OUT" | grep -q '3 famille(s)' || fail "polices : comptage des familles distinctes incorrect"
+echo "$OUT" | grep -q '4 variante(s)' || fail "polices : comptage des variantes incorrect"
 echo "$OUT" | grep -q 'big.woff2.*40 Ko' || fail "polices : excès au-delà de 40 Ko non détecté"
 echo "$OUT" | grep -q 'legacy.ttf.*non compressé' || fail "polices : format TTF non signalé"
 echo "$OUT" | grep -q 'small.woff2' && fail "polices : ne doit rien signaler sur une police déjà conforme (woff2, < 40 Ko)"
+true
+
+# Sous le seuil RGESN (2 familles, 2 variantes, woff2 légers) : rester conforme
+# n'est pas une remarque à faire. Émettre le décompte dans tous les cas rendait
+# la règle impossible à satisfaire.
+cat > "$TMP/fonts-ok.css" <<EOF
+@font-face {
+  font-family: "Inter";
+  src: url("small.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Serif";
+  src: url("small.woff2") format("woff2");
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/fonts-ok.css")"
+echo "$OUT" | grep -q 'ECO-UX-05' && fail "polices : ne doit rien signaler sous le seuil RGESN (2 familles / 2 variantes)"
+true
+
+# Une famille restreinte par unicode-range à une écriture non latine n'est
+# téléchargée que si la page affiche cette écriture : elle ne pèse pas sur le
+# budget latin, sinon tout site multilingue échoue en faisant ce qu'il faut.
+cat > "$TMP/fonts-ar.css" <<EOF
+@font-face {
+  font-family: "Inter";
+  src: url("small.woff2") format("woff2");
+  unicode-range: U+0000-00FF;
+}
+@font-face {
+  font-family: "Serif";
+  src: url("small.woff2") format("woff2");
+  unicode-range: U+0000-00FF;
+}
+@font-face {
+  font-family: "Cairo";
+  src: url("small.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+FE70-FEFC;
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/fonts-ar.css")"
+echo "$OUT" | grep -q 'dépasse le seuil RGESN 4.8' && fail "polices : une famille non latine scopée par unicode-range ne doit pas peser sur le budget latin"
 true
 
 cat > "$TMP/google-fonts.html" <<EOF
@@ -172,6 +219,25 @@ echo "$OUT" | grep -q 'hors du if' && fail "code mort : faux positif (code aprè
 echo "$OUT" | grep -q 'gestion erreur' && fail "code mort : faux positif (catch après un return dans le try)"
 N=$(echo "$OUT" | grep -c 'ECO-FRONT-05')
 [ "$N" -eq 1 ] || fail "code mort : attendu 1 seul hit sur ce fichier, trouvé $N"
+
+# Le détecteur suit la profondeur des accolades : celles qui vivent dans une
+# chaîne ou un commentaire n'en sont pas. Et une garde `if (x) return;` sur une
+# seule ligne, ou un `return` dont le bloc se referme sur la même ligne, ne rend
+# rien inatteignable. Ces trois formes sont omniprésentes en JS réel.
+cat > "$TMP/dead-strings.js" <<'EOF'
+const dict = { fr: "Formation continue du personnel technique" };
+function guard(x) {
+  if (!x) return;
+  work(x);
+}
+function oneline() { return 2; }
+const after = 3;
+let nodes = null; // [{ node, original }]
+const tpl = `un { accolade } dans un template`;
+EOF
+OUT="$(bash eco-audit.sh "$TMP/dead-strings.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "code mort : faux positif (mot-clé dans une chaîne, garde sur une ligne, ou bloc refermé sur la ligne du return)"
+true
 
 # 10. ECO-FRONT-06 (globales implicites) : détecte var/affectation nue au
 # niveau racine d'un script, silencieux dans une IIFE/fonction, et ne
@@ -482,6 +548,64 @@ OUT="$(bash eco-audit.sh "$TMP/reel.js")"
 echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort JS non détecté après ajout du périmètre"
 echo "$OUT" | grep -q 'ECO-FRONT-06' || fail "globale implicite JS non détectée après ajout du périmètre"
 
+# exclude_file_patterns : le remède vit ailleurs dans le fichier que la ligne
+# détectée. Un timer suspendu quand l'onglet est caché, un handler de scroll
+# étalé sur requestAnimationFrame, des listeners détachés via AbortController
+# appliquent déjà la recommandation — une exclusion ligne à ligne ne le voit pas.
+cat > "$TMP/sobre.js" <<'EOF'
+let timer = null;
+function start() { timer = setInterval(tick, 1000); }
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { clearInterval(timer); timer = null; } else { start(); }
+});
+window.addEventListener('scroll', () => {
+  if (queued) return;
+  queued = true;
+  requestAnimationFrame(paint);
+}, { passive: true });
+EOF
+OUT="$(bash eco-audit.sh "$TMP/sobre.js")"
+echo "$OUT" | grep -q 'ECO-JS-03' && fail "polling : timer suspendu sur visibilitychange ne doit pas être signalé"
+echo "$OUT" | grep -q 'ECO-JS-04' && fail "handler haute fréquence : scroll calé sur requestAnimationFrame ne doit pas être signalé"
+true
+
+cat > "$TMP/pas-sobre.js" <<'EOF'
+setInterval(() => fetch('/api/status'), 1000);
+window.addEventListener('scroll', () => { paint(window.scrollY); });
+EOF
+OUT="$(bash eco-audit.sh "$TMP/pas-sobre.js")"
+echo "$OUT" | grep -q 'ECO-JS-03' || fail "polling : setInterval sans garde de visibilité doit rester signalé"
+echo "$OUT" | grep -q 'ECO-JS-04' || fail "handler haute fréquence : scroll non throttlé doit rester signalé"
+
+# ECO-BACK-02 cherchait "new.*Connection", qui matche la prose : un fichier de
+# traductions contenant "400 new connections" était signalé comme ouvrant une
+# connexion base de données sans pool.
+cat > "$TMP/i18n.js" <<'EOF'
+window.I18N = { en: { "400 branchements neufs": "400 new connections" } };
+EOF
+OUT="$(bash eco-audit.sh "$TMP/i18n.js")"
+echo "$OUT" | grep -q 'ECO-BACK-02' && fail "pool de connexions : faux positif sur une chaîne de traduction"
+true
+
+cat > "$TMP/db.js" <<'EOF'
+const conn = createConnection({ host: process.env.DB_HOST });
+EOF
+OUT="$(bash eco-audit.sh "$TMP/db.js")"
+echo "$OUT" | grep -q 'ECO-BACK-02' || fail "pool de connexions : createConnection doit rester détecté"
+
+# ECO-CONT-01 : une balise servant déjà WebP/AVIF, un srcset ou du lazy-loading
+# n'est pas le problème visé. Les métadonnées sociales et les favicons non plus :
+# les scrapers et les favicons ne lisent pas WebP, le JPG/PNG y est obligatoire.
+cat > "$TMP/images-ok.html" <<'EOF'
+<meta property="og:image" content="https://exemple.org/apercu.jpg">
+<link rel="icon" href="favicon.png" type="image/png">
+<picture><source type="image/webp" srcset="photo.webp"><img src="photo.jpg" loading="lazy" width="600" height="450" alt=""></picture>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/images-ok.html")"
+echo "$OUT" | grep -q 'ECO-CONT-01' && fail "images : faux positif sur WebP + fallback, og:image et favicon"
+true
+
+
 # 31. Empaquetage : les deux canaux qui attendent un zip (API Skills, upload
 # Claude.ai) exigent un dossier unique à la racine, nommé comme le skill, et
 # une description sous leur limite respective — 1024 et 200 caractères.
@@ -503,4 +627,38 @@ if command -v zip >/dev/null 2>&1; then
         || fail "les règles par langage manquent dans l'archive"
 fi
 
-echo "OK - 31 verifications passees"
+# Retour d'objet littéral : l'accolade fermante de `return { a: 1 };` ne
+# referme aucun bloc, la suite reste donc bien du code mort. Chercher une
+# fermante quelconque après le mot-clé ratait ce cas, pourtant l'une des
+# formes de retour les plus courantes en JS.
+cat > "$TMP/retour-objet.js" <<'EOF'
+function f() {
+  return { a: 1 };
+  console.log("vraiment mort");
+}
+function g() {
+  return { a: { b: 1 } };
+  console.log("mort aussi");
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/retour-objet.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort après un return d'objet littéral non détecté"
+
+# Et l'inverse : un bloc réellement refermé sur la ligne du return ne laisse
+# aucune place à du code inatteignable.
+cat > "$TMP/retour-inline.js" <<'EOF'
+function g() { return 2; }
+const x = g();
+console.log(x);
+EOF
+OUT="$(bash eco-audit.sh "$TMP/retour-inline.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : bloc refermé sur la ligne du return"
+true
+
+# Toute règle dotée d'exclude_file_patterns doit porter une note : l'exclusion
+# vaut pour le fichier entier, donc un silence n'est pas une absence de
+# problème. Sans note, Claude relaie ce silence comme un verdict.
+MANQUANTES=$(jq -s -r '[.[].categories[].rules[] | select(.exclude_file_patterns) | select((.note // "") == "") | .id] | join(", ")' ../rules/langages/*.json)
+[ -z "$MANQUANTES" ] || fail "règles avec exclude_file_patterns sans note : $MANQUANTES"
+
+echo "OK - suite complete"

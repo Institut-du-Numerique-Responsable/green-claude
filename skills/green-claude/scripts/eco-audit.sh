@@ -214,6 +214,11 @@ while IFS= read -r rule_json; do
     # une ligne non exclue — Rails.cache.fetch pose problème sans expires_in,
     # pas avec.
     excludes=$(jq -r '(.exclude_patterns // []) | join("|")' <<<"$rule_json")
+    # exclude_file_patterns (facultatif) : le remède ne vit pas sur la ligne
+    # détectée mais ailleurs dans le fichier. Un setInterval suspendu par un
+    # visibilitychange trente lignes plus bas applique déjà la recommandation,
+    # et une exclusion ligne à ligne ne peut pas le voir.
+    file_excludes=$(jq -r '(.exclude_file_patterns // []) | join("|")' <<<"$rule_json")
     detector=$(jq -r '.detector // ""' <<<"$rule_json")
     enrich=$(jq -r '.enrich // ""' <<<"$rule_json")
     recommendation=$(jq -r '.recommendation' <<<"$rule_json")
@@ -236,6 +241,13 @@ while IFS= read -r rule_json; do
                 *) continue ;;
             esac
         fi
+        # Si l'un des motifs d'exclusion fichier apparaît quelque part dans le
+        # fichier, la règle se tait : la bonne pratique y est déjà appliquée.
+        if [ -n "$file_excludes" ]; then
+            fscan="$CLEAN_DIR/$(cleaned_name "$file")"
+            [ -f "$fscan" ] || fscan="$file"
+            grep -qiE "$file_excludes" "$fscan" 2>/dev/null && continue
+        fi
         matches=""
         if [ -n "$detector" ]; then
             # Détecteur dédié multi-lignes (grep ligne-par-ligne ne sait pas
@@ -253,25 +265,34 @@ while IFS= read -r rule_json; do
                 matches=$(grep -qiE "$patterns" "$scanned" 2>/dev/null && echo "match" || true)
             fi
         fi
+        # Enrichissement calculé avant l'affichage : certaines règles n'ont de
+        # verdict que par la mesure.
+        enrich_out=""
+        if [ -n "$matches" ] && [ -n "$enrich" ]; then
+            # Best-effort : inspecte les fichiers réels référencés (image,
+            # police...) quand c'est possible. Un pattern seul ne peut pas dire
+            # si une image est déjà compressée ou correctement dimensionnée — on
+            # ajoute l'info réelle quand le fichier est résolvable sur disque,
+            # sans rien affirmer quand il ne l'est pas (URL distante, chemin
+            # construit dynamiquement...).
+            enrich_script="$SCRIPT_DIR/inspect-$(echo "$enrich" | tr '_' '-').sh"
+            [ -f "$enrich_script" ] && enrich_out=$(bash "$enrich_script" "$file" 2>/dev/null || true)
+        fi
+        # enrich_is_verdict : pour certaines règles, seule la mesure tranche.
+        # Détecter un @font-face ne dit rien en soi — c'est le décompte des
+        # familles et le poids réel qui décident. Sans mesure à rapporter, il
+        # n'y a rien à signaler, sinon la règle ne peut jamais être satisfaite.
+        if [ -n "$matches" ] && [ "$(jq -r '.enrich_is_verdict // false' <<<"$rule_json")" = "true" ] \
+           && [ -z "$enrich_out" ]; then
+            matches=""
+        fi
         if [ -n "$matches" ]; then
             echo "[$impact] $id — $title"
             echo "  Fichier        : $file"
             if [ "$matches" != "match" ]; then
                 echo "$matches" | head -5 | sed 's/^/  Ligne          : /'
             fi
-            if [ -n "$enrich" ]; then
-                # Best-effort : inspecte les fichiers réels référencés (image,
-                # etc.) quand c'est possible. Un pattern seul ne peut pas dire
-                # si une image est déjà compressée ou correctement dimensionnée
-                # — ceci ajoute l'info réelle quand le fichier est résolvable
-                # sur disque, sans rien affirmer quand il ne l'est pas (URL
-                # distante, chemin construit dynamiquement...).
-                enrich_script="$SCRIPT_DIR/inspect-$(echo "$enrich" | tr '_' '-').sh"
-                if [ -f "$enrich_script" ]; then
-                    enrich_out=$(bash "$enrich_script" "$file" 2>/dev/null || true)
-                    [ -n "$enrich_out" ] && echo "$enrich_out" | sed 's/^/  Détail         : /'
-                fi
-            fi
+            [ -n "$enrich_out" ] && echo "$enrich_out" | sed 's/^/  Détail         : /'
             echo "  Catégorie      : $category"
             echo "  RGESN          : $rgesn_ref"
             echo "  Recommandation : $recommendation"

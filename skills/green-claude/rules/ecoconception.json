@@ -378,6 +378,7 @@
             "new FontFace\\("
           ],
           "enrich": "fonts",
+          "enrich_is_verdict": true,
           "enrich_note": "Un pattern ne peut ni compter les polices/variantes ni sommer leur poids réel. scripts/inspect-fonts.sh le fait pour les polices auto-hébergées résolvables sur disque (nombre de familles, variantes, poids total contre 400 Ko, format WOFF2 vs TTF/OTF/EOT) ; les polices tierces (CDN) sont détectées mais leur poids réel n'est pas mesurable sans requête réseau.",
           "recommendation": "Utiliser la pile system-ui d'abord. Si une police est nécessaire : au maximum 2 familles et 4 variantes au total (ou 400 Ko téléchargés au total), auto-hébergées, sous-ensemblées (subset), en WOFF2, avec font-display: swap.",
           "rgesn_ref": "4.8",
@@ -444,6 +445,20 @@
           "patterns": [
             "\\.png",
             "\\.jpe?g"
+          ],
+          "exclude_patterns": [
+            "\\.webp",
+            "\\.avif",
+            "srcset",
+            "loading\\s*=\\s*[\"']lazy",
+            "type\\s*=\\s*[\"']image/(webp|avif)",
+            "og:image",
+            "twitter:image",
+            "rel\\s*=\\s*[\"']icon",
+            "apple-touch-icon",
+            "rel\\s*=\\s*[\"']manifest",
+            "\"logo\"\\s*:",
+            "\"image\"\\s*:"
           ],
           "enrich": "image",
           "enrich_note": "Un pattern ne peut pas dire si l'image est déjà compressée ou correctement dimensionnée. scripts/inspect-image.sh résout le fichier réel quand c'est possible (pas une URL distante) et ajoute son poids/dimensions réels au rapport, sans rien affirmer quand le fichier n'est pas résolvable.",
@@ -801,8 +816,11 @@
           "description": "Ouvrir une connexion à la base à chaque requête est coûteux en CPU et en latence, côté application comme côté serveur.",
           "impact": "Élevé",
           "patterns": [
-            "new.*Connection",
-            "createConnection"
+            "new\\s+[A-Za-z_$][\\w$]*Connection\\s*\\(",
+            "\\bcreateConnection\\s*\\(",
+            "\\bpsycopg2\\.connect\\b",
+            "\\bDriverManager\\.getConnection\\b",
+            "\\bmysqli_connect\\s*\\("
           ],
           "recommendation": "Configurer un pool de connexions (pg-pool, HikariCP, mysql2/promise).",
           "rgesn_ref": "7.x",
