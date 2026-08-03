@@ -627,4 +627,38 @@ if command -v zip >/dev/null 2>&1; then
         || fail "les règles par langage manquent dans l'archive"
 fi
 
+# Retour d'objet littéral : l'accolade fermante de `return { a: 1 };` ne
+# referme aucun bloc, la suite reste donc bien du code mort. Chercher une
+# fermante quelconque après le mot-clé ratait ce cas, pourtant l'une des
+# formes de retour les plus courantes en JS.
+cat > "$TMP/retour-objet.js" <<'EOF'
+function f() {
+  return { a: 1 };
+  console.log("vraiment mort");
+}
+function g() {
+  return { a: { b: 1 } };
+  console.log("mort aussi");
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/retour-objet.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort après un return d'objet littéral non détecté"
+
+# Et l'inverse : un bloc réellement refermé sur la ligne du return ne laisse
+# aucune place à du code inatteignable.
+cat > "$TMP/retour-inline.js" <<'EOF'
+function g() { return 2; }
+const x = g();
+console.log(x);
+EOF
+OUT="$(bash eco-audit.sh "$TMP/retour-inline.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : bloc refermé sur la ligne du return"
+true
+
+# Toute règle dotée d'exclude_file_patterns doit porter une note : l'exclusion
+# vaut pour le fichier entier, donc un silence n'est pas une absence de
+# problème. Sans note, Claude relaie ce silence comme un verdict.
+MANQUANTES=$(jq -s -r '[.[].categories[].rules[] | select(.exclude_file_patterns) | select((.note // "") == "") | .id] | join(", ")' ../rules/langages/*.json)
+[ -z "$MANQUANTES" ] || fail "règles avec exclude_file_patterns sans note : $MANQUANTES"
+
 echo "OK - suite complete"

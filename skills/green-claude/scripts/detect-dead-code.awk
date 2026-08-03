@@ -22,6 +22,12 @@ BEGIN { depth = 0; dead_depth = -1; flagged_this_zone = 0 }
 # les accolades ni les mots-clés qu'elles contiennent ne soient lus comme du
 # code. Sans ça, un dictionnaire de traductions contenant "Formation continue
 # du personnel" ouvre une zone morte sur le `continue` d'une phrase française.
+function count_char(s, c,   n, i) {
+    n = 0
+    for (i = 1; i <= length(s); i++) if (substr(s, i, 1) == c) n++
+    return n
+}
+
 function blank_strings(s,   out, i, n, c, q, esc) {
     out = ""; n = length(s); q = ""; esc = 0
     for (i = 1; i <= n; i++) {
@@ -99,9 +105,14 @@ function blank_strings(s,   out, i, n, c, q, esc) {
     guarded = (trimmed ~ /(^|[^[:alnum:]_.])(if|else)[ \t]*\(/ && trimmed !~ /\{[ \t]*$/)
     # Bloc refermé après le return, sur la ligne même : `function f() { return x; }`.
     # Il ne reste aucun bloc où du code pourrait devenir inatteignable.
+    # On compare les accolades ouvertes et fermées après le mot-clé plutôt que
+    # de chercher une fermante : `return { a: 1 };` en contient une sans rien
+    # refermer, et l'objet littéral est l'une des formes de retour les plus
+    # courantes en JS. Seul un excédent de fermantes referme vraiment le bloc.
     closed_here = 0
     if (match(line, /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/)) {
-        if (index(substr(line, RSTART + RLENGTH), "}") > 0) closed_here = 1
+        apres = substr(line, RSTART + RLENGTH)
+        if (count_char(apres, "}") > count_char(apres, "{")) closed_here = 1
     }
     if (dead_depth < 0 && !guarded && !closed_here && trimmed ~ /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/) {
         dead_depth = depth
