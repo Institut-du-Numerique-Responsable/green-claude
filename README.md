@@ -150,6 +150,22 @@ eco-audit.sh --list-rules python    # full checklist for one language
 
 ---
 
+## Measure, don't assume
+
+`eco-score.sh` counts the patterns found in a repository, weights them by impact and reports them against code volume:
+
+```bash
+skills/green-claude/scripts/eco-score.sh          # human-readable
+skills/green-claude/scripts/eco-score.sh --json   # one line per measurement, to keep over time
+```
+
+This score counts known patterns, not joules. A falling density says the code holds fewer recognizable patterns, not that it draws less power. Compare it to last month's rather than to zero, and check it against a real runtime measurement (query count, bytes transferred, CPU time, EcoIndex on a page): that's what settles it.
+
+Two more checkpoints, both optional:
+
+- `hooks/green-claude-pre-commit.sh` audits staged files. Where the Claude Code hook only sees what Claude writes, this one also sees what you write. It reports without blocking, unless you pass `GREEN_CLAUDE_STRICT=1`.
+- `.github/workflows/eco-audit.yml` runs the rule test suite on every PR and publishes the repository's density in the job summary.
+
 ## Boris's practices: using Claude soberly and sensibly
 
 Coding with AI also has a cost during the session itself: every request consumes energy. [Boris Cherny](https://howborisusesclaudecode.com/), Claude Code's creator, documents efficient usage practices. Efficient use is also sober use: every avoided back-and-forth saves tokens, every trimmed context does too.
