@@ -32,7 +32,7 @@
     "name": "Green Claude",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "macOS, Linux",
-    "softwareVersion": "1.3.0",
+    "softwareVersion": "1.4.0",
     "description": "Skill pour Claude Code : sobriété numérique du code produit (RGESN 2024, GR491, Green Software Foundation, W3C Web Sustainability Guidelines), installé une fois et appliqué automatiquement.",
     "license": "https://opensource.org/licenses/MIT",
     "url": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
@@ -128,6 +128,14 @@
       <h3>Sur demande, un audit</h3>
       <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep sur les règles), zéro coût de raisonnement, qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</p>
     </div>
+    <div class="card">
+      <h3>Le détail de ton langage</h3>
+      <p>80 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C et C++. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel te concerne, d'après l'extension du fichier.</p>
+    </div>
+    <div class="card">
+      <h3>À chaque écriture, sans y penser</h3>
+      <p>Un hook optionnel relance l'audit après chaque fichier écrit par Claude Code, sans passer par une décision du modèle. Charger un skill dépend du modèle ; exécuter un hook, non.</p>
+    </div>
   </div>
 
   <h2>Exemple concret</h2>
@@ -153,23 +161,28 @@ app.get('/api/users', (req, res) => {
   <pre><code>/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
 /plugin install green-claude@green-claude</code></pre>
   <p>Rien d'autre à faire : Claude Code charge le skill automatiquement dans les sessions suivantes et gère ses mises à jour. Tape <code>/green-claude</code> pour voir la checklist complète.</p>
-  <p>Alternative via <code>install.sh</code> (nécessaire pour câbler en plus le hook de cache local) :</p>
+  <p>Alternative via <code>install.sh</code>, nécessaire pour câbler en plus les hooks (audit après écriture, cache local) :</p>
   <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
 cd green-claude && ./install.sh</code></pre>
+  <p>Pour <strong>Claude.ai</strong> et l'<strong>API Skills</strong>, qui attendent une archive plutôt qu'un dépôt, <code>scripts/package-skill.sh</code> fabrique les deux zips attendus.</p>
 
   <h2>Ce que contient le projet</h2>
   <ul>
     <li>Un skill Claude Code qui s'invoque tout seul dès qu'il s'agit d'écrire ou de revoir du code.</li>
     <li>52 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
+    <li>80 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
     <li>14 pratiques de sobriété inspirées de Boris Cherny, le créateur de Claude Code : chacune est sourcée et expliquée.</li>
-    <li>Un hook optionnel pour le cache local des réponses et un avertissement aux heures de pointe, proposé à l'installation, jamais imposé.</li>
+    <li>Des hooks optionnels, proposés à l'installation et jamais imposés : audit après chaque écriture de code, audit avant commit, cache local des réponses, avertissement aux heures de pointe.</li>
+    <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
   </ul>
 
   <h2>Pourquoi c'est important</h2>
   <p>Le code généré par l'IA va tourner pendant des années chez des utilisateurs qu'on ne verra jamais. C'est là que se joue l'essentiel de l'empreinte du « coder avec l'IA », pas pendant la session de génération. Green Claude s'attaque à ce moment précis, en s'appuyant sur des référentiels publics français et internationaux plutôt que sur des règles maison.</p>
 
   <h2>Pourquoi un skill, pas une checklist</h2>
-  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les familles de règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 66 règles à chaque échange, et vérifie le code déjà produit sur demande via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
+  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 146 règles à chaque échange, et vérifie le code déjà produit via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
+
+  <p>Reste que charger un skill est une décision du modèle. Pour les équipes qui veulent une vérification qui ne dépende de personne, le hook d'audit s'exécute après chaque écriture de fichier de code et renvoie ses trouvailles à Claude, qui corrige avant de continuer.</p>
 
   <footer>
     <p>Une production de l'<strong>Institut du Numérique Responsable</strong>, 2026, open source (MIT).<br>

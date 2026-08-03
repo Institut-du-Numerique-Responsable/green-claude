@@ -3,7 +3,8 @@
 # =============================================================================
 # Green Claude — Installation
 # Installe le skill éco-conception dans ~/.claude/skills/green-claude
-# et propose le hook de cache/heures creuses (~/.claude/hooks/).
+# et propose les hooks optionnels : audit après écriture, cache local et
+# avertissement aux heures creuses (~/.claude/hooks/).
 # =============================================================================
 
 set -e
