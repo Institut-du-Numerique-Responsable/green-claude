@@ -63,6 +63,12 @@ Ces règles ne sont testées que sur les fichiers de leur langage, ce qui autori
 
 Les pratiques d'usage sobre de Claude Code vivent dans `skills/green-claude/rules/boris.json`, sur le même principe. Si vous citez un outil tiers en exemple, vérifiez qu'il est open source et sous une licence permissive avant de l'ajouter.
 
+## Ce que l'audit ne lit pas
+
+Avant de chercher les motifs, `eco-audit.sh` retire les commentaires et, dans les fichiers de balisage, le texte rédigé : seuls l'intérieur des balises et les blocs `<script>`/`<style>` sont conservés. Un fichier qui *parle* d'autoplay ou de `SELECT *` n'en contient pas pour autant, et du code commenté ne s'exécute pas. Les détecteurs awk, eux, travaillent sur le fichier d'origine, dont ils ont besoin pour les numéros de ligne et la structure des blocs.
+
+Écrivez donc vos motifs pour du code réel. Un motif qui repose sur un mot isolé (`vue`, `next`, `autoplay`) se déclenche sur de la prose française et sur des mots-clés de langage : ancrez-le dans sa syntaxe (`from "vue"`, `autoplay=`).
+
 ## Corriger un faux positif
 
 Si un pattern regex déclenche l'audit à tort, ouvrez une PR qui resserre l'expression régulière et expliquez le cas limite rencontré dans la description de la PR.

@@ -208,13 +208,12 @@
           "description": "Un framework lourd pour un site vitrine, c'est du JavaScript téléchargé, parsé et exécuté par chaque visiteur pour rien.",
           "impact": "Élevé",
           "patterns": [
-            "\\breact\\b",
-            "\\bangular\\b",
-            "\\bvue\\b",
-            "\\bnext\\b"
+            "from\\s+['\"](react|react-dom|vue|@angular/[a-z]+|next)['\"]",
+            "require\\(\\s*['\"](react|react-dom|vue|@angular/[a-z]+|next)['\"]",
+            "\"(react|react-dom|vue|@angular/core|next|nuxt)\"\\s*:\\s*['\"]?[\\^~0-9]"
           ],
           "recommendation": "Avant d'adopter un framework, évaluer si du HTML/CSS statique, du Vanilla JS ou HTMX suffisent au besoin réel.",
-          "note": "Vise le choix initial d'architecture pour un besoin simple, pas un projet déjà construit sur un de ces frameworks : ne resignale pas à chaque audit d'un projet existant.",
+          "note": "Le nom du framework doit apparaître dans un import, un require ou une dépendance déclarée : cherché comme simple mot, « vue » signale n'importe quel texte français et « next » n'importe quelle boucle awk ou JS.",
           "rgesn_ref": "3.1",
           "gr491_famille": "Architecture",
           "tags": [
@@ -301,7 +300,9 @@
           "description": "L'autoplay télécharge et décode de la vidéo, du son ou des animations que l'utilisateur n'a pas demandés — le pire ratio utilité/consommation du web.",
           "impact": "Élevé",
           "patterns": [
-            "autoplay"
+            "<(video|audio|iframe)[^>]*autoplay",
+            "autoplay\\s*[=:]",
+            "autoPlay"
           ],
           "recommendation": "Remplacer l'autoplay par une image de couverture cliquable (façade) ; ne charger le média qu'au clic.",
           "rgesn_ref": "4.1",
@@ -310,7 +311,8 @@
             "video",
             "autoplay",
             "energie"
-          ]
+          ],
+          "note": "Le mot « autoplay » seul ne suffit pas : seuls l'attribut HTML et la propriété JS sont cherchés, sinon toute page qui parle d'autoplay est signalée."
         },
         {
           "id": "ECO-UX-02",

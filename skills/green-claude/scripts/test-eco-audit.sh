@@ -413,4 +413,46 @@ OUT="$(bash eco-audit.sh "$TMP/cache_ok.rb")"
 echo "$OUT" | grep -q 'ECO-RB-06' && fail "exclude_patterns ignoré : cache avec expires_in signalé à tort"
 true
 
-echo "OK - 26 verifications passees"
+# 27. Prose et commentaires : un fichier qui *parle* d'un motif n'en contient
+# pas pour autant. Vaut pour le texte des pages de balisage comme pour les
+# commentaires de code, y compris quand ils citent du code désactivé.
+cat > "$TMP/prose.html" <<'EOF'
+<!-- On évite autoplay et SELECT * dans ce projet -->
+<p>L'audit détecte SELECT *, les bibliothèques lourdes et l'autoplay.</p>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/prose.html")"
+echo "$OUT" | grep -q 'ECO-BACK-01' && fail "faux positif : SELECT * cité dans du texte HTML"
+echo "$OUT" | grep -q 'ECO-UX-01' && fail "faux positif : autoplay cité dans du texte HTML"
+
+cat > "$TMP/commente.py" <<'EOF'
+# Ce module évite SELECT * et n'utilise plus Article.objects.all()
+def liste(session, url):
+    return session.get(url).json()
+EOF
+OUT="$(bash eco-audit.sh "$TMP/commente.py")"
+echo "$OUT" | grep -q 'ECO-BACK-01' && fail "faux positif : SELECT * cité dans un commentaire Python"
+echo "$OUT" | grep -q 'ECO-PY-02' && fail "faux positif : queryset cité dans un commentaire Python"
+true
+
+# 28. Le vrai code, lui, reste détecté : attribut autoplay et bloc <script>.
+cat > "$TMP/media.html" <<'EOF'
+<video autoplay src="promo.mp4"></video>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/media.html")"
+echo "$OUT" | grep -q 'ECO-UX-01' || fail "attribut autoplay réel non détecté"
+
+# 29. Noms de frameworks : cherchés comme simples mots, « vue » signale tout
+# texte français et « next » toute boucle. Il faut un import ou une dépendance.
+cat > "$TMP/appli.jsx" <<'EOF'
+import React from "react";
+EOF
+cat > "$TMP/vue-francaise.js" <<'EOF'
+const total = items.length;
+EOF
+OUT="$(bash eco-audit.sh "$TMP/appli.jsx")"
+echo "$OUT" | grep -q 'ECO-ARCH-01' || fail "import React réel non détecté"
+OUT="$(bash eco-audit.sh "$TMP/vue-francaise.js")"
+echo "$OUT" | grep -q 'ECO-ARCH-01' && fail "faux positif : framework signalé sans import ni dépendance"
+true
+
+echo "OK - 29 verifications passees"
