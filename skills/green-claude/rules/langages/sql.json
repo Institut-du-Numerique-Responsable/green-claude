@@ -1,0 +1,156 @@
+{
+  "metadata": {
+    "name": "Éco-conception SQL et PL/SQL",
+    "description": "Règles d'écoconception pour SQL et PL/SQL : sobriété des lectures, index et sargabilité, traitements ensemblistes, cycle de vie des données.",
+    "version": "1.0.0",
+    "globs": "**/*.{sql,pks,pkb,prc,fnc,trg}",
+    "extensions": ["sql", "pks", "pkb", "prc", "fnc", "trg"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 11,
+    "type": "code_audit"
+  },
+  "categories": {
+    "lectures": {
+      "name": "SQL — lectures sobres",
+      "description": "Ne lire et ne transférer que les lignes et colonnes nécessaires (RGESN Backend, GR491_Backend_1).",
+      "rules": [
+        {
+          "id": "ECO-SQL-01",
+          "title": "SELECT * exposé",
+          "description": "Transfère toutes les colonnes, y compris celles jamais lues : réseau, mémoire et sérialisation gaspillés, et rupture au moindre changement de schéma.",
+          "impact": "Élevé",
+          "patterns": ["select\\s+\\*"],
+          "recommendation": "Lister explicitement les colonnes nécessaires au besoin.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "projection"]
+        },
+        {
+          "id": "ECO-SQL-02",
+          "title": "Pagination par OFFSET",
+          "description": "OFFSET relit et jette toutes les lignes ignorées : le coût de la page N croît avec N.",
+          "impact": "Moyen",
+          "patterns": ["\\boffset\\b"],
+          "recommendation": "Pagination par curseur/keyset : WHERE id > :dernier_id ORDER BY id LIMIT n.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "pagination"]
+        },
+        {
+          "id": "ECO-SQL-03",
+          "title": "Prédicat non sargable",
+          "description": "Une fonction appliquée à la colonne filtrée (UPPER, DATE, CAST) ou un LIKE '%…' en tête de motif interdit l'usage de l'index : parcours complet de la table.",
+          "impact": "Élevé",
+          "patterns": ["where[^;]*\\b(upper|lower|date|trunc|to_char|cast|convert)\\s*\\(", "like\\s+'%"],
+          "recommendation": "Réécrire le prédicat sur la colonne brute (plage de dates, comparaison directe) ou créer un index fonctionnel dédié.",
+          "rgesn_ref": "7.1, 9.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "index", "sargabilite"]
+        },
+        {
+          "id": "ECO-SQL-04",
+          "title": "SELECT DISTINCT masquant une jointure",
+          "description": "Un DISTINCT ajouté pour dédoublonner cache souvent une jointure incorrecte : la base trie ou hache tout le résultat pour rien.",
+          "impact": "Moyen",
+          "patterns": ["\\bselect\\s+distinct\\b"],
+          "recommendation": "Vérifier la cardinalité des jointures ; préférer EXISTS à IN (sous-requête) sur de gros volumes.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "jointure"]
+        },
+        {
+          "id": "ECO-SQL-05",
+          "title": "Index absent sur les colonnes filtrées",
+          "description": "Une clause WHERE/JOIN/ORDER BY fréquente sans index déclenche un parcours complet à chaque exécution.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Vérifier le plan d'exécution ; indexer les colonnes filtrées fréquemment, sans dupliquer d'index existant (coût à chaque écriture).",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "index"]
+        }
+      ]
+    },
+    "ecritures": {
+      "name": "SQL — écritures et traitements",
+      "description": "Traiter en ensembliste et par tranches plutôt que ligne à ligne (RGESN Backend/Architecture).",
+      "rules": [
+        {
+          "id": "ECO-SQL-06",
+          "title": "Traitement ligne à ligne (curseur / boucle)",
+          "description": "Un curseur ou une boucle exécutant un ordre par ligne multiplie les bascules de contexte et les allers-retours, là où un seul ordre ensembliste suffirait.",
+          "impact": "Élevé",
+          "patterns": ["\\bcursor\\b", "for\\s+\\w+\\s+in\\s*\\(?\\s*select", "\\bloop\\b"],
+          "recommendation": "UPDATE … WHERE, INSERT … SELECT ou MERGE en un ordre ; sinon BULK COLLECT (avec LIMIT) et FORALL en PL/SQL.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "plsql", "ensembliste"]
+        },
+        {
+          "id": "ECO-SQL-07",
+          "title": "COMMIT ligne à ligne",
+          "description": "Un COMMIT par ligne multiplie les écritures de journal ; à l'inverse une transaction géante tient verrous et undo.",
+          "impact": "Moyen",
+          "patterns": ["\\bcommit\\b"],
+          "recommendation": "COMMIT par lots dimensionnés (quelques milliers de lignes), transactions bornées.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "plsql", "transaction"]
+        },
+        {
+          "id": "ECO-SQL-08",
+          "title": "Suppression ou purge massive en un ordre",
+          "description": "Un DELETE sans WHERE ni découpage sature le journal, tient des verrous longs et peut faire échouer l'opération entière.",
+          "impact": "Moyen",
+          "patterns": ["delete\\s+from\\s+[\\w.\"]+\\s*;"],
+          "recommendation": "Purger par tranches (chunks) avec pauses ; envisager TRUNCATE ou le partitionnement quand la sémantique le permet.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "purge", "batch"]
+        },
+        {
+          "id": "ECO-SQL-09",
+          "title": "Journalisation ligne à ligne en production",
+          "description": "DBMS_OUTPUT ou un log par ligne dans une boucle de production consomme CPU et stockage pour une information jamais lue.",
+          "impact": "Faible",
+          "patterns": ["dbms_output"],
+          "recommendation": "Journaliser par lot ou à la fin du traitement ; niveaux de production sobres.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["sql", "plsql", "logs"]
+        }
+      ]
+    },
+    "cycle_de_vie": {
+      "name": "SQL — cycle de vie des données",
+      "description": "Stocker moins, et prévoir la fin de vie dès la création (RGESN 7.3, GR491_Architecture_3/5).",
+      "rules": [
+        {
+          "id": "ECO-SQL-10",
+          "title": "Types surdimensionnés par défaut",
+          "description": "VARCHAR(MAX)/CLOB « au cas où » gonflent stockage, sauvegardes et transferts sur toute la durée de vie de la table.",
+          "impact": "Faible",
+          "patterns": ["varchar\\s*\\(\\s*max", "nvarchar\\s*\\(\\s*max", "\\bclob\\b"],
+          "recommendation": "Dimensionner les types au besoin réel (pas de BIGINT si INT suffit, pas de TEXT par défaut).",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Architecture",
+          "tags": ["sql", "stockage", "schema"]
+        },
+        {
+          "id": "ECO-SQL-11",
+          "title": "Politique de rétention absente",
+          "description": "Une table sans purge ni archivage croît indéfiniment : stockage, sauvegardes et temps de requête augmentent sans fin.",
+          "impact": "Élevé",
+          "patterns": [],
+          "recommendation": "Définir dès la création la rétention et la purge ; prévoir partitionnement ou archivage pour les tables à forte croissance.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Architecture",
+          "tags": ["sql", "retention", "donnees"]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "metadata": {
+    "name": "Éco-conception Python",
+    "description": "Règles d'écoconception spécifiques au code Python : ORM sobre (Django/SQLAlchemy), générateurs, vectorisation, caches bornés, réutilisation des connexions.",
+    "version": "1.0.0",
+    "globs": "**/*.py",
+    "extensions": ["py"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 11,
+    "type": "code_audit"
+  },
+  "categories": {
+    "donnees": {
+      "name": "Python — accès aux données",
+      "description": "ORM Django / SQLAlchemy : ne transférer et ne matérialiser que le nécessaire (RGESN Backend, GR491_Backend_2/3).",
+      "rules": [
+        {
+          "id": "ECO-PY-01",
+          "title": "Requête N+1 sur un queryset parcouru",
+          "description": "Itérer un queryset dont on lit les associations déclenche une requête par ligne : le coût réseau et base croît linéairement avec le volume.",
+          "impact": "Élevé",
+          "patterns": ["for\\s+\\w+\\s+in\\s+\\w+\\.objects\\.(all|filter)\\("],
+          "recommendation": "Charger les associations parcourues avec select_related/prefetch_related (Django) ou joinedload/selectinload (SQLAlchemy).",
+          "rgesn_ref": "7.1, 9.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "orm", "n+1"]
+        },
+        {
+          "id": "ECO-PY-02",
+          "title": "Queryset non borné matérialisé",
+          "description": "`.all()` ou `list(...)` sur une table non bornée charge l'intégralité des lignes en mémoire applicative.",
+          "impact": "Élevé",
+          "patterns": ["\\.objects\\.all\\(\\)", "list\\(\\s*\\w+\\.objects\\.", "\\.query\\([^)]*\\)\\.all\\(\\)"],
+          "recommendation": "Paginer toute liste exposée ; parcourir les gros volumes en flux avec iterator() (Django) ou yield_per() (SQLAlchemy).",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "orm", "pagination"]
+        },
+        {
+          "id": "ECO-PY-03",
+          "title": "Projeter les champs nécessaires",
+          "description": "Charger des objets complets quand seules deux colonnes sont lues transfère et désérialise des données inutiles.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Utiliser only()/defer()/values()/values_list() (Django) ou load_only() (SQLAlchemy) pour ne récupérer que les colonnes utilisées.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "orm", "projection"]
+        },
+        {
+          "id": "ECO-PY-04",
+          "title": "Écritures en masse groupées",
+          "description": "Un save() par ligne dans une boucle génère un aller-retour base par enregistrement.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "bulk_create/bulk_update (Django), executemany ou insert() par lots (SQLAlchemy) ; borner la taille des lots.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "orm", "batch"]
+        }
+      ]
+    },
+    "memoire": {
+      "name": "Python — mémoire et flux",
+      "description": "Ne pas matérialiser en mémoire ce qui peut être traité en flux (RGESN Algorithmie, GR491_Backend_4).",
+      "rules": [
+        {
+          "id": "ECO-PY-05",
+          "title": "Fichier lu intégralement en mémoire",
+          "description": "read()/readlines() charge tout le fichier ; la mémoire consommée croît avec la taille du fichier, jusqu'au swap ou à l'OOM.",
+          "impact": "Moyen",
+          "patterns": ["open\\([^)]*\\)\\.read\\(\\)", "\\.readlines\\(\\)"],
+          "recommendation": "Itérer le fichier ligne à ligne, ou lire par blocs (read(taille), iter_content) pour les gros volumes.",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["python", "memoire", "flux"]
+        },
+        {
+          "id": "ECO-PY-06",
+          "title": "pandas : boucle ligne à ligne au lieu de vectoriser",
+          "description": "iterrows() et apply(axis=1) exécutent du Python par ligne : un à deux ordres de grandeur plus coûteux que l'opération vectorisée équivalente.",
+          "impact": "Élevé",
+          "patterns": ["\\.iterrows\\(\\)", "axis\\s*=\\s*1"],
+          "recommendation": "Vectoriser avec les opérations numpy/pandas ; réduire la mémoire avec des dtypes adaptés (category, entiers courts).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "pandas", "vectorisation"]
+        },
+        {
+          "id": "ECO-PY-07",
+          "title": "Concaténation de chaînes en boucle",
+          "description": "`s += ...` recrée la chaîne entière à chaque tour (comportement quadratique sur les grandes séquences).",
+          "impact": "Faible",
+          "patterns": ["\\+=\\s*[\"'f]"],
+          "recommendation": "Accumuler dans une liste puis ''.join(...), ou écrire directement dans un flux.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "cpu", "chaines"]
+        },
+        {
+          "id": "ECO-PY-08",
+          "title": "Recherche d'appartenance sur une grande liste",
+          "description": "`x in liste` est linéaire ; répété dans une boucle, le traitement devient quadratique.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "Indexer dans un set ou un dict avant la boucle (recherche en temps constant).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["python", "cpu", "algorithmie"]
+        }
+      ]
+    },
+    "io": {
+      "name": "Python — I/O, réseau et cache",
+      "description": "Réutiliser les connexions, borner les caches, ne pas scruter en boucle (RGESN Backend/Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-PY-09",
+          "title": "Cache non borné",
+          "description": "Un lru_cache sans maxsize ou un dict global de cache grossit sans limite : mémoire retenue pour des entrées jamais réutilisées.",
+          "impact": "Moyen",
+          "patterns": ["lru_cache\\(\\s*\\)", "@lru_cache\\s*$", "@cache\\s*$"],
+          "recommendation": "Borner et faire expirer tout cache : lru_cache(maxsize=N), TTL côté Redis/Memcached.",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Backend",
+          "tags": ["python", "cache", "memoire"]
+        },
+        {
+          "id": "ECO-PY-10",
+          "title": "Connexions HTTP non réutilisées",
+          "description": "requests.get() ouvre une connexion (et une poignée de main TLS) par appel : coût réseau et CPU répété inutilement.",
+          "impact": "Moyen",
+          "patterns": ["requests\\.(get|post|put|patch|delete)\\("],
+          "recommendation": "Réutiliser une requests.Session (ou un client httpx partagé) ; async pour les I/O concurrentes.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["python", "reseau", "connexions"]
+        },
+        {
+          "id": "ECO-PY-11",
+          "title": "Scrutation en boucle (polling)",
+          "description": "Une boucle sleep + requête consomme CPU, réseau et énergie en continu, même quand rien ne change.",
+          "impact": "Moyen",
+          "patterns": ["time\\.sleep\\("],
+          "recommendation": "Préférer un déclenchement événementiel (webhook, message, notification) ; sinon espacer nettement les intervalles.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["python", "polling", "reseau"]
+        }
+      ]
+    }
+  }
+}

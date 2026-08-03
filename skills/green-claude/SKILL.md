@@ -15,8 +15,9 @@ user-invocable: true
 
 # Green Claude
 
-Deux jeux de règles : `rules/ecoconception.json` (52 règles, RGESN 2024 / GR491 /
-Green Software Foundation) pendant que tu écris ou modifies du code, et
+Trois jeux de règles : `rules/ecoconception.json` (52 règles, RGESN 2024 / GR491 /
+Green Software Foundation) pendant que tu écris ou modifies du code,
+`rules/langages/*.json` (80 règles) pour le langage sur lequel tu travailles, et
 `rules/boris.json` (14 pratiques d'usage) pendant la conversation elle-même. Un
 usage efficace de Claude Code est aussi un usage sobre.
 
@@ -60,6 +61,18 @@ résultat tel quel.
 Les règles sans pattern détectable (« mesurer avant d'optimiser », « critères
 environnementaux dans les user stories »...) sont des règles de démarche,
 listées via `<chemin-du-skill>/scripts/eco-audit.sh --list-rules` plutôt que cherchées par grep.
+
+## Règles propres à un langage
+
+`rules/langages/` contient un fichier par langage (Python, JS/TS, SQL, Java, C#,
+PHP, Ruby, Rust, C, C++) : les idiomes que les règles transverses ne peuvent pas
+nommer, comme le N+1 d'un ORM, la pagination par curseur, `parallelStream()` ou
+`clone()` de confort. Ne consulte que le fichier du langage sur lequel tu
+travailles, jamais les dix : l'audit fait déjà cette sélection à partir de
+l'extension du fichier, et n'applique jamais un motif Python à du Java.
+
+`eco-audit.sh --list-langs` liste les langages couverts, `--list-rules <langage>`
+sort la checklist complète d'un langage.
 
 ## Mode browse (`/green-claude`)
 

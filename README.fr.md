@@ -124,6 +124,34 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 ---
 
+## Les règles par langage : 80 règles chargées à la demande
+
+Les 52 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
+
+[`skills/green-claude/rules/langages/`](skills/green-claude/rules/langages/) descend d'un cran, avec un fichier par langage appliqué **uniquement aux fichiers de ce langage** :
+
+| Fichier | Fichiers concernés | Règles | Ce qu'il attrape en propre |
+|---|---|---|---|
+| `python.json` | `**/*.py` | 11 | N+1 Django/SQLAlchemy, `iterrows()`, `lru_cache()` non borné, `requests.get` sans session |
+| `sql.json` | `**/*.{sql,pks,pkb,prc,fnc,trg}` | 11 | `SELECT *`, pagination `OFFSET`, prédicats non sargables, curseurs PL/SQL, rétention |
+| `javascript.json` | `**/*.{js,jsx,ts,tsx,mjs,cjs}` | 9 | `import * as`, `fs.*Sync`, `setInterval`, listeners jamais détachés |
+| `java.json` | `**/*.java` | 8 | `findAll()`, N+1 JPA, `parallelStream()`, cache statique non borné |
+| `csharp.json` | `**/*.cs` | 8 | `ToList()` prématuré, `.Result`, `new HttpClient()` par requête |
+| `php.json` | `**/*.php` | 7 | `->get()` non borné, N+1 Eloquent/Doctrine, `file_get_contents`, cache sans purge |
+| `ruby.json` | `**/*.rb` | 7 | `.all.each`, `map(&:col)`, `count > 0`, cache sans `expires_in` |
+| `rust.json` | `**/*.rs` | 7 | `clone()` de confort, `collect()` intermédiaire, blocage d'exécuteur async |
+| `c.json` | `**/*.{c,h}` | 6 | `strlen()` en condition de boucle, `strcat()` répété, I/O octet par octet, attente active |
+| `cpp.json` | `**/*.{cpp,cc,cxx,hpp,hh}` | 6 | Passage par valeur, `std::find` linéaire, `shared_ptr` par défaut |
+
+Sans ce filtrage par extension, les motifs d'un langage se déclenchent à tort sur les autres : `.all()`, `save()` et `+=` existent partout et n'y désignent pas le même problème. L'audit ne charge que le fichier des langages réellement présents parmi ses arguments.
+
+```bash
+eco-audit.sh --list-langs           # langages couverts et globs associés
+eco-audit.sh --list-rules python    # checklist complète d'un langage
+```
+
+---
+
 ## Les pratiques Boris : utiliser Claude sobrement et avec bon sens
 
 Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête consomme de l'énergie. [Boris Cherny](https://howborisusesclaudecode.com/), créateur de Claude Code, documente des pratiques d'usage efficace. Un usage efficace est aussi un usage sobre : chaque aller-retour évité économise des tokens, chaque contexte allégé aussi.

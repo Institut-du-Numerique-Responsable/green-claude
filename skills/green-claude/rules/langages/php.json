@@ -1,0 +1,112 @@
+{
+  "metadata": {
+    "name": "Éco-conception PHP",
+    "description": "Règles d'écoconception pour le code PHP : ORM sobre (Doctrine/Eloquent/PDO), générateurs, flux, OPcache, connexions réutilisées.",
+    "version": "1.0.0",
+    "globs": "**/*.php",
+    "extensions": ["php"],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 7,
+    "type": "code_audit"
+  },
+  "categories": {
+    "donnees": {
+      "name": "PHP — accès aux données",
+      "description": "Doctrine / Eloquent / PDO : ne charger que ce qui est lu (RGESN Backend, GR491_Backend_2/3).",
+      "rules": [
+        {
+          "id": "ECO-PHP-01",
+          "title": "Collection non bornée chargée",
+          "description": "->get()/findAll() sur une table non bornée hydrate toutes les lignes en objets : mémoire et CPU proportionnels au volume.",
+          "impact": "Élevé",
+          "patterns": ["->get\\(\\)", "->findAll\\(\\)"],
+          "recommendation": "Paginer toute liste exposée ; parcourir les gros volumes par lots avec chunk()/cursor() (Eloquent) ou toIterable() (Doctrine).",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["php", "orm", "pagination"]
+        },
+        {
+          "id": "ECO-PHP-02",
+          "title": "Association parcourue en boucle (N+1)",
+          "description": "Lire une association dans un foreach déclenche une requête par élément.",
+          "impact": "Élevé",
+          "patterns": ["foreach\\s*\\(\\s*\\$\\w+->"],
+          "recommendation": "Eager loading : with() (Eloquent) ou fetch join / jointure DQL (Doctrine) ; projeter les colonnes utiles plutôt que des entités complètes.",
+          "rgesn_ref": "7.1, 9.1",
+          "gr491_famille": "Backend",
+          "tags": ["php", "orm", "n+1"]
+        },
+        {
+          "id": "ECO-PHP-03",
+          "title": "Écritures ligne à ligne",
+          "description": "save() dans une boucle génère un aller-retour base par enregistrement.",
+          "impact": "Moyen",
+          "patterns": [],
+          "recommendation": "insert() multi-lignes, upsert() ou lots ; exists() plutôt que count() > 0.",
+          "rgesn_ref": "7.1",
+          "gr491_famille": "Backend",
+          "tags": ["php", "orm", "batch"]
+        }
+      ]
+    },
+    "memoire": {
+      "name": "PHP — mémoire et flux",
+      "description": "Traiter en flux plutôt que de tout matérialiser (RGESN Algorithmie).",
+      "rules": [
+        {
+          "id": "ECO-PHP-04",
+          "title": "Fichier chargé entièrement en mémoire",
+          "description": "file_get_contents/file() sur un gros fichier consomme une mémoire proportionnelle à sa taille.",
+          "impact": "Moyen",
+          "patterns": ["file_get_contents\\(", "\\bfile\\s*\\("],
+          "recommendation": "Lire en flux (fopen + lecture par blocs), fputcsv/streams pour les exports ; générateurs (yield) pour produire de grandes séquences.",
+          "rgesn_ref": "9.2",
+          "gr491_famille": "Backend",
+          "tags": ["php", "flux", "memoire"]
+        },
+        {
+          "id": "ECO-PHP-05",
+          "title": "Recherche linéaire dans un grand tableau",
+          "description": "in_array/array_search parcourt tout le tableau ; répété en boucle, le traitement devient quadratique.",
+          "impact": "Moyen",
+          "patterns": ["in_array\\(", "array_search\\("],
+          "recommendation": "Indexer par clés et tester avec isset($index[$k]) (temps constant).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": ["php", "algorithmie"]
+        }
+      ]
+    },
+    "infra": {
+      "name": "PHP — exécution et infrastructure",
+      "description": "Réutiliser les connexions, borner les caches, alléger le graphe de dépendances (RGESN Hébergement).",
+      "rules": [
+        {
+          "id": "ECO-PHP-06",
+          "title": "Connexion HTTP par appel",
+          "description": "curl_init() par requête refait résolution DNS et poignée de main TLS à chaque appel.",
+          "impact": "Moyen",
+          "patterns": ["curl_init\\("],
+          "recommendation": "Client HTTP partagé et injecté (Guzzle), connexions PDO persistantes ou pool selon la plateforme.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Backend",
+          "tags": ["php", "reseau", "connexions"]
+        },
+        {
+          "id": "ECO-PHP-07",
+          "title": "Cache fichier sans purge",
+          "description": "Un cache écrit sur disque sans expiration ni purge croît indéfiniment : stockage et sauvegardes gonflés pour des entrées mortes.",
+          "impact": "Moyen",
+          "patterns": ["file_put_contents\\([^)]*cache"],
+          "recommendation": "Cache borné et expirant (APCu, Redis avec TTL) ; OPcache activé en production, autoload optimisé (composer dump-autoload -o).",
+          "rgesn_ref": "7.3",
+          "gr491_famille": "Hébergement",
+          "tags": ["php", "cache", "stockage"]
+        }
+      ]
+    }
+  }
+}
