@@ -455,4 +455,31 @@ OUT="$(bash eco-audit.sh "$TMP/vue-francaise.js")"
 echo "$OUT" | grep -q 'ECO-ARCH-01' && fail "faux positif : framework signalé sans import ni dépendance"
 true
 
-echo "OK - 29 verifications passees"
+# 30. Périmètre des détecteurs : les awk sont écrits pour un langage donné et
+# ne doivent pas parler des autres. Sur un script shell, `esac` ressemble à du
+# code mort et `VAR=` à une variable globale implicite.
+cat > "$TMP/script.sh" <<'EOF'
+#!/bin/bash
+SCRIPT_DIR="$(dirname "$0")"
+case "$1" in
+    a) echo un ;;
+esac
+EOF
+OUT="$(bash eco-audit.sh "$TMP/script.sh")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : détecteur de code mort JS lancé sur du shell"
+echo "$OUT" | grep -q 'ECO-FRONT-06' && fail "faux positif : détecteur de globales JS lancé sur du shell"
+true
+
+# Et le détecteur reste actif là où il a un sens.
+cat > "$TMP/reel.js" <<'EOF'
+var fuite = 1;
+function f() {
+  return 1;
+  console.log("mort");
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/reel.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort JS non détecté après ajout du périmètre"
+echo "$OUT" | grep -q 'ECO-FRONT-06' || fail "globale implicite JS non détectée après ajout du périmètre"
+
+echo "OK - 30 verifications passees"

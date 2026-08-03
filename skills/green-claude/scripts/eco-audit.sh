@@ -220,7 +220,11 @@ while IFS= read -r rule_json; do
     rgesn_ref=$(jq -r '.rgesn_ref' <<<"$rule_json")
     note=$(jq -r '.note // .detector_note // .enrich_note // ""' <<<"$rule_json")
 
-    exts=$(jq -r '(.exts // []) | join(" ")' <<<"$rule_json")
+    # `exts` vient des règles de langage (rules/langages/), `extensions` du
+    # périmètre déclaré par une règle transverse — un détecteur écrit pour du
+    # JavaScript n'a rien à dire sur un script shell, où `esac` ressemble à du
+    # code mort et `VAR=` à une globale implicite.
+    exts=$(jq -r '((.exts // []) + (.extensions // [])) | join(" ")' <<<"$rule_json")
 
     for file in "$@"; do
         [ -f "$file" ] || continue
