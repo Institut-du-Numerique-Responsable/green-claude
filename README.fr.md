@@ -151,12 +151,13 @@ Détail complet : [`skills/green-claude/rules/boris.json`](skills/green-claude/r
 
 ## Ce qu'un skill ne peut pas faire (et comment on le couvre quand même)
 
-Un skill s'exécute *pendant* une session déjà lancée. Il ne peut donc pas décider avec quel modèle démarrer, ni empêcher un appel au modèle avant qu'il n'ait lieu. Deux leviers restent donc hors du skill, dans [`hooks/`](hooks/), optionnels et proposés à l'installation :
+Un skill s'exécute *pendant* une session déjà lancée, et c'est le modèle qui décide de l'appliquer. Il ne choisit donc pas le modèle de démarrage, n'intercepte pas un appel avant qu'il parte, et ne garantit pas qu'une règle soit vérifiée à tous les coups. Trois leviers restent hors du skill, dans [`hooks/`](hooks/), optionnels et proposés à l'installation :
 
+- **Audit systématique** (`hooks/green-claude-audit.sh`) : câblé en `PostToolUse` sur `Write|Edit|MultiEdit`. Claude Code l'exécute après chaque écriture de fichier de code, sans demander son avis au modèle. Le hook audite ce qui vient d'être ajouté et renvoie les motifs trouvés à Claude, qui corrige avant de continuer.
 - **Cache local** (`hooks/green-claude-cache.sh`) : une question déjà posée est resservie sans réappeler le modèle, zéro token consommé.
 - **Avertissement heures creuses** (même hook) : signale les heures de pointe (hors 22h-6h UTC) sans bloquer.
 
-Ces hooks se câblent dans `~/.claude/settings.json`. Si on réponds « o », `install.sh` les y ajoute (les autres réglages sont préservés et une sauvegarde du fichier d'origine est laissée en `settings.json.green-claude.bak`). Sans `jq` il affiche la config à coller à la main. Pour les retirer : supprimer les deux entrées `green-claude-*` du fichier.
+Ces hooks se câblent dans `~/.claude/settings.json`. Si on répond « o », `install.sh` les y ajoute (les autres réglages sont préservés et une sauvegarde du fichier d'origine est laissée en `settings.json.green-claude.bak`). Sans `jq` il affiche la config à coller à la main. Pour les retirer : supprimer les entrées `green-claude-*` du fichier.
 
 ---
 

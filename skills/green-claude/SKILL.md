@@ -75,6 +75,15 @@ détecteur pour cette règle (faux positif connu, seuil, portée...) — c'est
 l'information à jour, plutôt qu'une liste séparée ici qui se périmerait à
 chaque nouvelle règle.
 
+## Garantie d'application
+
+Charger ce skill reste une décision du modèle : ça arrive souvent, pas à tous les
+coups. Pour une vérification qui ne dépende de personne, le dépôt fournit
+`hooks/green-claude-audit.sh`, câblé en `PostToolUse` sur `Write|Edit|MultiEdit`.
+Claude Code l'exécute après chaque écriture de fichier de code et te renvoie les
+motifs trouvés. N'audite que le contenu ajouté par l'écriture, et reste muet
+quand il ne trouve rien.
+
 ## Ce que ce skill ne fait PAS
 
 Le cache de réponses « zéro token » ne peut pas être géré par un skill : il doit
