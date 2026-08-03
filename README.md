@@ -102,6 +102,33 @@ In practice, you don't need to run the audit yourself on code like this: in proa
 
 ---
 
+## Installing natively in Claude
+
+Three channels, three formats. Claude Code needs nothing more than the repository:
+
+```bash
+/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
+/plugin install green-claude
+```
+
+The other two want a zip archive, which `package-skill.sh` builds:
+
+```bash
+bash skills/green-claude/scripts/package-skill.sh    # writes into dist/
+```
+
+| Channel | Archive | How to install |
+|---|---|---|
+| Claude Code | none | `/plugin marketplace add …` above, or `npx skills add Institut-du-Numerique-Responsable/green-claude` |
+| Claude.ai | `dist/green-claude-claude-ai.zip` | Settings → Capabilities → Skills → Upload skill (code execution must be enabled) |
+| Claude API | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-claude"))` |
+
+The two archives hold the same skill and differ only by the description: Claude.ai caps it at 200 characters where the API allows 1024. The repository keeps the long one, which is what makes Claude Code load the skill at the right moment; the packaging script substitutes a short version rather than truncating mid-sentence, since a sentence cut in half triggers badly.
+
+The audit script needs `bash` and `jq`. Where `jq` is missing, the rules still apply while Claude writes code — only `eco-audit.sh` stops working.
+
+---
+
 ## The rules: 52 rules aligned with the 9 RGESN 2024 families
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) covers all **9 families** of [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 official criteria). Each rule references the matching RGESN criterion (`rgesn_ref`) and [GR491](https://gr491.isit-europe.org/) family (`gr491_famille`):

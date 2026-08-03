@@ -482,4 +482,25 @@ OUT="$(bash eco-audit.sh "$TMP/reel.js")"
 echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort JS non détecté après ajout du périmètre"
 echo "$OUT" | grep -q 'ECO-FRONT-06' || fail "globale implicite JS non détectée après ajout du périmètre"
 
-echo "OK - 30 verifications passees"
+# 31. Empaquetage : les deux canaux qui attendent un zip (API Skills, upload
+# Claude.ai) exigent un dossier unique à la racine, nommé comme le skill, et
+# une description sous leur limite respective — 1024 et 200 caractères.
+if command -v zip >/dev/null 2>&1; then
+    DIST="$TMP/dist"
+    bash package-skill.sh "$DIST" >/dev/null 2>&1 || fail "package-skill.sh a échoué"
+    [ -f "$DIST/green-claude-api.zip" ] || fail "archive API absente"
+    [ -f "$DIST/green-claude-claude-ai.zip" ] || fail "archive Claude.ai absente"
+
+    RACINES=$(unzip -l "$DIST/green-claude-api.zip" | awk 'NR>3 && $4 != "" {split($4,a,"/"); print a[1]}' | sort -u | grep -v '^-' || true)
+    [ "$RACINES" = "green-claude" ] || fail "l'archive doit contenir un seul dossier racine nommé green-claude (trouvé : $RACINES)"
+
+    DESC=$(unzip -p "$DIST/green-claude-claude-ai.zip" green-claude/SKILL.md | awk -F'description: ' '/^description: /{print $2}')
+    N=$(printf '%s' "$DESC" | wc -c | tr -d ' ')
+    [ "$N" -le 200 ] || fail "description de la variante Claude.ai : $N caractères, limite 200"
+    [ "$N" -gt 0 ] || fail "description absente de la variante Claude.ai"
+
+    unzip -p "$DIST/green-claude-api.zip" green-claude/rules/langages/python.json >/dev/null 2>&1 \
+        || fail "les règles par langage manquent dans l'archive"
+fi
+
+echo "OK - 31 verifications passees"
