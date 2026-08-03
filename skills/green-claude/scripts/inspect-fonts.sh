@@ -102,7 +102,17 @@ $pending_family"
             pending_family=""
         fi
     fi
-done < "$FILE"
+# Le parcours est ligne à ligne, et l'entrée dans un @font-face consomme le
+# reste de sa ligne. Un bloc écrit d'un seul tenant — `@font-face { font-family:
+# "A"; src: url("a.woff2"); }`, ce que produit tout minifieur CSS — passait donc
+# entièrement inaperçu. On découpe d'abord sur les accolades et les
+# points-virgules pour retomber sur la forme multi-lignes que la boucle sait
+# lire, sans rien changer à sa logique.
+done < <(sed -e 's/{/{\
+/g' -e 's/;/;\
+/g' -e 's/}/\
+}\
+/g' "$FILE")
 
 nb_familles=$(printf '%s\n' "$families" | sort -u | grep -c . || true)
 nb_autres=$(printf '%s\n' "$families_autres" | sort -u | grep -c . || true)
