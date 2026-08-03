@@ -419,6 +419,15 @@
             "css",
             "animation",
             "accessibilite"
+          ],
+          "extensions": [
+            "css",
+            "scss",
+            "sass",
+            "html",
+            "htm",
+            "vue",
+            "svelte"
           ]
         }
       ]
@@ -550,6 +559,29 @@
             "code-mort",
             "javascript",
             "maintenance"
+          ],
+          "extensions": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx",
+            "mjs",
+            "cjs",
+            "java",
+            "cs",
+            "php",
+            "go",
+            "rs",
+            "swift",
+            "kt",
+            "scala",
+            "c",
+            "h",
+            "cpp",
+            "cc",
+            "cxx",
+            "hpp",
+            "hh"
           ]
         },
         {
@@ -567,6 +599,18 @@
             "javascript",
             "portee",
             "maintenance"
+          ],
+          "extensions": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx",
+            "mjs",
+            "cjs",
+            "vue",
+            "svelte",
+            "html",
+            "htm"
           ]
         },
         {
@@ -602,6 +646,12 @@
             "dom",
             "html",
             "complexite"
+          ],
+          "extensions": [
+            "html",
+            "htm",
+            "vue",
+            "svelte"
           ]
         },
         {
@@ -619,6 +669,12 @@
             "dom",
             "html",
             "accessibilite"
+          ],
+          "extensions": [
+            "html",
+            "htm",
+            "vue",
+            "svelte"
           ]
         },
         {
@@ -636,6 +692,15 @@
             "css",
             "specificite",
             "maintenance"
+          ],
+          "extensions": [
+            "css",
+            "scss",
+            "sass",
+            "vue",
+            "svelte",
+            "html",
+            "htm"
           ]
         },
         {
@@ -654,6 +719,11 @@
             "css",
             "code-mort",
             "maintenance"
+          ],
+          "extensions": [
+            "css",
+            "scss",
+            "sass"
           ]
         },
         {
@@ -691,6 +761,12 @@
             "javascript",
             "chargement",
             "performance"
+          ],
+          "extensions": [
+            "html",
+            "htm",
+            "vue",
+            "svelte"
           ]
         }
       ]
@@ -752,6 +828,31 @@
             "algorithmes",
             "complexite",
             "cpu"
+          ],
+          "extensions": [
+            "js",
+            "jsx",
+            "ts",
+            "tsx",
+            "mjs",
+            "cjs",
+            "py",
+            "java",
+            "cs",
+            "php",
+            "rb",
+            "go",
+            "rs",
+            "kt",
+            "swift",
+            "scala",
+            "c",
+            "h",
+            "cpp",
+            "cc",
+            "cxx",
+            "hpp",
+            "hh"
           ]
         },
         {
@@ -835,6 +936,22 @@
             "https",
             "tls",
             "securite"
+          ],
+          "extensions": [
+            "html",
+            "htm",
+            "vue",
+            "svelte",
+            "css",
+            "scss",
+            "sass",
+            "js",
+            "jsx",
+            "ts",
+            "tsx",
+            "mjs",
+            "cjs",
+            "md"
           ]
         },
         {
@@ -877,6 +994,15 @@
             "liens",
             "404",
             "maintenance"
+          ],
+          "extensions": [
+            "html",
+            "htm",
+            "vue",
+            "svelte",
+            "css",
+            "scss",
+            "sass"
           ]
         }
       ]
