@@ -76,15 +76,21 @@ strip_markup_text() {
             line = substr(line, 1, RSTART - 1) " " substr(line, RSTART + RLENGTH)
         }
         if (match(line, /<!--/)) { line = substr(line, 1, RSTART - 1); incomment = 1 }
+        # Une balise par ligne. Les exclusions de motif (exclude_patterns)
+        # portent sur la ligne, donc deux balises voisines se couvraient
+        # mutuellement : <img src="photo.jpg"><img src="ok.webp"> faisait taire
+        # la regle sur le JPG parce que le WebP occupait la meme ligne, alors
+        # que ce sont deux images distinctes dont une seule pose probleme.
+        # (Sans apostrophe ni accent : ce bloc awk vit entre quotes simples.)
         out = ""
         n = length(line)
         for (i = 1; i <= n; i++) {
             c = substr(line, i, 1)
             if (c == "<") intag = 1
             if (intag) out = out c
-            if (c == ">") { intag = 0; out = out " " }
+            if (c == ">") { intag = 0; print out; out = "" }
         }
-        print out
+        if (out != "") print out
     }' "$1"
 }
 

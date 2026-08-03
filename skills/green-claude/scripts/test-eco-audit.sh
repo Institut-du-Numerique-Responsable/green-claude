@@ -661,4 +661,45 @@ true
 MANQUANTES=$(jq -s -r '[.[].categories[].rules[] | select(.exclude_file_patterns) | select((.note // "") == "") | .id] | join(", ")' ../rules/langages/*.json)
 [ -z "$MANQUANTES" ] || fail "règles avec exclude_file_patterns sans note : $MANQUANTES"
 
+# Exclusions par balise : elles portent sur la ligne, or deux balises voisines
+# partagent souvent la leur. Une image déjà optimisée ne doit pas couvrir celle
+# qui ne l'est pas, même collée à elle dans le source.
+cat > "$TMP/voisines.html" <<'EOF'
+<img src="photo.jpg"><img src="ok.webp">
+EOF
+OUT="$(bash eco-audit.sh "$TMP/voisines.html")"
+echo "$OUT" | grep -q 'ECO-CONT-01' || fail "image non optimisée masquée par une image WebP voisine sur la même ligne"
+
+# L'inverse tient toujours : une balise réellement conforme reste silencieuse.
+cat > "$TMP/conforme.html" <<'EOF'
+<img src="ok.webp" srcset="ok.webp 1x" loading="lazy">
+EOF
+OUT="$(bash eco-audit.sh "$TMP/conforme.html")"
+echo "$OUT" | grep -q 'ECO-CONT-01' && fail "faux positif : image déjà servie en WebP avec srcset"
+true
+
+# @font-face écrit d'un seul tenant, ce que produit tout minifieur CSS : le
+# parcours ligne à ligne consommait le reste de la ligne en entrant dans le
+# bloc, et le fichier entier passait inaperçu.
+python3 -c "
+import os
+for n in 'abc': open(os.path.join('$TMP', n + '.woff2'), 'wb').write(b'\\0' * 20000)
+"
+cat > "$TMP/minifie.css" <<'EOF'
+@font-face { font-family: "A"; src: url("a.woff2"); }
+@font-face { font-family: "B"; src: url("b.woff2"); }
+@font-face { font-family: "C"; src: url("c.woff2"); }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/minifie.css")"
+echo "$OUT" | grep -q 'ECO-UX-05' || fail "trois familles sur une seule ligne : dépassement de seuil non détecté"
+
+# Et sous le seuil, toujours rien à dire, quel que soit le formatage.
+cat > "$TMP/deux-familles.css" <<'EOF'
+@font-face { font-family: "A"; src: url("a.woff2"); }
+@font-face { font-family: "B"; src: url("b.woff2"); }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/deux-familles.css")"
+echo "$OUT" | grep -q 'ECO-UX-05' && fail "faux positif : deux familles restent sous le seuil RGESN 4.8"
+true
+
 echo "OK - suite complete"
