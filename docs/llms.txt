@@ -1,0 +1,18 @@
+# green-claude — Skill de sobriete numerique pour Claude Code
+
+> Skill open source pour Claude Code : fait ecrire du code eco-concu selon le RGESN 2024, le GR491 et d'autres referentiels reconnus, avec un audit deterministe (eco-audit.sh) et des pratiques de sobriete d'usage de l'assistant lui-meme.
+
+## Docs
+
+- [Site du projet](https://institut-du-numerique-responsable.github.io/green-claude/)
+- [Code source et README](https://github.com/Institut-du-Numerique-Responsable/green-claude)
+- [Projet frere, 11 assistants](https://github.com/Institut-du-Numerique-Responsable/skill-nr)
+
+## Qui publie
+
+Publie par l'**Institut du Numerique Responsable** (INR), association loi 1901
+creee en 2018 : https://institutnr.org — voir aussi ISIT Belgique
+(https://isit-be.org) et ISIT Suisse (https://isit-ch.org).
+
+Citation : voir CITATION.cff a la racine du depot.
+Contributeurs : voir la page "Contributors" du depot GitHub.
