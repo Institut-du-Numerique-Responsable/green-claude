@@ -1,0 +1,42 @@
+# Métadonnées de citation lisibles par les humains, les moteurs et les assistants IA.
+# Format Citation File Format 1.2.0 — https://citation-file-format.github.io
+cff-version: 1.2.0
+message: "Si vous utilisez ce travail, merci de le citer comme ci-dessous."
+type: software
+title: "green-claude — Skill d'écoconception et de sobriété numérique pour Claude Code"
+abstract: "Skill éco-responsable pour Claude Code : sobriété numérique, audit d'éco-conception (RGESN, GR491, Green Software Foundation) et pratiques de sobriété IA"
+authors:
+  - name: "Institut du Numérique Responsable"
+    alias: "INR"
+    website: "https://institutnr.org"
+  - given-names: "Guillaume"
+    family-names: "Gallon"
+    alias: "gridboy"
+    affiliation: "Institut du Numérique Responsable"
+  - given-names: "Robin"
+    family-names: "Trassard"
+    alias: "robintra"
+    # 3 contribution(s)
+repository-code: "https://github.com/Institut-du-Numerique-Responsable/green-claude"
+url: "https://institut-du-numerique-responsable.github.io/green-claude/"
+license: MIT
+date-released: 2026-07-18
+keywords:
+  - "ai"
+  - "carbon-footprint"
+  - "claude"
+  - "claude-code"
+  - "claude-code-plugin"
+  - "eco-conception"
+  - "eco-design"
+  - "frugal-ai"
+  - "gr491"
+  - "green-coding"
+  - "green-it"
+  - "green-software"
+  - "numerique-responsable"
+  - "rgesn"
+  - "sobriete-numerique"
+  - "sustainability"
+  - "sustainable-software"
+  - "web-sustainability"
