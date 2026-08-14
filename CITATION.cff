@@ -10,15 +10,15 @@ authors:
     family-names: "Gallon"
     alias: "gridboy"
     affiliation: "Institut du Numérique Responsable"
+  - given-names: "Robin"
+    family-names: "Trassard"
+    alias: "robintra"
+    # 3 contribution(s)
 contact:
   - given-names: "Guillaume"
     family-names: "Gallon"
     alias: "gridboy"
     affiliation: "Institut du Numérique Responsable"
-  - given-names: "Robin"
-    family-names: "Trassard"
-    alias: "robintra"
-    # 3 contribution(s)
 repository-code: "https://github.com/Institut-du-Numerique-Responsable/green-claude"
 publisher:
   name: "Institut du Numérique Responsable"
