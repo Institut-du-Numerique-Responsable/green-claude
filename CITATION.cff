@@ -6,9 +6,11 @@ type: software
 title: "green-claude — Skill d'écoconception et de sobriété numérique pour Claude Code"
 abstract: "Skill éco-responsable pour Claude Code : sobriété numérique, audit d'éco-conception (RGESN, GR491, Green Software Foundation) et pratiques de sobriété IA"
 authors:
-  - name: "Institut du Numérique Responsable"
-    alias: "INR"
-    website: "https://institutnr.org"
+  - given-names: "Guillaume"
+    family-names: "Gallon"
+    alias: "gridboy"
+    affiliation: "Institut du Numérique Responsable"
+contact:
   - given-names: "Guillaume"
     family-names: "Gallon"
     alias: "gridboy"
@@ -18,6 +20,10 @@ authors:
     alias: "robintra"
     # 3 contribution(s)
 repository-code: "https://github.com/Institut-du-Numerique-Responsable/green-claude"
+publisher:
+  name: "Institut du Numérique Responsable"
+  alias: "INR"
+  website: "https://institutnr.org"
 url: "https://institut-du-numerique-responsable.github.io/green-claude/"
 license: MIT
 date-released: 2026-07-18
