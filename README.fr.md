@@ -267,6 +267,11 @@ Les contributions les plus utiles : nouvelles règles d'audit sourcées (RGESN, 
 
 Détail complet du format des règles et du processus de PR : [CONTRIBUTING.md](CONTRIBUTING.md).
 
+La participation suit le [code de conduite](CODE_OF_CONDUCT.md) et la
+[gouvernance](GOVERNANCE.md) du projet. Consultez [SUPPORT.md](SUPPORT.md) pour
+choisir le bon canal et [SECURITY.md](SECURITY.md) pour signaler une
+vulnérabilité en privé.
+
 ---
 
 ## Releases

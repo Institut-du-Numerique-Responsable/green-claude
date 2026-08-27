@@ -2,6 +2,11 @@
 
 Merci de l'intérêt porté à ce projet. Les contributions les plus utiles sont les nouvelles règles d'audit sourcées, les corrections de faux positifs et les traductions.
 
+En participant, vous acceptez le [code de conduite](CODE_OF_CONDUCT.md) et la
+[gouvernance](GOVERNANCE.md). Les questions d'utilisation suivent
+[SUPPORT.md](SUPPORT.md) et les vulnérabilités doivent être signalées en privé
+selon [SECURITY.md](SECURITY.md).
+
 ## Avant de commencer
 
 1. Forkez ce dépôt.

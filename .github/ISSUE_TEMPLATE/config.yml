@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question / Support
+    url: https://github.com/Institut-du-Numerique-Responsable/green-claude/discussions
+    about: Poser une question d'utilisation sans ouvrir un rapport de bug.
+  - name: Vulnérabilité / Security vulnerability
+    url: https://github.com/Institut-du-Numerique-Responsable/green-claude/security/advisories/new
+    about: Signaler une vulnérabilité en privé, jamais dans une issue publique.
