@@ -54,4 +54,3 @@ Completion requires fresh evidence from:
 - package generation and archive inspection;
 - clean Git status after commit;
 - remote confirmation that `v1.4.0` and its GitHub release exist with both assets.
-

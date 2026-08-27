@@ -250,4 +250,3 @@ Expected: the tag targets the verified main commit and triggers the release work
 - [ ] **Step 5: Verify the published release**
 
 Use GitHub CLI to wait for the triggered workflow, confirm success, and inspect `gh release view v1.4.0 --json tagName,isDraft,isPrerelease,assets,url`. Expected: published, non-draft, non-prerelease, with exactly the two named zip assets.
-

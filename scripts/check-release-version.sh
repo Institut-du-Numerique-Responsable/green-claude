@@ -13,7 +13,7 @@ error() {
     ERRORS=$((ERRORS + 1))
 }
 
-if [ -z "$REQUESTED" ] || ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+if [ -z "$REQUESTED" ] || ! printf '%s' "$VERSION" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'; then
     echo "ERREUR - format SemVer invalide : ${REQUESTED:-<vide>} (attendu : vMAJOR.MINOR.PATCH ou MAJOR.MINOR.PATCH)" >&2
     exit 1
 fi
@@ -38,7 +38,8 @@ SKILL_VERSION="$(awk '
     || error ".claude-plugin/plugin.json déclare ${PLUGIN_VERSION:-<aucune version>}, attendu $VERSION"
 [ "$SKILL_VERSION" = "$VERSION" ] \
     || error "SKILL.md déclare ${SKILL_VERSION:-<aucune version>}, attendu $VERSION"
-grep -Fq "## [$VERSION]" "$ROOT_DIR/CHANGELOG.md" 2>/dev/null \
+ESCAPED_VERSION="${VERSION//./\.}"
+grep -Eq "^## \\[$ESCAPED_VERSION\\]( - [0-9]{4}-[0-9]{2}-[0-9]{2})?$" "$ROOT_DIR/CHANGELOG.md" 2>/dev/null \
     || error "CHANGELOG.md ne contient pas de section [$VERSION]"
 
 if [ "$ERRORS" -ne 0 ]; then
@@ -46,4 +47,3 @@ if [ "$ERRORS" -ne 0 ]; then
 fi
 
 echo "OK - release v$VERSION cohérente"
-

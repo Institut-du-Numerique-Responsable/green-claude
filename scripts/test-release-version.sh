@@ -53,6 +53,9 @@ make_fixture "$TMP_DIR/valid"
 expect_success "$TMP_DIR/valid" "1.4.0"
 expect_success "$TMP_DIR/valid" "v1.4.0"
 expect_failure "$TMP_DIR/valid" "1.4" "format SemVer invalide"
+expect_failure "$TMP_DIR/valid" "01.4.0" "format SemVer invalide"
+expect_failure "$TMP_DIR/valid" "1.04.0" "format SemVer invalide"
+expect_failure "$TMP_DIR/valid" "1.4.00" "format SemVer invalide"
 
 make_fixture "$TMP_DIR/plugin-mismatch"
 printf '{"version":"1.3.0"}\n' > "$TMP_DIR/plugin-mismatch/.claude-plugin/plugin.json"
@@ -102,5 +105,18 @@ require_release_pattern 'check-release-version\.sh.*GITHUB_REF_NAME' "le tag n'e
 require_release_pattern 'package-skill\.sh' "le workflow ne construit pas les archives"
 require_release_pattern 'green-claude-claude-ai\.zip' "l'archive Claude.ai n'est pas publiée"
 require_release_pattern 'green-claude-api\.zip' "l'archive API n'est pas publiée"
+
+README_EN="$SCRIPT_DIR/../README.md"
+README_FR="$SCRIPT_DIR/../README.fr.md"
+CONTRIBUTING="$SCRIPT_DIR/../CONTRIBUTING.md"
+
+for readme in "$README_EN" "$README_FR"; do
+    grep -Fq '[changelog](CHANGELOG.md)' "$readme" \
+        || fail "$readme ne référence pas CHANGELOG.md"
+    grep -Fq 'vMAJOR.MINOR.PATCH' "$readme" \
+        || fail "$readme ne documente pas le format des tags"
+done
+grep -Fq 'bash scripts/check-release-version.sh vX.Y.Z' "$CONTRIBUTING" \
+    || fail "CONTRIBUTING.md ne documente pas la commande de validation"
 
 echo "OK - cohérence des versions vérifiée"
