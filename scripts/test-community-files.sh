@@ -16,6 +16,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 mkdir -p "$TMP_DIR/scripts"
 cp "$CHECKER" "$TMP_DIR/scripts/check-community-files.sh"
+cp "$SCRIPT_DIR/validate-issue-forms.rb" "$TMP_DIR/scripts/validate-issue-forms.rb"
 chmod +x "$TMP_DIR/scripts/check-community-files.sh"
 
 if COMMUNITY_ROOT="$TMP_DIR" "$TMP_DIR/scripts/check-community-files.sh" >/dev/null 2>&1; then
@@ -60,5 +61,17 @@ EOF
 done
 COMMUNITY_ROOT="$TMP_DIR" "$TMP_DIR/scripts/check-community-files.sh" >/dev/null \
     || fail "un jeu de fichiers communautaires valide a été refusé"
+
+cat >> "$TMP_DIR/.github/ISSUE_TEMPLATE/new-rule.yml" <<'EOF'
+  - type: input
+    id: details
+    attributes:
+      label: Duplicate
+    validations:
+      required: true
+EOF
+if COMMUNITY_ROOT="$TMP_DIR" "$TMP_DIR/scripts/check-community-files.sh" >/dev/null 2>&1; then
+    fail "un formulaire contenant deux ids identiques a été accepté"
+fi
 
 echo "OK - validations communautaires vérifiées"

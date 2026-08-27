@@ -721,9 +721,16 @@ printf '%s\n' "$FRONT01" | grep -Fq "$TMP/collision/src/a_b.js" \
 
 # Linux fournit souvent sha256sum plutôt que shasum. Le même chemin de code doit
 # fonctionner avec ce repli, et une sélection invalide doit expliquer le manque.
-OUT="$(GREEN_CLAUDE_SHA256_TOOL=sha256sum bash eco-audit.sh "$TMP/collision/src/a_b.js")"
-printf '%s\n' "$OUT" | grep -q 'ECO-FRONT-01' \
-    || fail "repli sha256sum : le fichier n'est pas audité"
+if command -v sha256sum >/dev/null 2>&1; then
+    OUT="$(GREEN_CLAUDE_SHA256_TOOL=sha256sum bash eco-audit.sh "$TMP/collision/src/a_b.js")"
+    printf '%s\n' "$OUT" | grep -q 'ECO-FRONT-01' \
+        || fail "repli sha256sum : le fichier n'est pas audité"
+fi
+if command -v shasum >/dev/null 2>&1; then
+    OUT="$(GREEN_CLAUDE_SHA256_TOOL=shasum bash eco-audit.sh "$TMP/collision/src/a_b.js")"
+    printf '%s\n' "$OUT" | grep -q 'ECO-FRONT-01' \
+        || fail "backend shasum : le fichier n'est pas audité"
+fi
 if OUT="$(GREEN_CLAUDE_SHA256_TOOL=absent bash eco-audit.sh "$TMP/collision/src/a_b.js" 2>&1)"; then
     fail "outil SHA-256 invalide : l'audit aurait dû échouer"
 fi

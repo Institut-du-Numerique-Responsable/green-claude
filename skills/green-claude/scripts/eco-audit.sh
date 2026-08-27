@@ -179,6 +179,7 @@ issues_found=0
 # chaque règle. Pas de tableau associatif pour la retrouver : bash 3.2, livré
 # avec macOS, ne les connaît pas.
 CLEAN_DIR="$(mktemp -d)"
+trap 'rm -rf "$CLEAN_DIR"' EXIT
 select_sha256_tool() {
     local requested="${GREEN_CLAUDE_SHA256_TOOL:-}"
     if [ -n "$requested" ]; then
@@ -222,7 +223,6 @@ done
 # testée que sur ces fichiers — un motif Python signalerait n'importe quoi sur un
 # fichier Java (`.all()`, `save()`, `+=` existent partout).
 lang_rules="$(mktemp)"
-trap 'rm -f "$lang_rules"' EXIT
 for arg in "$@"; do
     [ -f "$arg" ] || continue
     lang_json="$(lang_file_for_ext "${arg##*.}")" || true

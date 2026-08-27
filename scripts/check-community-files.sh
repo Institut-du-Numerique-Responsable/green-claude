@@ -46,21 +46,10 @@ if [ -s "$config" ]; then
         || error "la configuration des issues ne route pas les vulnérabilités en privé"
 fi
 
-for form in bug.yml false-positive.yml new-rule.yml; do
-    path="$ROOT_DIR/.github/ISSUE_TEMPLATE/$form"
-    [ -s "$path" ] || continue
-    grep -Eq '^name:[[:space:]]+.+' "$path" || error "$form n'a pas de nom"
-    grep -Eq '^description:[[:space:]]+.+' "$path" || error "$form n'a pas de description"
-    grep -Eq '^body:' "$path" || error "$form n'a pas de formulaire body"
-    grep -Eq 'required:[[:space:]]+true' "$path" || error "$form ne contient aucun champ obligatoire"
-done
-
-if command -v ruby >/dev/null 2>&1; then
-    for yaml in "$ROOT_DIR"/.github/ISSUE_TEMPLATE/*.yml; do
-        [ -f "$yaml" ] || continue
-        ruby -e 'require "yaml"; YAML.load_file(ARGV.fetch(0))' "$yaml" >/dev/null \
-            || error "$yaml n'est pas un YAML valide"
-    done
+if ! command -v ruby >/dev/null 2>&1; then
+    error "ruby est requis pour valider le schéma des formulaires GitHub"
+elif ! COMMUNITY_ROOT="$ROOT_DIR" ruby "$SCRIPT_DIR/validate-issue-forms.rb" >/dev/null; then
+    error "les formulaires GitHub ne respectent pas le schéma attendu"
 fi
 
 [ "$ERRORS" -eq 0 ] || exit 1
