@@ -179,10 +179,41 @@ issues_found=0
 # chaque règle. Pas de tableau associatif pour la retrouver : bash 3.2, livré
 # avec macOS, ne les connaît pas.
 CLEAN_DIR="$(mktemp -d)"
-cleaned_name() { printf '%s' "$1" | tr '/ ' '__'; }
+select_sha256_tool() {
+    local requested="${GREEN_CLAUDE_SHA256_TOOL:-}"
+    if [ -n "$requested" ]; then
+        case "$requested" in
+            shasum|sha256sum) ;;
+            *) echo "Outil SHA-256 inconnu : $requested (attendu : shasum ou sha256sum)." >&2; return 1 ;;
+        esac
+        command -v "$requested" >/dev/null 2>&1 \
+            || { echo "Outil SHA-256 introuvable : $requested." >&2; return 1; }
+        printf '%s' "$requested"
+    elif command -v shasum >/dev/null 2>&1; then
+        printf '%s' "shasum"
+    elif command -v sha256sum >/dev/null 2>&1; then
+        printf '%s' "sha256sum"
+    else
+        echo "Aucun outil SHA-256 disponible : installe shasum ou sha256sum." >&2
+        return 1
+    fi
+}
+SHA256_TOOL="$(select_sha256_tool)" || { rm -rf "$CLEAN_DIR"; exit 1; }
+cleaned_name() {
+    case "$SHA256_TOOL" in
+        shasum)    printf '%s' "$1" | shasum -a 256 | cut -d' ' -f1 ;;
+        sha256sum) printf '%s' "$1" | sha256sum | cut -d' ' -f1 ;;
+    esac
+}
+CLEANED_NAMES=()
+clean_index=0
 for arg in "$@"; do
-    [ -f "$arg" ] || continue
-    clean_source "$arg" > "$CLEAN_DIR/$(cleaned_name "$arg")"
+    CLEANED_NAMES[clean_index]=""
+    if [ -f "$arg" ]; then
+        CLEANED_NAMES[clean_index]="$(cleaned_name "$arg")"
+        clean_source "$arg" > "$CLEAN_DIR/${CLEANED_NAMES[clean_index]}"
+    fi
+    clean_index=$((clean_index + 1))
 done
 
 # Règles propres aux langages réellement présents parmi les fichiers audités :
@@ -237,7 +268,10 @@ while IFS= read -r rule_json; do
     # code mort et `VAR=` à une globale implicite.
     exts=$(jq -r '((.exts // []) + (.extensions // [])) | join(" ")' <<<"$rule_json")
 
+    file_index=0
     for file in "$@"; do
+        cleaned="${CLEANED_NAMES[file_index]}"
+        file_index=$((file_index + 1))
         [ -f "$file" ] || continue
         # Règle propre à un langage : ne s'applique qu'aux fichiers de ce langage.
         if [ -n "$exts" ]; then
@@ -250,7 +284,7 @@ while IFS= read -r rule_json; do
         # Si l'un des motifs d'exclusion fichier apparaît quelque part dans le
         # fichier, la règle se tait : la bonne pratique y est déjà appliquée.
         if [ -n "$file_excludes" ]; then
-            fscan="$CLEAN_DIR/$(cleaned_name "$file")"
+            fscan="$CLEAN_DIR/$cleaned"
             [ -f "$fscan" ] || fscan="$file"
             grep -qiE "$file_excludes" "$fscan" 2>/dev/null && continue
         fi
@@ -263,7 +297,7 @@ while IFS= read -r rule_json; do
             matches=$(awk -f "$detector_script" "$file" 2>/dev/null || true)
         elif [ -n "$patterns" ]; then
             # Motifs cherchés sur la version nettoyée (sans prose ni commentaires).
-            scanned="$CLEAN_DIR/$(cleaned_name "$file")"
+            scanned="$CLEAN_DIR/$cleaned"
             [ -f "$scanned" ] || scanned="$file"
             if [ -n "$excludes" ]; then
                 matches=$(grep -iE "$patterns" "$scanned" 2>/dev/null | grep -qvE "$excludes" && echo "match" || true)
