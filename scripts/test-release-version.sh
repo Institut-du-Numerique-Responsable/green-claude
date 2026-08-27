@@ -84,4 +84,23 @@ require_workflow_pattern 'timeout-minutes:' "les jobs CI n'ont pas de délai max
 require_workflow_pattern 'actions/checkout@[0-9a-f]{40}' "checkout n'est pas épinglé par SHA"
 require_workflow_pattern 'bash scripts/test-release-version.sh' "la CI ne teste pas la cohérence des versions"
 
+RELEASE_WORKFLOW="$SCRIPT_DIR/../.github/workflows/release.yml"
+[ -f "$RELEASE_WORKFLOW" ] || fail "le workflow de release est absent"
+
+require_release_pattern() {
+    local pattern="$1" diagnostic="$2"
+    grep -Eq "$pattern" "$RELEASE_WORKFLOW" || fail "$diagnostic"
+}
+
+require_release_pattern "'v\*\.\*\.\*'" "le déclencheur de release n'impose pas un tag SemVer"
+require_release_pattern '^permissions:$' "le workflow de release ne définit pas ses permissions"
+require_release_pattern '^[[:space:]]+contents:[[:space:]]+read$' "les permissions par défaut de release ne sont pas en lecture seule"
+require_release_pattern 'timeout-minutes:' "les jobs de release n'ont pas de délai maximal"
+require_release_pattern 'needs:[[:space:]]+validate' "la publication ne dépend pas de la validation"
+require_release_pattern '^[[:space:]]{6}contents:[[:space:]]+write$' "la publication n'obtient pas contents: write au niveau du job"
+require_release_pattern 'check-release-version\.sh.*GITHUB_REF_NAME' "le tag n'est pas comparé aux versions du dépôt"
+require_release_pattern 'package-skill\.sh' "le workflow ne construit pas les archives"
+require_release_pattern 'green-claude-claude-ai\.zip' "l'archive Claude.ai n'est pas publiée"
+require_release_pattern 'green-claude-api\.zip' "l'archive API n'est pas publiée"
+
 echo "OK - cohérence des versions vérifiée"
