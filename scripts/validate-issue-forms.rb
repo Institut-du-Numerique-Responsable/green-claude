@@ -18,7 +18,10 @@ end
   next unless File.file?(path)
 
   form = load_yaml.call(path)
-  next unless form.is_a?(Hash)
+  unless form.is_a?(Hash)
+    errors << "#{name}: la racine YAML doit être un objet"
+    next
+  end
 
   errors << "#{name}: name manquant" unless form["name"].is_a?(String) && !form["name"].empty?
   errors << "#{name}: description manquante" unless form["description"].is_a?(String) && !form["description"].empty?
@@ -57,7 +60,9 @@ end
 config_path = File.join(forms_dir, "config.yml")
 if File.file?(config_path)
   config = load_yaml.call(config_path)
-  if config.is_a?(Hash)
+  unless config.is_a?(Hash)
+    errors << "config.yml: la racine YAML doit être un objet"
+  else
     errors << "config.yml: blank_issues_enabled doit valoir false" unless config["blank_issues_enabled"] == false
     links = config["contact_links"]
     errors << "config.yml: contact_links doit être une liste non vide" unless links.is_a?(Array) && !links.empty?

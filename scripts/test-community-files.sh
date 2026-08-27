@@ -62,6 +62,35 @@ done
 COMMUNITY_ROOT="$TMP_DIR" "$TMP_DIR/scripts/check-community-files.sh" >/dev/null \
     || fail "un jeu de fichiers communautaires valide a été refusé"
 
+printf '[]\n' > "$TMP_DIR/.github/ISSUE_TEMPLATE/new-rule.yml"
+if COMMUNITY_ROOT="$TMP_DIR" "$TMP_DIR/scripts/check-community-files.sh" >/dev/null 2>&1; then
+    fail "un formulaire dont la racine YAML n'est pas un objet a été accepté"
+fi
+
+cat > "$TMP_DIR/.github/ISSUE_TEMPLATE/new-rule.yml" <<'EOF'
+name: Test
+description: Test form
+body:
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+    validations:
+      required: true
+EOF
+
+printf '[]\n' > "$TMP_DIR/.github/ISSUE_TEMPLATE/config.yml"
+if COMMUNITY_ROOT="$TMP_DIR" ruby "$TMP_DIR/scripts/validate-issue-forms.rb" >/dev/null 2>&1; then
+    fail "une configuration dont la racine YAML n'est pas un objet a été acceptée"
+fi
+cat > "$TMP_DIR/.github/ISSUE_TEMPLATE/config.yml" <<'EOF'
+blank_issues_enabled: false
+contact_links:
+  - name: Security
+    url: https://github.com/example/project/security/advisories/new
+    about: Private reports
+EOF
+
 cat >> "$TMP_DIR/.github/ISSUE_TEMPLATE/new-rule.yml" <<'EOF'
   - type: input
     id: details

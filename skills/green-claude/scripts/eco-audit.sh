@@ -223,6 +223,7 @@ done
 # testée que sur ces fichiers — un motif Python signalerait n'importe quoi sur un
 # fichier Java (`.all()`, `save()`, `+=` existent partout).
 lang_rules="$(mktemp)"
+trap 'rm -rf "$lang_rules" "$lang_rules.seen" "$CLEAN_DIR"' EXIT
 for arg in "$@"; do
     [ -f "$arg" ] || continue
     lang_json="$(lang_file_for_ext "${arg##*.}")" || true
@@ -235,7 +236,6 @@ for arg in "$@"; do
         | .[]
         | select((.patterns // []) | length > 0)' "$lang_json" >> "$lang_rules"
 done
-trap 'rm -rf "$lang_rules" "$lang_rules.seen" "$CLEAN_DIR"' EXIT
 
 # Une ligne JSON compacte par règle (jq -c) : pas de délimiteur maison à
 # échapper (l'ancien découpage TSV cassait les patterns contenant des
