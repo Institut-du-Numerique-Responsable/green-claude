@@ -1,0 +1,33 @@
+name: Bug
+description: Signaler un défaut reproductible d'installation ou de fonctionnement.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Que s'est-il passé et quel résultat attendiez-vous ?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction minimale
+      description: Commandes, fichiers minimaux et sortie complète.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version de Green Claude
+      placeholder: v1.4.0
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environnement
+      description: OS, version de Bash, jq et canal d'installation.
+    validations:
+      required: true

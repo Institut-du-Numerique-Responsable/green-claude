@@ -25,6 +25,10 @@ jobs:
         run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
       - name: Vérifier la cohérence de la release
         run: bash scripts/test-release-version.sh
+      - name: Valider les fichiers communautaires
+        run: |
+          bash scripts/test-community-files.sh
+          bash scripts/check-community-files.sh
       - name: Lancer la suite de tests
         run: bash skills/green-claude/scripts/test-eco-audit.sh
 

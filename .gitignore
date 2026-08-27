@@ -1,5 +1,7 @@
 # Artefacts locaux Claude Code (worktrees d'agents, cache de session)
 .claude/
+.Codex/
+docs/superpowers/
 
 # Système
 .DS_Store

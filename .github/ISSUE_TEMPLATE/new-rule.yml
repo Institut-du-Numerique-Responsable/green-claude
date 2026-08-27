@@ -1,0 +1,45 @@
+name: Nouvelle règle
+description: Proposer une règle d'écoconception sourcée et testable.
+title: "[Règle] "
+labels: [enhancement]
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Référence publique
+      description: URL du RGESN, GR491, GSF, WSG ou autre source reconnue.
+    validations:
+      required: true
+  - type: input
+    id: scope
+    attributes:
+      label: Langage ou famille concernée
+    validations:
+      required: true
+  - type: textarea
+    id: positive
+    attributes:
+      label: Exemple qui doit être détecté
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: negative
+    attributes:
+      label: Exemple conforme qui ne doit pas être détecté
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact proposé
+      options: [Élevé, Moyen, Faible]
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Justification de l'impact
+    validations:
+      required: true

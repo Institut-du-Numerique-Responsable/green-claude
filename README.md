@@ -265,6 +265,11 @@ Most useful contributions: new audit rules sourced from RGESN, GR491, GSF, WSG, 
 
 Full detail on the rule format and PR process: [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Community participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md)
+and [governance policy](GOVERNANCE.md). See [SUPPORT.md](SUPPORT.md) for the
+right help channel and [SECURITY.md](SECURITY.md) for private vulnerability
+reporting.
+
 ---
 
 ## Releases
