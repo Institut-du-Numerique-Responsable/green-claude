@@ -70,4 +70,18 @@ make_fixture "$TMP_DIR/changelog-mismatch"
 printf '# Changelog\n' > "$TMP_DIR/changelog-mismatch/CHANGELOG.md"
 expect_failure "$TMP_DIR/changelog-mismatch" "v1.4.0" "CHANGELOG.md ne contient pas de section [1.4.0]"
 
+WORKFLOW="$SCRIPT_DIR/../.github/workflows/eco-audit.yml"
+
+require_workflow_pattern() {
+    local pattern="$1" diagnostic="$2"
+    grep -Eq "$pattern" "$WORKFLOW" || fail "$diagnostic"
+}
+
+require_workflow_pattern '^permissions:$' "la CI ne définit pas de permissions globales"
+require_workflow_pattern '^[[:space:]]+contents:[[:space:]]+read$' "la CI ne limite pas contents à read"
+require_workflow_pattern '^concurrency:$' "la CI n'annule pas les exécutions obsolètes"
+require_workflow_pattern 'timeout-minutes:' "les jobs CI n'ont pas de délai maximal"
+require_workflow_pattern 'actions/checkout@[0-9a-f]{40}' "checkout n'est pas épinglé par SHA"
+require_workflow_pattern 'bash scripts/test-release-version.sh' "la CI ne teste pas la cohérence des versions"
+
 echo "OK - cohérence des versions vérifiée"

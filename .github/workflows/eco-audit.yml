@@ -5,24 +5,35 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: eco-audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: Suite de tests de l'audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Installer jq
         run: sudo apt-get install -y jq
       - name: Valider le JSON des règles
         run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
+      - name: Vérifier la cohérence de la release
+        run: bash scripts/test-release-version.sh
       - name: Lancer la suite de tests
         run: bash skills/green-claude/scripts/test-eco-audit.sh
 
   score:
     name: Densité d'issues
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Installer jq
         run: sudo apt-get install -y jq
       # Informatif, jamais bloquant : un audit qui fait échouer la CI sur un
