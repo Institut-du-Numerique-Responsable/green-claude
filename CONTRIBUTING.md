@@ -101,10 +101,30 @@ Décrivez la source de la règle (lien vers le référentiel), l'impact attendu,
 
 ## Publier une release
 
-Les tags suivent la convention `green-claude--v<version>`, posée via la commande officielle du CLI plutôt qu'à la main :
+Les nouvelles releases suivent Semantic Versioning et utilisent exclusivement
+des tags `vMAJOR.MINOR.PATCH`. Les anciens tags restent intacts afin de préserver
+les liens existants.
+
+Avant de fusionner une release :
+
+1. mettez à jour `version` dans `.claude-plugin/plugin.json` ;
+2. mettez à jour le frontmatter `version` de `skills/green-claude/SKILL.md` ;
+3. ajoutez la section correspondante dans `CHANGELOG.md` ;
+4. vérifiez leur cohérence et lancez les tests :
 
 ```bash
-claude plugin tag --push
+bash scripts/check-release-version.sh vX.Y.Z
+bash scripts/test-release-version.sh
+bash skills/green-claude/scripts/test-eco-audit.sh
+bash hooks/test-cache.sh
 ```
 
-Elle valide que `version` dans `.claude-plugin/plugin.json` et l'entrée correspondante dans `.claude-plugin/marketplace.json` sont cohérentes avant de créer et pousser le tag. Les tags `v1.0.0`/`v1.0.1`, antérieurs à la restructuration en plugin, ne suivent pas cette convention — ne pas la reprendre pour les prochaines releases.
+Une fois le commit validé présent sur `main`, créez et poussez un tag annoté :
+
+```bash
+git tag -a vX.Y.Z -m "Green Claude vX.Y.Z"
+git push origin vX.Y.Z
+```
+
+Le workflow `.github/workflows/release.yml` revalide le tag, exécute les suites
+de tests, construit les archives Claude.ai/API et publie la release GitHub.

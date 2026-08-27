@@ -269,6 +269,16 @@ Détail complet du format des règles et du processus de PR : [CONTRIBUTING.md](
 
 ---
 
+## Releases
+
+Les changements notables sont consignés dans le [changelog](CHANGELOG.md). Les
+nouvelles releases utilisent des tags Semantic Versioning au format
+`vMAJOR.MINOR.PATCH` ; les anciens tags conservent leur nom afin de ne casser
+aucun lien. Une release taguée n'est publiée automatiquement qu'après
+vérification de sa version, des tests et des archives produites.
+
+---
+
 ## 🙏 Références
 
 - [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) : Référentiel Général d'Écoconception de Services Numériques (78 critères, 9 familles)

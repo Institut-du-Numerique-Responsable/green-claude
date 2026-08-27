@@ -267,6 +267,16 @@ Full detail on the rule format and PR process: [CONTRIBUTING.md](CONTRIBUTING.md
 
 ---
 
+## Releases
+
+Notable changes are recorded in the [changelog](CHANGELOG.md). New releases use
+Semantic Versioning tags in the form `vMAJOR.MINOR.PATCH`; legacy tags retain
+their original names so existing links keep working. A tagged release is
+published automatically only after its version, tests, and packaged archives
+have been verified.
+
+---
+
 ## 🙏 References
 
 - [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/): Référentiel Général d'Écoconception de Services Numériques (78 criteria, 9 families)

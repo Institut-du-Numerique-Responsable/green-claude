@@ -3,16 +3,20 @@
 `README.md` — English project overview, installation, usage, rule inventory, packaging and contribution entry point.
 `README.fr.md` — French counterpart of the project overview.
 `CONTRIBUTING.md` — contribution rules for adding and testing audit rules and detectors.
+`CHANGELOG.md` — Keep a Changelog release history and comparison links.
 `CITATION.cff` — software citation metadata and authorship.
 `install.sh` — interactive installer for the skill and optional Claude Code hooks.
 `.claude-plugin/plugin.json` — Claude Code plugin metadata and current public version.
 `.claude-plugin/marketplace.json` — local marketplace descriptor for the plugin.
 `.github/workflows/eco-audit.yml` — CI for JSON validation, audit tests and repository eco-score.
+`.github/workflows/release.yml` — tag-gated validation, packaging and GitHub Release publication.
 `hooks/green-claude-audit.sh` — PostToolUse hook auditing newly written code.
 `hooks/green-claude-cache.sh` — UserPromptSubmit hook serving short-lived cached responses.
 `hooks/green-claude-cache-save.sh` — Stop hook extracting and storing the final response.
 `hooks/green-claude-pre-commit.sh` — optional staged-file eco-audit.
 `hooks/test-cache.sh` — deterministic cache-hook regression tests.
+`scripts/check-release-version.sh` — validates tag, plugin, skill and changelog version agreement.
+`scripts/test-release-version.sh` — regression tests for version consistency and workflow invariants.
 `skills/green-claude/SKILL.md` — skill trigger description and operating instructions; declares the current version.
 `skills/green-claude/rules/ecoconception.json` — 52 cross-language eco-design rules.
 `skills/green-claude/rules/boris.json` — sober Claude usage practices.
@@ -28,4 +32,3 @@
 `docs/robots.txt` — crawler policy for the public site.
 `docs/sitemap.xml` — public-site sitemap.
 `docs/llms.txt` — concise machine-readable project description.
-
