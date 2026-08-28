@@ -37,7 +37,7 @@ if COMMUNITY_ROOT="$TMP_DIR" "$TMP_DIR/scripts/check-community-files.sh" >/dev/n
     fail "des propriétaires incorrects et un canal sécurité absent ont été acceptés"
 fi
 
-printf '* @gridboy @robintra\n' > "$TMP_DIR/.github/CODEOWNERS"
+printf '* @gridboy @robintra @Guillaume-INR @vcourbou @vincentcourboulay\n' > "$TMP_DIR/.github/CODEOWNERS"
 printf '# Security\nhttps://github.com/example/project/security/advisories/new\n' > "$TMP_DIR/SECURITY.md"
 cat > "$TMP_DIR/.github/ISSUE_TEMPLATE/config.yml" <<'EOF'
 blank_issues_enabled: false

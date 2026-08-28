@@ -29,8 +29,11 @@ $required_files
 EOF
 
 if [ -s "$ROOT_DIR/.github/CODEOWNERS" ]; then
-    grep -Eq '^\*[[:space:]]+@gridboy[[:space:]]+@robintra[[:space:]]*$' "$ROOT_DIR/.github/CODEOWNERS" \
-        || error "CODEOWNERS doit attribuer * à @gridboy et @robintra"
+    owners_line=$(grep -E '^\*[[:space:]]+' "$ROOT_DIR/.github/CODEOWNERS" | head -n 1 || true)
+    for owner in @gridboy @robintra @Guillaume-INR @vcourbou @vincentcourboulay; do
+        printf '%s\n' "$owners_line" | grep -Eq "(^|[[:space:]])${owner}([[:space:]]|$)" \
+            || error "CODEOWNERS doit attribuer * à $owner"
+    done
 fi
 
 if [ -s "$ROOT_DIR/SECURITY.md" ]; then
