@@ -1,0 +1,103 @@
+# GitHub Search Configuration for Green Claude
+# This file helps GitHub understand and index the repository content
+
+# Repository name for search indexing
+name: green-claude
+
+# Description for search engines (160 characters max for Google snippet)
+description: "Eco-design skill for Claude Code: digital sobriety, RGESN/GR491 compliance, AI responsibility, water/electricity/CPU/GPU optimization"
+
+# Keywords for search indexing (comma-separated, max 255 characters)
+keywords: >
+  ai,eco-design,digital sobriety,sustainable software,green it,rg491,rgesn,claude code,eco-conception,frugal ai
+
+# Topics for GitHub discovery (max 50)
+topics: [
+  ai,
+  carbon-footprint,
+  claude,
+  claude-code,
+  claude-code-plugin,
+  eco-conception,
+  eco-design,
+  frugal-ai,
+  gr491,
+  green-coding,
+  green-it,
+  green-software,
+  numerique-responsable,
+  rgesn,
+  sobriete-numerique,
+  sustainability,
+  sustainable-software,
+  web-sustainability,
+  eco-responsable,
+  digital-sobriety,
+  energy-efficiency,
+  water-usage,
+  cpu-optimization,
+  gpu-optimization
+]
+
+# Author information for search attribution
+author:
+  name: Institut du Numérique Responsable
+  email: contact@institutnr.org
+  url: https://institutnr.org
+
+# License for search indexing
+license: MIT
+
+# Homepage for search results
+homepage: https://institut-du-numerique-responsable.github.io/green-claude/
+
+# Repository URL (canonical)
+repository: https://github.com/Institut-du-Numerique-Responsable/green-claude
+
+# Maintainers for search ranking
+maintainers:
+  - name: Guillaume Gallon
+    github: gridboy
+    email: guillaume.gallon@gmail.com
+  - name: Robin Trassard
+    github: robintra
+  - name: Guillaume Bourgeois
+    github: bourgeoisguillaume01-glitch
+  - name: Vincent Courboulay
+    github: vcourbou
+
+# Languages for language-specific search
+languages: [en, fr]
+
+# Primary language
+default_language: en
+
+# Tags for specialized search (AI, sustainability, etc.)
+tags:
+  - ai
+  - sustainability
+  - eco-design
+  - digital-sobriety
+  - responsible-ai
+  - green-it
+  - carbon-aware
+  - energy-efficient
+  - water-aware
+
+# Standards compliance for technical search
+standards:
+  - RGESN 2024
+  - GR491
+  - Green Software Foundation
+  - W3C Web Sustainability Guidelines
+
+# Features for feature-based search
+features:
+  - eco-design rules: 225
+  - ai specific rules: 23
+  - language rules: 127
+  - supported languages: 25
+  - automatic detection: true
+  - claude code integration: true
+  - security scanning: true
+  - push protection: true

@@ -1,0 +1,190 @@
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Green Claude",
+  "description": "Eco-design skill for Claude Code that promotes digital sobriety, eco-conception (RGESN 2024, GR491, Green Software Foundation, W3C Web Sustainability Guidelines) and AI sobriety practices. Automatically applies eco-design rules during code generation to reduce environmental impact.",
+  "version": "3.0.0",
+  "datePublished": "2026-07-18",
+  "dateModified": "2026-09-05",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
+  "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
+  "documentation": "https://institut-du-numerique-responsable.github.io/green-claude/",
+  "keywords": [
+    "ai",
+    "eco-design", 
+    "digital sobriety",
+    "sustainable software",
+    "green it",
+    "responsible ai",
+    "rg491",
+    "rgesn 2024",
+    "green software foundation",
+    "w3c web sustainability",
+    "claude code",
+    "claude code plugin",
+    "eco-conception",
+    "frugal ai",
+    "carbon footprint",
+    "energy efficiency",
+    "water usage",
+    "cpu optimization",
+    "gpu optimization",
+    "token counting",
+    "token efficiency",
+    "ecological design",
+    "sustainability",
+    "numerique responsable",
+    "sobriete numerique",
+    "institut du numerique responsable",
+    "inr",
+    "green coding",
+    "green it",
+    "web sustainability"
+  ],
+  "author": {
+    "@type": "Organization",
+    "name": "Institut du Numérique Responsable",
+    "url": "https://institutnr.org",
+    "logo": "https://institut-du-numerique-responsable.github.io/green-claude/assets/logo.jpg"
+  },
+  "maintainers": [
+    {
+      "name": "Guillaume Gallon",
+      "github": "https://github.com/gridboy",
+      "role": "Lead Maintainer"
+    },
+    {
+      "name": "Robin Trassard", 
+      "github": "https://github.com/robintra",
+      "role": "Core Contributor"
+    },
+    {
+      "name": "Guillaume Bourgeois",
+      "github": "https://github.com/bourgeoisguillaume01-glitch",
+      "role": "Core Contributor"
+    },
+    {
+      "name": "Vincent Courboulay",
+      "github": "https://github.com/vcourbou",
+      "role": "Core Contributor"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Guillaume Gallon",
+      "github": "https://github.com/gridboy"
+    },
+    {
+      "name": "Robin Trassard",
+      "github": "https://github.com/robintra"
+    },
+    {
+      "name": "Guillaume Bourgeois",
+      "github": "https://github.com/bourgeoisguillaume01-glitch"
+    },
+    {
+      "name": "Vincent Courboulay",
+      "github": "https://github.com/vcourbou"
+    }
+  ],
+  "features": {
+    "total_rules": 225,
+    "ecoconception_rules": 106,
+    "language_specific_rules": 127,
+    "ai_specific_rules": 23,
+    "hosting_for_ai_rules": 4,
+    "supported_languages": 25,
+    "standards_compliance": ["RGESN 2024", "GR491", "Green Software Foundation", "W3C Web Sustainability Guidelines"],
+    "security": {
+      "secret_scanning": "enabled",
+      "push_protection": "enabled",
+      "branch_protection": "enabled"
+    }
+  },
+  "rules": {
+    "water_electricity": [
+      {
+        "id": "ECO-ALGO-09",
+        "title": "Link tokens to physical resources",
+        "impact": "High"
+      },
+      {
+        "id": "ECO-ALGO-10", 
+        "title": "Require real measurements for AI systems",
+        "impact": "High"
+      },
+      {
+        "id": "ECO-ALGO-11",
+        "title": "Set water and electricity budgets",
+        "impact": "High"
+      }
+    ],
+    "hosting_for_ai": [
+      {
+        "id": "ECO-HOST-07",
+        "title": "Prefer inference-optimized GPUs"
+      },
+      {
+        "id": "ECO-HOST-08",
+        "title": "Avoid oversized GPUs for small tasks"
+      },
+      {
+        "id": "ECO-HOST-09",
+        "title": "Deploy in green datacenters"
+      },
+      {
+        "id": "ECO-HOST-10",
+        "title": "Use CPU for small models"
+      }
+    ]
+  },
+  "documentation_files": [
+    "README.md",
+    "README.fr.md", 
+    "CONTRIBUTORS.md",
+    "CITATION.cff",
+    "docs/languages/README.md",
+    "docs/water-electricity-detection.md",
+    "docs/security-audit.md"
+  ],
+  "links": {
+    "repository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
+    "documentation": "https://institut-du-numerique-responsable.github.io/green-claude/",
+    "organization": "https://institutnr.org",
+    "issues": "https://github.com/Institut-du-Numerique-Responsable/green-claude/issues",
+    "pull_requests": "https://github.com/Institut-du-Numerique-Responsable/green-claude/pulls",
+    "releases": "https://github.com/Institut-du-Numerique-Responsable/green-claude/releases"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Institut du Numérique Responsable",
+    "url": "https://institutnr.org",
+    "description": "French non-profit organization promoting responsible digital practices",
+    "foundingDate": "2019"
+  },
+  "inLanguage": ["fr", "en"],
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": ["macOS", "Linux", "Windows"],
+  "applicationSubCategory": [
+    "Code Quality",
+    "Sustainability", 
+    "AI Assistants",
+    "Developer Tools",
+    "Eco-Design",
+    "Digital Sobriety"
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "reviewCount": "45",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR",
+    "category": "free"
+  }
+}

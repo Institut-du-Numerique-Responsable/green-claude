@@ -1,5 +1,10 @@
 # Green Claude : sobriété numérique pour Claude Code
 
+<!-- SEO: Alternate language links for search engines -->
+<link rel="alternate" hreflang="en" href="README.md" />
+<link rel="alternate" hreflang="fr" href="README.fr.md" />
+<link rel="canonical" href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md" />
+
 🇬🇧 [Read in English](README.md)
 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
