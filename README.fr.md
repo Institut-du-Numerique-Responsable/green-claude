@@ -144,23 +144,24 @@ Le script d'audit a besoin de `bash` et de `jq`. Là où `jq` manque, les règle
 
 ---
 
-## Les règles : 83 règles alignées sur les 9 familles du RGESN 2024
+## Les règles : 106 règles alignées sur les 9 familles du RGESN 2024
 
-[`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle porte un renvoi RGESN (`rgesn_ref`) et une famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`).
+[`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels) **et une nouvelle catégorie "Hébergement pour l'IA"**. Chaque règle porte un renvoi RGESN (`rgesn_ref`) et une famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`).
 
 Précision du renvoi RGESN, en l'état : **18 règles** pointent le critère exact (familles 1 à 4, ex. `4.8`), **33 règles** ne pointent que leur famille (`5.x` à `9.x`) faute d'un mappage encore fait, et une règle relève de la Green Software Foundation plutôt que du RGESN. L'affinage des familles 5 à 9 est un chantier ouvert — le champ dit ce qu'il sait, jamais plus.
 
 | Famille RGESN | Règles | Exemples |
 |---|---|---|
-| 1. Stratégie | 6 | Mesurer avant d'optimiser, données raisonnées, formats ouverts, référent sobriété, sensibilisation, transparence utilisateur |
+| 1. Stratégie | 9 | Mesurer avant d'optimiser, données raisonnées, formats ouverts, référent sobriété, sensibilisation, transparence utilisateur |
 | 2. Spécifications | 5 | Compatibilité anciens terminaux, bas débit, impact des services tiers |
-| 3. Architecture | 5 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres, code testé et maintenable |
-| 4. UX/UI | 7 | Pas d'autoplay ni de scroll infini, composants natifs, polices limitées, média le plus sobre, prefers-reduced-motion |
-| 5. Contenus | 2 | Images optimisées, SVG |
-| 6. Frontend | 13 | Pas de bibliothèque lourde, lazy loading, minification, dépendances, pas de code mort, pas de globales implicites, pas de XHR synchrone, DOM sobre, pas d'IDs dupliqués, !important limité, pas de CSS dupliqué, pas de hacks IE legacy, scripts différés |
-| 7. Backend | 4 | SQL optimisé, pools de connexions, complexité, pagination + cache |
-| 8. Hébergement | 6 | Hébergeur sobre, compression HTTP, cache HTTP, HTTPS/TLS, liens cassés |
-| 9. **Algorithmie (dont IA)** | 4 | **Justifier l'IA, dimensionner le modèle, mesurer, alternatives sobres** |
+| 3. Architecture | 11 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres, code testé et maintenable |
+| 4. UX/UI | 8 | Pas d'autoplay ni de scroll infini, composants natifs, polices limitées, média le plus sobre, prefers-reduced-motion |
+| 5. Contenus | 3 | Images optimisées, SVG, polices |
+| 6. Frontend | 14 | Pas de bibliothèque lourde, lazy loading, minification, dépendances, pas de code mort, pas de globales implicites, pas de XHR synchrone, DOM sobre, pas d'IDs dupliqués, !important limité, pas de CSS dupliqué, pas de hacks IE legacy, scripts différés |
+| 7. Backend | 13 | SQL optimisé, pools de connexions, complexité, pagination + cache, requêtes N+1 |
+| 8. Hébergement | 12 | Hébergeur sobre, compression HTTP, cache HTTP, HTTPS/TLS, liens cassés |
+| 9. **Algorithmie (dont IA)** | 27 | **Justifier l'IA, dimensionner le modèle, mesurer, alternatives sobres, quantification, batching, streaming** |
+| 10. **Hébergement pour l'IA** | 4 | **GPU optimisés inférence, datacenters verts, inférence CPU, dimensionnement modèle** |
 
 Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l'audit et servent de checklist dans `/green-claude`.
 
@@ -168,7 +169,7 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 ## Les règles par langage : 127 règles chargées à la demande
 
-Les 83 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
+Les 106 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
 
 [`skills/green-claude/rules/langages/`](skills/green-claude/rules/langages/) descend d'un cran, avec un fichier par langage appliqué **uniquement aux fichiers de ce langage** :
 
