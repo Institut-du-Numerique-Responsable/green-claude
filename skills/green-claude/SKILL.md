@@ -29,7 +29,7 @@ model, which costs computation and the energy behind it. After the session, the
 code you leave behind runs on every user's machine, on every request, for years.
 Both matter; only one of them stops when the conversation does.
 
-Three rule sets: `rules/ecoconception.json` (106 rules, RGESN 2024 / GR491 /
+Three rule sets: `rules/ecoconception.json` (107 rules, RGESN 2024 / GR491 /
 Green Software Foundation / W3C WSG) while you write or modify code,
 `rules/langages/*.json` (127 rules across 24 languages and frameworks) for the language you're
 working in, and `rules/usage.json` (15 responsible-use practices) during the
@@ -131,7 +131,7 @@ outcome the user must never be handed.
 
 `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` is a deterministic
 script (grep/awk) with no reasoning cost for detection. Run it rather than
-grepping by hand: it carries 248 rules, their thresholds, their per-language
+grepping by hand: it carries 250 rules, their thresholds, their per-language
 scoping and their known false positives, none of which a hand-written grep
 reproduces. Interpret and prioritize its output (High impact first), and read
 *Common mistakes* below before relaying a result as-is.

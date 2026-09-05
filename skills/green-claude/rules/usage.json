@@ -5,7 +5,7 @@
     "version": "3.0.0",
     "editorial_status": "Recommendations of the Green Claude project, not attributed to any individual.",
     "source_policy": "Any attribution to a named person requires a verifiable primary source. Commands and features mentioned here must be checked against the official documentation for the version in use.",
-    "count": 15,
+    "count": 16,
     "type": "practices",
     "type_note": "These rules describe USAGE PRACTICES, not code patterns: they carry no grep-able 'patterns'. The --eco-check audit ignores them; use --list-rules to consult them as a checklist.",
     "energy_claim_policy": "This project states the direction and refuses the ratio. Fewer tokens processed means less computation, and less computation means less energy: that much holds. Converting a token count into watts, joules or grams of CO2 does not, because prompt caching, model size, batching, hardware and the grid mix each move the result more than the token count does. Earlier versions of this file carried such conversions, taken from a secondary source and never measured; they were removed. Keep the qualitative claim, keep the guard: any figure put on this link must come from a measurement of the setup it describes. A test in scripts/test-eco-audit.sh fails if the removed figures return, and this policy is checked alongside them."
@@ -203,6 +203,23 @@
             "skills",
             "commands",
             "reuse"
+          ]
+        },
+        {
+          "id": "USAGE-MEM-03",
+          "title": "Write commit messages and PR descriptions for the next reader",
+          "principle": "A commit or a PR is read far more often than it is written; write it for that reader, not for the moment of writing.",
+          "description": "State what changed and why in plain language, lead with the part a reviewer needs first, and skip the parts that add length without adding understanding. The same applies to a merge: a reviewer approving in a hurry still needs to know what they are approving.",
+          "why_green": "A commit message nobody can follow gets re-explained in a comment thread, or the change gets re-reviewed from the diff alone; both cost more than writing it clearly once. This extends the code-comment discipline to the message that carries the change itself.",
+          "how": "One clear sentence for what changed, one or two for why if it is not obvious from the diff. Name the specific fix or feature, not \"various improvements\". Keep it short: state the point once, plainly, without an admin explaining how thorough they were.",
+          "impact": "Medium",
+          "patterns": [],
+          "source_ref": "Editorial recommendation of the Green Claude project.",
+          "tags": [
+            "commits",
+            "pull-requests",
+            "documentation",
+            "readability"
           ]
         }
       ]
