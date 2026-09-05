@@ -47,7 +47,7 @@
           "description": "Reading an association inside a foreach fires one query per element.",
           "impact": "High",
           "patterns": [
-            "foreach\\s*\\(\\s*\\$\\w+->"
+            "foreach[[:space:]]*\\([[:space:]]*\\$\\w+->"
           ],
           "recommendation": "Eager loading: with() (Eloquent) or a fetch join / DQL join (Doctrine); project the useful columns rather than full entities.",
           "example": {
@@ -90,7 +90,7 @@
           "impact": "Medium",
           "patterns": [
             "file_get_contents\\(",
-            "\\bfile\\s*\\("
+            "\\bfile[[:space:]]*\\("
           ],
           "recommendation": "Read as a stream (fopen plus block reads), fputcsv and streams for exports; generators (yield) to produce long sequences.",
           "rgesn_ref": "9.2",

@@ -64,7 +64,7 @@
           "description": "strlen re-evaluated on every iteration walks the whole string again: a quadratic loop invisible on reading.",
           "impact": "High",
           "patterns": [
-            "for\\s*\\([^;]*;[^;]*strlen\\s*\\("
+            "for[[:space:]]*\\([^;]*;[^;]*strlen[[:space:]]*\\("
           ],
           "recommendation": "Compute the length once before the loop.",
           "example": {
@@ -127,7 +127,7 @@
           "description": "A polling loop or a short sleep keeps the CPU core busy and prevents low-power states.",
           "impact": "High",
           "patterns": [
-            "while\\s*\\(\\s*1\\s*\\)",
+            "while[[:space:]]*\\([[:space:]]*1[[:space:]]*\\)",
             "\\busleep\\(",
             "\\bsleep\\("
           ],

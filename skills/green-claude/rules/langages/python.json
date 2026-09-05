@@ -25,7 +25,7 @@
           "description": "Iterating a queryset whose associations you read fires one query per row: network and database cost grow linearly with the volume.",
           "impact": "High",
           "patterns": [
-            "for\\s+\\w+\\s+in\\s+\\w+\\.objects\\.(all|filter)\\("
+            "for[[:space:]]+\\w+[[:space:]]+in[[:space:]]+\\w+\\.objects\\.(all|filter)\\("
           ],
           "recommendation": "Load the associations you walk with select_related/prefetch_related (Django) or joinedload/selectinload (SQLAlchemy).",
           "example": {
@@ -47,7 +47,7 @@
           "impact": "High",
           "patterns": [
             "\\.objects\\.all\\(\\)",
-            "list\\(\\s*\\w+\\.objects\\.",
+            "list\\([[:space:]]*\\w+\\.objects\\.",
             "\\.query\\([^)]*\\)\\.all\\(\\)"
           ],
           "recommendation": "Paginate every exposed list; stream large volumes with iterator() (Django) or yield_per() (SQLAlchemy).",
@@ -124,7 +124,7 @@
           "impact": "High",
           "patterns": [
             "\\.iterrows\\(\\)",
-            "axis\\s*=\\s*1"
+            "axis[[:space:]]*=[[:space:]]*1"
           ],
           "recommendation": "Vectorise with numpy and pandas operations; cut memory with suitable dtypes (category, short integers).",
           "example": {
@@ -145,7 +145,7 @@
           "description": "`s += ...` rebuilds the whole string on every iteration (quadratic behaviour on long sequences).",
           "impact": "Low",
           "patterns": [
-            "\\+=\\s*[\"'f]"
+            "\\+=[[:space:]]*[\"'f]"
           ],
           "recommendation": "Accumulate in a list then ''.join(...), or write straight to a stream.",
           "rgesn_ref": "9.1",
@@ -183,9 +183,9 @@
           "description": "An lru_cache with no maxsize, or a global dict used as a cache, grows without limit: memory held for entries never reused.",
           "impact": "Medium",
           "patterns": [
-            "lru_cache\\(\\s*\\)",
-            "@lru_cache\\s*$",
-            "@cache\\s*$"
+            "lru_cache\\([[:space:]]*\\)",
+            "@lru_cache[[:space:]]*$",
+            "@cache[[:space:]]*$"
           ],
           "recommendation": "Bound and expire every cache: lru_cache(maxsize=N), a TTL on the Redis or Memcached side.",
           "rgesn_ref": "7.3",

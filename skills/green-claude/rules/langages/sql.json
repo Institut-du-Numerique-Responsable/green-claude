@@ -30,7 +30,7 @@
           "description": "Transfers every column, including the ones never read: network, memory and serialisation wasted, and breakage on the slightest schema change.",
           "impact": "High",
           "patterns": [
-            "select\\s+\\*"
+            "select[[:space:]]+\\*"
           ],
           "recommendation": "List explicitly the columns the need requires.",
           "example": {
@@ -66,8 +66,8 @@
           "description": "A function applied to the filtered column (UPPER, DATE, CAST), or a LIKE '%...' with a leading wildcard, rules out the index: full table scan.",
           "impact": "High",
           "patterns": [
-            "where[^;]*\\b(upper|lower|date|trunc|to_char|cast|convert)\\s*\\(",
-            "like\\s+'%"
+            "where[^;]*\\b(upper|lower|date|trunc|to_char|cast|convert)[[:space:]]*\\(",
+            "like[[:space:]]+'%"
           ],
           "recommendation": "Rewrite the predicate against the raw column (a date range, a direct comparison) or create a dedicated functional index.",
           "example": {
@@ -88,7 +88,7 @@
           "description": "A DISTINCT added to remove duplicates usually hides an incorrect join: the database sorts or hashes the whole result for nothing.",
           "impact": "Medium",
           "patterns": [
-            "\\bselect\\s+distinct\\b"
+            "\\bselect[[:space:]]+distinct\\b"
           ],
           "recommendation": "Check the cardinality of the joins; prefer EXISTS over IN (subquery) on large volumes.",
           "rgesn_ref": "9.1",
@@ -125,7 +125,7 @@
           "impact": "High",
           "patterns": [
             "\\bcursor\\b",
-            "for\\s+\\w+\\s+in\\s*\\(?\\s*select",
+            "for[[:space:]]+\\w+[[:space:]]+in[[:space:]]*\\(?[[:space:]]*select",
             "\\bloop\\b"
           ],
           "recommendation": "UPDATE ... WHERE, INSERT ... SELECT or MERGE in one statement; failing that, BULK COLLECT (with LIMIT) and FORALL in PL/SQL.",
@@ -164,7 +164,7 @@
           "description": "A DELETE with no WHERE and no slicing saturates the journal, holds long locks, and can fail the whole operation.",
           "impact": "Medium",
           "patterns": [
-            "delete\\s+from\\s+[\\w.\"]+\\s*;"
+            "delete[[:space:]]+from[[:space:]]+[\\w.\"]+[[:space:]]*;"
           ],
           "recommendation": "Purge in chunks with pauses; consider TRUNCATE or partitioning where the semantics allow.",
           "rgesn_ref": "7.3",
@@ -204,8 +204,8 @@
           "description": "VARCHAR(MAX) and CLOB \"just in case\" inflate storage, backups and transfers for the whole lifetime of the table.",
           "impact": "Low",
           "patterns": [
-            "varchar\\s*\\(\\s*max",
-            "nvarchar\\s*\\(\\s*max",
+            "varchar[[:space:]]*\\([[:space:]]*max",
+            "nvarchar[[:space:]]*\\([[:space:]]*max",
             "\\bclob\\b"
           ],
           "recommendation": "Size the types to the real need (no BIGINT when INT is enough, no TEXT by default).",

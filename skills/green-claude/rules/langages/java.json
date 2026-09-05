@@ -25,7 +25,7 @@
           "description": "Loads every row and manages them as managed entities: memory, CPU and network proportional to the table size.",
           "impact": "High",
           "patterns": [
-            "\\.findAll\\(\\s*\\)"
+            "\\.findAll\\([[:space:]]*\\)"
           ],
           "recommendation": "Paginate as a matter of course (Pageable, setMaxResults); process large volumes in chunks.",
           "example": {
@@ -106,7 +106,7 @@
           "description": "`s += ...` allocates a new String on every iteration: needless memory and GC pressure in hot loops.",
           "impact": "Low",
           "patterns": [
-            "\\+=\\s*\""
+            "\\+=[[:space:]]*\""
           ],
           "recommendation": "StringBuilder for repeated concatenation; avoid boxing in pipelines (IntStream rather than Stream<Integer>).",
           "rgesn_ref": "9.1",
@@ -123,7 +123,7 @@
           "description": "A static Map used as a cache grows without limit: memory held until restart, and possibly an OOM.",
           "impact": "Medium",
           "patterns": [
-            "static\\s+(final\\s+)?(Map|HashMap|ConcurrentHashMap)"
+            "static[[:space:]]+(final[[:space:]]+)?(Map|HashMap|ConcurrentHashMap)"
           ],
           "recommendation": "Caffeine with maximumSize plus expireAfterWrite, or an external cache with a TTL.",
           "rgesn_ref": "7.3",
