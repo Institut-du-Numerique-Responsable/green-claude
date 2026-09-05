@@ -53,6 +53,15 @@ else
     exit 0
 fi
 
+# Le contenu est audité depuis une copie temporaire, mais les chemins relatifs
+# qu'il contient (« assets/logo.webp », « ./config.json ») se résolvent depuis
+# le répertoire du fichier réel. Sans cette base, toute règle qui vérifie
+# l'existence d'un fichier référencé — liens locaux cassés, poids réel d'une
+# image — signale systématiquement un défaut inexistant, et un faux positif
+# systématique est ce qui apprend à ignorer le hook.
+GREEN_CLAUDE_BASE_DIR="$(dirname "$FILE")"
+export GREEN_CLAUDE_BASE_DIR
+
 REPORT="$("$AUDIT" "$TARGET" 2>/dev/null)" || exit 0
 grep -q '^\[' <<<"$REPORT" || exit 0  # aucune issue : silence
 

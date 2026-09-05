@@ -24,7 +24,14 @@
   <meta name="twitter:description" content="Skill open source pour un agent IA de code éco-conçu par défaut (RGESN 2024 / GR491 / WSG), plus un hook optionnel de cache local et heures creuses.">
   <meta name="twitter:image" content="https://institut-du-numerique-responsable.github.io/green-claude/assets/logo.jpg">
   <meta name="twitter:image:alt" content="Green Claude : un prompt de terminal dont le curseur devient une pousse verte">
-  <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+  <!-- Le logo complet servait d'icône : 10 Ko de JPEG pour un rendu 32x32.
+       Le glyphe est une forme plate à deux couleurs, donc vectoriel par
+       nature — 994 octets, net à toute taille, et il suit le thème du
+       système via une media query interne au SVG. Le PNG reste en repli
+       pour les navigateurs sans favicon SVG ; ils sont les seuls à le
+       télécharger. -->
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -98,22 +105,44 @@
   </style>
   <!-- Matomo -->
   <script>
-    var _paq = window._paq = window._paq || [];
-    _paq.push(['trackPageView']);
-    _paq.push(['enableLinkTracking']);
+    // Trois écarts corrigés par rapport au snippet Matomo par défaut :
+    //   1. disableCookies : plus d'écriture locale, donc exemption de bandeau
+    //      de consentement (CNIL) et une requête de moins au retour du visiteur ;
+    //   2. chargement différé à l'inactivité : matomo.js ne concurrence plus le
+    //      rendu de la page, qui est le seul contenu utile au visiteur ;
+    //   3. _paq déclaré dans la fermeture plutôt qu'en variable globale nue —
+    //      la globale reste nécessaire à Matomo, mais assignée explicitement.
     (function() {
-      var u="//analytic.institutnr.org:8443/";
-      _paq.push(['setTrackerUrl', u+'matomo.php']);
+      var u = "//analytic.institutnr.org:8443/";
+      var _paq = window._paq = window._paq || [];
+      _paq.push(['disableCookies']);
+      _paq.push(['setTrackerUrl', u + 'matomo.php']);
       _paq.push(['setSiteId', '11']);
-      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-      g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      var load = function() {
+        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+        g.async = true; g.src = u + 'matomo.js'; s.parentNode.insertBefore(g, s);
+      };
+      if ('requestIdleCallback' in window) { requestIdleCallback(load, { timeout: 3000 }); }
+      else { window.addEventListener('load', load); }
     })();
   </script>
   <!-- End Matomo Code -->
 </head>
 <body>
 <main>
-  <img class="logo" src="assets/logo.jpg" alt="Green Claude, un prompt de terminal dont le curseur devient une pousse verte" width="192" height="99">
+  <!-- Le JPEG 1024x529 était servi tel quel pour un affichage 192x99, soit
+       cinq fois la résolution utile, et son fond crème opaque formait un
+       rectangle clair en mode sombre. Le même SVG que le favicon sert ici,
+       recadré comme l'original : 1 064 octets (615 compressés), net à toute
+       taille, et l'encre suit le thème. Le JPEG reste pour og:image — les
+       robots des réseaux sociaux ne lisent pas tous le SVG — et sert de repli
+       aux navigateurs sans SVG, les seuls à le télécharger. -->
+  <picture>
+    <source srcset="assets/logo.svg" type="image/svg+xml">
+    <img class="logo" src="assets/logo.jpg" alt="Green Claude, un prompt de terminal dont le curseur devient une pousse verte" width="192" height="99">
+  </picture>
   <h1>🌱 Green Claude, un skill IA éco-conçu</h1>
   <p class="tagline">Un skill pour <strong>Claude Code</strong> qui guide Claude vers un code éco-conçu selon le <strong>RGESN&nbsp;2024</strong> et le <strong>GR491</strong>, installé une fois et appliqué automatiquement.</p>
 
@@ -128,7 +157,7 @@
   <div class="duo">
     <div class="card">
       <h3>Pendant que Claude code</h3>
-      <p>52 règles d'éco-conception alignées sur les 9 familles du RGESN 2024, avec renvoi aux critères officiels : Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
+      <p>83 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : renvoi au critère officiel près pour les familles 1 à 4, renvoi à la famille pour les suivantes. Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
     </div>
     <div class="card">
       <h3>Sur demande, un audit</h3>
@@ -136,7 +165,7 @@
     </div>
     <div class="card">
       <h3>Le détail de ton langage</h3>
-      <p>80 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C et C++. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel te concerne, d'après l'extension du fichier.</p>
+      <p>127 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++, Go, Kotlin, Swift et Shell. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel te concerne, d'après l'extension du fichier.</p>
     </div>
     <div class="card">
       <h3>À chaque écriture, sans y penser</h3>
@@ -153,14 +182,26 @@ app.get('/api/users', (req, res) => {
     res.json(rows);
   });
 });</code></pre>
-  <p><code>eco-audit.sh api.js</code> (sortie réelle, non retouchée) :</p>
-  <pre><code>[Élevé] ECO-FRONT-01 — Pas de bibliothèque lourde pour un besoin mineur
-  Recommandation : Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).
+  <p><code>eco-audit.sh api.js</code> (sortie réelle, non retouchée ; les règles sont en anglais) :</p>
+  <pre><code>[High] ECO-FRONT-01 — No heavy library for a minor need
+  File           : api.js
+  Category       : 6. Frontend
+  RGESN          : 6.x
+  Recommendation : Prefer the language's native functions or lighter alternatives (date-fns, Alpine.js).
 
-[Élevé] ECO-BACK-01 — Optimiser les requêtes SQL
-  Recommandation : Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE et les requêtes N+1.
+[High] ECO-BACK-01 — Optimise SQL queries
+  File           : api.js
+  Category       : 7. Backend
+  RGESN          : 7.x
+  Recommendation : Select only the columns you need, index the filtered columns, and avoid functions in WHERE clauses and N+1 queries.
 
-2 issue(s) d'éco-conception détectée(s).</code></pre>
+[High] ECO-JS-01 — Whole-library import
+  File           : api.js
+  Category       : JS/TS — dependencies and weight
+  RGESN          : 6.1, 6.2
+  Recommendation : Targeted imports (import { x } from 'lib/x'); native APIs first (fetch, Intl, URL, structuredClone, Date/Temporal) before adding a dependency.
+
+3 ecodesign issue(s) found.</code></pre>
   <p>En pratique, pas besoin de lancer l'audit toi-même sur ce genre de code : en mode proactif, Claude évite <code>lodash</code> pour une seule fonction et <code>SELECT *</code> dès l'écriture, avant même qu'un audit ait lieu.</p>
 
   <h2>En 30 secondes</h2>
@@ -175,9 +216,9 @@ cd green-claude && ./install.sh</code></pre>
   <h2>Ce que contient le projet</h2>
   <ul>
     <li>Un skill Claude Code qui s'invoque tout seul dès qu'il s'agit d'écrire ou de revoir du code.</li>
-    <li>52 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
-    <li>80 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
-    <li>14 pratiques de sobriété inspirées de Boris Cherny, le créateur de Claude Code : chacune est sourcée et expliquée.</li>
+    <li>83 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
+    <li>127 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
+    <li>15 pratiques d’usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
     <li>Des hooks optionnels, proposés à l'installation et jamais imposés : audit après chaque écriture de code, audit avant commit, cache local des réponses, avertissement aux heures de pointe.</li>
     <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
   </ul>
@@ -186,13 +227,14 @@ cd green-claude && ./install.sh</code></pre>
   <p>Le code généré par l'IA va tourner pendant des années chez des utilisateurs qu'on ne verra jamais. C'est là que se joue l'essentiel de l'empreinte du « coder avec l'IA », pas pendant la session de génération. Green Claude s'attaque à ce moment précis, en s'appuyant sur des référentiels publics français et internationaux plutôt que sur des règles maison.</p>
 
   <h2>Pourquoi un skill, pas une checklist</h2>
-  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 146 règles à chaque échange, et vérifie le code déjà produit via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
+  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 225 règles à chaque échange, et vérifie le code déjà produit via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
 
   <p>Reste que charger un skill est une décision du modèle. Pour les équipes qui veulent une vérification qui ne dépende de personne, le hook d'audit s'exécute après chaque écriture de fichier de code et renvoie ses trouvailles à Claude, qui corrige avant de continuer.</p>
 
   <footer>
     <p>Une production de l'<strong>Institut du Numérique Responsable</strong>, 2026, open source (MIT).<br>
-    Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page. Seule exception : une mesure d'audience légère et auto-hébergée (Matomo).</p>
+    Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page, un logo vectoriel qui sert aussi de favicon et suit le thème. <strong>6,6 Ko transférés</strong> en deux requêtes à la première visite, hors mesure d'audience.</p>
+    <p>Mesure d'audience&nbsp;: Matomo auto-hébergé, <strong>sans cookie ni traceur tiers</strong>, chargé une fois la page rendue. Aucune donnée n'est transmise à un tiers, et rien n'est écrit sur votre appareil.</p>
   </footer>
 </main>
 </body>

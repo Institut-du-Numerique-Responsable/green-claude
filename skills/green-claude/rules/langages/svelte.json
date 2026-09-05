@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Svelte",
+    "description": "Ecodesign rules for Svelte: narrow reactive statements, stores unsubscribed, static rendering where possible.",
+    "version": "1.0.0",
+    "globs": "**/*.svelte",
+    "extensions": [
+      "svelte"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 2,
+    "type": "code_audit"
+  },
+  "categories": {
+    "reactivite": {
+      "name": "Svelte — reactivity",
+      "description": "A reactive statement re-runs whenever anything it touches changes (RGESN Frontend).",
+      "rules": [
+        {
+          "id": "ECO-SVELTE-01",
+          "title": "Store subscribed without teardown",
+          "description": "A manual store subscription outlives the component that made it unless something unsubscribes. The auto-subscription with $ does that for you and is usually what was meant.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.subscribe\\("
+          ],
+          "exclude_file_patterns": [
+            "onDestroy",
+            "unsubscribe"
+          ],
+          "recommendation": "Use the $store auto-subscription, or keep the returned function and call it in onDestroy.",
+          "note": "One onDestroy or unsubscribe anywhere in the file silences the rule. Where several manual subscriptions coexist, check that each is torn down.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-SVELTE-003 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "svelte",
+            "stores",
+            "leaks"
+          ]
+        },
+        {
+          "id": "ECO-SVELTE-02",
+          "title": "Broad reactive statement",
+          "description": "A reactive block that recomputes a large derived value re-runs whenever any of its dependencies moves, including the ones that do not affect the result.",
+          "impact": "Low",
+          "patterns": [
+            "^[[:space:]]*\\$:[[:space:]]*[a-zA-Z_]+[[:space:]]*=[^=]"
+          ],
+          "recommendation": "Keep the statement to the data it needs, and split a wide one into several narrow ones so each re-runs only for its own inputs.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-SVELTE-001 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "svelte",
+            "reactivity"
+          ]
+        }
+      ]
+    }
+  }
+}

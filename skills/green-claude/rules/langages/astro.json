@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Astro",
+    "description": "Ecodesign rules for Astro: static by default, the smallest client directive, media optimised at build.",
+    "version": "1.0.0",
+    "globs": "**/*.astro",
+    "extensions": [
+      "astro"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 2,
+    "type": "code_audit"
+  },
+  "categories": {
+    "hydratation": {
+      "name": "Astro — hydration",
+      "description": "Every hydrated island ships a runtime the static page did not need (RGESN Frontend).",
+      "rules": [
+        {
+          "id": "ECO-ASTRO-01",
+          "title": "Island hydrated on load",
+          "description": "client:load ships and boots the component's framework before the user has done anything. On a component below the fold, that runtime is downloaded, parsed and executed for an interaction that may never happen.",
+          "impact": "High",
+          "patterns": [
+            "client:load"
+          ],
+          "recommendation": "Pick the smallest directive that meets the interaction: client:idle, client:visible, or client:media. Keep client:load for what must be interactive immediately.",
+          "example": {
+            "bad": "<Carousel client:load />",
+            "good": "<Carousel client:visible />"
+          },
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-ASTRO-003 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "astro",
+            "hydration",
+            "bundle"
+          ]
+        },
+        {
+          "id": "ECO-ASTRO-02",
+          "title": "Image used without the build-time pipeline",
+          "description": "A raw img tag skips the optimisation Astro would have done at build: no modern format, no responsive sizes, no dimensions. The visitor pays the difference on every load.",
+          "impact": "Medium",
+          "patterns": [
+            "<img[[:space:]]"
+          ],
+          "exclude_file_patterns": [
+            "from[[:space:]]+['\"]astro:assets['\"]",
+            "<Image"
+          ],
+          "recommendation": "Use the Image component so the format, the sizes and the dimensions are produced at build time, and keep an accessible alt.",
+          "note": "Importing the Image component anywhere in the file silences the rule. A raw img is legitimate for an SVG or a remote asset the build cannot process, so check what the source points at.",
+          "rgesn_ref": "5.x",
+          "gr491_famille": "Contenus",
+          "source_note": "Adapted from the Green Codex rule LANG-ASTRO-002 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "astro",
+            "images",
+            "build"
+          ]
+        }
+      ]
+    }
+  }
+}

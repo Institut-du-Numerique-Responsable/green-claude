@@ -1,0 +1,141 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Kotlin",
+    "description": "Ecodesign rules for Kotlin code, on Android as much as on the server: scoped coroutines, no blocking on a thread, bounded channels and collections.",
+    "globs": "**/*.{kt,kts}",
+    "extensions": [
+      "kt",
+      "kts"
+    ],
+    "version": "1.0.0",
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 5,
+    "type": "code_audit"
+  },
+  "categories": {
+    "coroutines": {
+      "name": "Kotlin — coroutines and threads",
+      "description": "Give every coroutine a lifetime, never block a thread waiting (RGESN Algorithms, GR491_Backend_4).",
+      "rules": [
+        {
+          "id": "ECO-KT-01",
+          "title": "GlobalScope coroutine",
+          "description": "A coroutine launched in GlobalScope outlives the screen, the request or the component that started it. On a phone that means work and radio use continuing for a screen the user has already left.",
+          "impact": "High",
+          "patterns": [
+            "GlobalScope\\.(launch|async)"
+          ],
+          "recommendation": "Launch from a scope with a lifetime: viewModelScope, lifecycleScope, or a CoroutineScope you cancel yourself. Cancellation then propagates to the children.",
+          "example": {
+            "bad": "GlobalScope.launch { fetch() }",
+            "good": "viewModelScope.launch { fetch() }"
+          },
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "kotlin",
+            "coroutines",
+            "lifecycle"
+          ]
+        },
+        {
+          "id": "ECO-KT-02",
+          "title": "Blocking call inside a coroutine",
+          "description": "runBlocking, or Thread.sleep inside a suspending function, pins a thread that the dispatcher could have given to other work. A handful of them is enough to starve a pool and keep cores busy waiting.",
+          "impact": "High",
+          "patterns": [
+            "runBlocking",
+            "Thread\\.sleep\\("
+          ],
+          "exclude_patterns": [
+            "fun main",
+            "@Test"
+          ],
+          "recommendation": "Use delay() in suspending code, and move genuinely blocking work to Dispatchers.IO with withContext. Keep runBlocking for main() and tests.",
+          "example": {
+            "bad": "runBlocking { api.load() }",
+            "good": "withContext(Dispatchers.IO) { api.load() }"
+          },
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "kotlin",
+            "coroutines",
+            "blocking"
+          ]
+        },
+        {
+          "id": "ECO-KT-03",
+          "title": "Unbounded channel",
+          "description": "Channel(UNLIMITED) removes the back-pressure that would have told the producer to slow down. The queue then grows to whatever memory allows, and the work is done twice: once to enqueue, once to discard.",
+          "impact": "Medium",
+          "patterns": [
+            "Channel\\.UNLIMITED",
+            "Int\\.MAX_VALUE"
+          ],
+          "recommendation": "Size the channel to what the consumer can absorb, and choose the overflow behaviour deliberately (SUSPEND, DROP_OLDEST).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "kotlin",
+            "channels",
+            "backpressure"
+          ]
+        }
+      ]
+    },
+    "collections": {
+      "name": "Kotlin — collections and allocations",
+      "description": "Do not materialise a collection you only walk once (RGESN Algorithms).",
+      "rules": [
+        {
+          "id": "ECO-KT-04",
+          "title": "Intermediate collection in a chain",
+          "description": "Each map or filter on a List allocates a new List. Chained three deep over a large collection, that is three full copies for one result that a sequence would have produced without any of them.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.map[[:space:]]*\\{[^}]*\\}[[:space:]]*\\.(filter|map)"
+          ],
+          "exclude_file_patterns": [
+            "asSequence\\(\\)"
+          ],
+          "recommendation": "Switch the chain to asSequence() when the collection is large, and materialise only the final result. On small collections the plain list stays clearer and cheaper.",
+          "note": "A single asSequence() anywhere in the file silences the rule, even for other chains that still materialise. On a small collection the plain list is both clearer and cheaper, so a hit is a question about volume, not a defect.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "kotlin",
+            "collections",
+            "allocations"
+          ]
+        },
+        {
+          "id": "ECO-KT-05",
+          "title": "Linear search inside a loop",
+          "description": "contains on a List walks it from the start. Called for every element of another collection, the work becomes quadratic and collapses on volumes that were fine in testing.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.contains\\(",
+            "[[:space:]]in[[:space:]]+[a-zA-Z]+List"
+          ],
+          "exclude_file_patterns": [
+            "Set<",
+            "\\.toSet\\(\\)",
+            "Map<"
+          ],
+          "recommendation": "Index into a Set or a Map before the loop, and look up in constant time.",
+          "note": "Declaring one Set or Map in the file silences the rule. contains on a short list is perfectly fine; what matters is whether this particular lookup sits inside a loop over a large collection.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "kotlin",
+            "algorithms"
+          ]
+        }
+      ]
+    }
+  }
+}

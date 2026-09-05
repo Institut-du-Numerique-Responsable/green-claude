@@ -1,10 +1,12 @@
 {
   "metadata": {
-    "name": "Éco-conception C# / .NET",
-    "description": "Règles d'écoconception pour le code C#/.NET : Entity Framework sobre, async de bout en bout, allocations, caches bornés, logs.",
+    "name": "Ecodesign for C# / .NET",
+    "description": "Ecodesign rules for C#/.NET code: sober Entity Framework, async end to end, allocations, bounded caches, logging.",
     "version": "1.0.0",
     "globs": "**/*.cs",
-    "extensions": ["cs"],
+    "extensions": [
+      "cs"
+    ],
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/"
@@ -14,108 +16,164 @@
   },
   "categories": {
     "donnees": {
-      "name": "C# — accès aux données (EF Core / ADO.NET)",
-      "description": "Garder le travail côté base et ne matérialiser que le nécessaire (RGESN Backend, GR491_Backend_2/3).",
+      "name": "C# — data access (EF Core / ADO.NET)",
+      "description": "Keep the work in the database and materialise only what is needed (RGESN Backend, GR491_Backend_2/3).",
       "rules": [
         {
           "id": "ECO-CS-01",
-          "title": "Matérialisation prématurée d'un IQueryable",
-          "description": "Un ToList()/AsEnumerable() avant les filtres rapatrie la table entière puis filtre en mémoire applicative.",
-          "impact": "Élevé",
-          "patterns": ["\\.ToList\\(\\)", "\\.AsEnumerable\\(\\)"],
-          "recommendation": "Filtrer, projeter et agréger sur l'IQueryable avant toute matérialisation ; paginer (Skip/Take ou keyset : Where(x => x.Id > dernierId).Take(n)).",
+          "title": "Premature materialisation of an IQueryable",
+          "description": "A ToList() or AsEnumerable() before the filters pulls the whole table back, then filters in application memory.",
+          "impact": "High",
+          "patterns": [
+            "\\.ToList\\(\\)",
+            "\\.AsEnumerable\\(\\)"
+          ],
+          "recommendation": "Filter, project and aggregate on the IQueryable before any materialisation; paginate (Skip/Take, or keyset: Where(x => x.Id > lastId).Take(n)).",
+          "example": {
+            "bad": "var users = db.Users.ToList().Where(u => u.Active);",
+            "good": "var users = db.Users.Where(u => u.Active).Select(u => u.Id).Take(100).ToList();"
+          },
           "rgesn_ref": "7.1",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "efcore", "pagination"]
+          "tags": [
+            "csharp",
+            "efcore",
+            "pagination"
+          ]
         },
         {
           "id": "ECO-CS-02",
-          "title": "Lecture seule sans AsNoTracking ni projection",
-          "description": "Charger des entités trackées pour un simple affichage consomme mémoire et CPU (snapshot de changement) pour rien.",
-          "impact": "Moyen",
-          "patterns": ["\\.Include\\("],
-          "recommendation": "AsNoTracking() systématique en lecture seule et projection Select(x => new Dto { … }) ciblée plutôt que Include en cascade.",
+          "title": "Read-only query without AsNoTracking or projection",
+          "description": "Loading tracked entities just to display them costs memory and CPU (the change snapshot) for nothing.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.Include\\("
+          ],
+          "recommendation": "AsNoTracking() as a matter of course on read-only queries, and a targeted Select(x => new Dto { ... }) rather than cascading Include.",
           "rgesn_ref": "7.1",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "efcore", "projection"]
+          "tags": [
+            "csharp",
+            "efcore",
+            "projection"
+          ]
         },
         {
           "id": "ECO-CS-03",
-          "title": "Count() là où Any() suffit",
-          "description": "Count() parcourt et compte toutes les lignes alors qu'un test d'existence s'arrête à la première.",
-          "impact": "Faible",
-          "patterns": ["\\.Count\\(\\)\\s*[><=]"],
-          "recommendation": "Any() pour un test d'existence ; éviter l'énumération multiple d'un même IEnumerable (matérialiser une fois si réutilisé).",
+          "title": "Count() where Any() is enough",
+          "description": "Count() walks and counts every row when an existence test can stop at the first one.",
+          "impact": "Low",
+          "patterns": [
+            "\\.Count\\(\\)\\s*[><=]"
+          ],
+          "recommendation": "Any() for an existence test; avoid enumerating the same IEnumerable several times (materialise once when reused).",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "linq"]
+          "tags": [
+            "csharp",
+            "linq"
+          ]
         }
       ]
     },
     "async": {
-      "name": "C# — asynchronisme et réseau",
-      "description": "Ne pas bloquer de thread, réutiliser les connexions (RGESN Backend/Hébergement).",
+      "name": "C# — asynchrony and network",
+      "description": "Do not block a thread, reuse connections (RGESN Backend/Hosting).",
       "rules": [
         {
           "id": "ECO-CS-04",
-          "title": "Attente bloquante sur une tâche",
-          "description": ".Result et .Wait() immobilisent un thread du pool : plus de threads, plus de mémoire, et risque d'interblocage.",
-          "impact": "Élevé",
-          "patterns": ["\\.Result\\b", "\\.Wait\\(\\)"],
-          "recommendation": "async/await de bout en bout pour tout I/O.",
+          "title": "Blocking wait on a task",
+          "description": ".Result and .Wait() pin a thread-pool thread: more threads, more memory, and a deadlock risk.",
+          "impact": "High",
+          "patterns": [
+            "\\.Result\\b",
+            "\\.Wait\\(\\)"
+          ],
+          "recommendation": "async/await end to end for every I/O.",
+          "example": {
+            "bad": "var data = GetAsync().Result;",
+            "good": "var data = await GetAsync();"
+          },
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "async"]
+          "tags": [
+            "csharp",
+            "async"
+          ]
         },
         {
           "id": "ECO-CS-05",
-          "title": "HttpClient instancié par requête",
-          "description": "Un HttpClient par appel épuise les sockets et refait la poignée de main TLS à chaque requête.",
-          "impact": "Moyen",
-          "patterns": ["new\\s+HttpClient\\("],
-          "recommendation": "IHttpClientFactory (réutilisation des connexions) ; activer la compression de réponse et les en-têtes de cache (ResponseCache, ETag).",
+          "title": "HttpClient instantiated per request",
+          "description": "One HttpClient per call exhausts sockets and repeats the TLS handshake on every request.",
+          "impact": "Medium",
+          "patterns": [
+            "new\\s+HttpClient\\("
+          ],
+          "recommendation": "IHttpClientFactory (connections reused); enable response compression and cache headers (ResponseCache, ETag).",
           "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "reseau", "connexions"]
+          "tags": [
+            "csharp",
+            "network",
+            "connections"
+          ]
         },
         {
           "id": "ECO-CS-06",
-          "title": "Service d'arrière-plan qui scrute",
-          "description": "Un BackgroundService qui interroge un état en boucle rapprochée consomme CPU et base en permanence.",
-          "impact": "Moyen",
-          "patterns": ["BackgroundService", "Task\\.Delay\\("],
-          "recommendation": "Déclenchement événementiel (message, webhook) ; sinon espacer nettement les intervalles.",
+          "title": "Background service that polls",
+          "description": "A BackgroundService querying a state in a tight loop consumes CPU and database capacity continuously.",
+          "impact": "Medium",
+          "patterns": [
+            "BackgroundService",
+            "Task\\.Delay\\("
+          ],
+          "recommendation": "Event-driven triggering (message, webhook); failing that, widen the interval substantially.",
           "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "polling"]
+          "tags": [
+            "csharp",
+            "polling"
+          ]
         }
       ]
     },
     "memoire": {
-      "name": "C# — mémoire et logs",
-      "description": "Limiter les allocations dans les chemins chauds et borner les caches (RGESN Algorithmie).",
+      "name": "C# — memory and logging",
+      "description": "Limit allocations on hot paths and bound the caches (RGESN Algorithms).",
       "rules": [
         {
           "id": "ECO-CS-07",
-          "title": "Cache statique non borné",
-          "description": "Un Dictionary statique utilisé comme cache grossit sans limite jusqu'au redémarrage du process.",
-          "impact": "Moyen",
-          "patterns": ["static\\s+(readonly\\s+)?(Dictionary|ConcurrentDictionary)"],
-          "recommendation": "IMemoryCache avec SizeLimit/AbsoluteExpiration, ou cache distribué avec TTL.",
+          "title": "Unbounded static cache",
+          "description": "A static Dictionary used as a cache grows without limit until the process restarts.",
+          "impact": "Medium",
+          "patterns": [
+            "static\\s+(readonly\\s+)?(Dictionary|ConcurrentDictionary)"
+          ],
+          "recommendation": "IMemoryCache with SizeLimit/AbsoluteExpiration, or a distributed cache with a TTL.",
           "rgesn_ref": "7.3",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "cache", "memoire"]
+          "tags": [
+            "csharp",
+            "cache",
+            "memory"
+          ]
         },
         {
           "id": "ECO-CS-08",
-          "title": "Concaténation de chaînes en boucle",
-          "description": "`s += ...` alloue une nouvelle string à chaque tour : pression GC inutile dans les chemins chauds.",
-          "impact": "Faible",
-          "patterns": ["\\+=\\s*\""],
-          "recommendation": "StringBuilder pour les concaténations répétées ; Span<T>/Memory<T> pour le parsing intensif ; logging structuré paramétré (_logger.LogDebug(\"x={X}\", x)).",
+          "title": "String concatenation in a loop",
+          "description": "`s += ...` allocates a new string on every iteration: needless GC pressure on hot paths.",
+          "impact": "Low",
+          "patterns": [
+            "\\+=\\s*\""
+          ],
+          "recommendation": "StringBuilder for repeated concatenation; Span<T>/Memory<T> for heavy parsing; parameterised structured logging (_logger.LogDebug(\"x={X}\", x)).",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["csharp", "memoire", "chaines"]
+          "tags": [
+            "csharp",
+            "memory",
+            "strings"
+          ]
         }
       ]
     }

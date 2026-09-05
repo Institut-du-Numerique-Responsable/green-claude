@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Zig",
+    "description": "Ecodesign rules for Zig code: explicit allocator ownership, bounded buffers, tested failure paths.",
+    "version": "1.0.0",
+    "globs": "**/*.zig",
+    "extensions": [
+      "zig"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 2,
+    "type": "code_audit"
+  },
+  "categories": {
+    "memoire": {
+      "name": "Zig — allocators and buffers",
+      "description": "Ownership is explicit in Zig; the cost is paying attention to it (RGESN Algorithms).",
+      "rules": [
+        {
+          "id": "ECO-ZIG-01",
+          "title": "Allocation without a matching defer",
+          "description": "Zig hands you the allocation and the responsibility. An alloc with no defer free leaks on every early return, and early returns are the normal control flow of a language built on error unions.",
+          "impact": "High",
+          "patterns": [
+            "\\.alloc\\(",
+            "\\.create\\(",
+            "allocPrint\\("
+          ],
+          "exclude_file_patterns": [
+            "defer[[:space:]]+[a-zA-Z_.]*free",
+            "defer[[:space:]]+[a-zA-Z_.]*destroy",
+            "arena"
+          ],
+          "recommendation": "Pair every alloc with a defer free on the next line, and test the failure path with a failing allocator.",
+          "example": {
+            "bad": "const buf = try allocator.alloc(u8, n);",
+            "good": "const buf = try allocator.alloc(u8, n);\ndefer allocator.free(buf);"
+          },
+          "note": "One matching defer free, or an arena allocator, anywhere in the file silences the rule. An arena freed as a whole is a valid strategy, which is why it is excluded.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "zig",
+            "allocator",
+            "leaks"
+          ]
+        },
+        {
+          "id": "ECO-ZIG-02",
+          "title": "Unbounded read from external input",
+          "description": "readAllAlloc with a large maximum lets whoever is on the other end decide how much memory you allocate. On a service that is a denial of service written as a convenience.",
+          "impact": "High",
+          "patterns": [
+            "readAllAlloc\\(",
+            "readToEndAlloc\\("
+          ],
+          "recommendation": "Set a maximum sized to what the format actually requires, or read into a fixed buffer in a loop.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "zig",
+            "memory",
+            "bounds"
+          ]
+        }
+      ]
+    }
+  }
+}

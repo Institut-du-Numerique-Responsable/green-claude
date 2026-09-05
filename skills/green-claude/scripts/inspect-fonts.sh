@@ -14,14 +14,18 @@
 set -euo pipefail
 
 FILE="$1"
-DIR="$(dirname "$FILE")"
+# Base de résolution des chemins relatifs. Vaut le répertoire du fichier
+# dans le cas courant ; l'appelant peut la forcer quand il audite une copie
+# du contenu plutôt que le fichier lui-même (hook PostToolUse), sans quoi
+# « assets/logo.webp » serait cherché dans /tmp et jamais trouvé.
+DIR="${GREEN_CLAUDE_BASE_DIR:-$(dirname "$FILE")}"
 SEUIL_EXCES_OCTETS=$((40 * 1024))   # au-delà, police probablement mal optimisée
 SEUIL_TOTAL_OCTETS=$((400 * 1024))  # RGESN 4.8
 
 # --- Polices tierces (CDN) : détectées, mais ni poids ni nombre réels ne
 # sont mesurables sans requête réseau vers le CDN.
 if grep -qiE 'fonts\.googleapis\.com|fonts\.gstatic\.com|use\.typekit\.net' "$FILE" 2>/dev/null; then
-    echo "police(s) tierce(s) détectée(s) (CDN) : poids/nombre réels non mesurables sans requête réseau — vérifie manuellement (RGESN 4.8 : max 2 polices, 4 variantes au total, ou 400 Ko)"
+    echo "third-party font(s) detected (CDN): real weight and count not measurable without a network request - check manually (RGESN 4.8: at most 2 fonts, 4 variants in total, or 400 KB)"
 fi
 
 # --- Polices auto-hébergées : parcourt les blocs @font-face { ... } pour en
@@ -74,13 +78,13 @@ while IFS= read -r line; do
                     total_bytes=$((total_bytes + size))
                     excess=$((size - SEUIL_EXCES_OCTETS))
                     if [ "$excess" -gt 0 ]; then
-                        echo "$(basename "$candidate") : $((size / 1024)) Ko, dépasse le seuil de 40 Ko de $((excess / 1024)) Ko — compression, glyphes surabondants ou formes complexes probablement à revoir"
+                        echo "$(basename "$candidate"): $((size / 1024)) KB, over the 40 KB threshold by $((excess / 1024)) KB - compression, surplus glyphs or complex outlines probably worth revisiting"
                     fi
                     case "$candidate" in
                         *.woff2) ;; # déjà le format le plus compressé
-                        *.woff)  echo "$(basename "$candidate") : format WOFF (v1) — WOFF2 compresse mieux" ;;
-                        *.ttf|*.otf) echo "$(basename "$candidate") : format non compressé (TTF/OTF) — préférer WOFF2" ;;
-                        *.eot)   echo "$(basename "$candidate") : format EOT (IE legacy) — obsolète, préférer WOFF2" ;;
+                        *.woff)  echo "$(basename "$candidate"): WOFF (v1) format - WOFF2 compresses better" ;;
+                        *.ttf|*.otf) echo "$(basename "$candidate"): uncompressed format (TTF/OTF) - prefer WOFF2" ;;
+                        *.eot)   echo "$(basename "$candidate"): EOT format (legacy IE) - obsolete, prefer WOFF2" ;;
                     esac
                 fi
             fi
@@ -120,11 +124,11 @@ nb_autres=$(printf '%s\n' "$families_autres" | sort -u | grep -c . || true)
 # faire : émettre le décompte dans tous les cas rendait la règle impossible à
 # satisfaire pour tout site chargeant la moindre police.
 if [ "$nb_familles" -gt 2 ] || [ "$variants" -gt 4 ]; then
-    echo "$nb_familles famille(s) latine(s) auto-hébergée(s), $variants variante(s) au total — dépasse le seuil RGESN 4.8 (max 2 / 4)"
+    echo "$nb_familles self-hosted Latin family/families, $variants variant(s) in total - over the RGESN 4.8 threshold (at most 2 / 4)"
 fi
 if [ "$nb_autres" -gt 0 ] && { [ "$nb_familles" -gt 2 ] || [ "$variants" -gt 4 ]; }; then
-    echo "note : $nb_autres famille(s) restreinte(s) par unicode-range à une écriture non latine, hors budget latin (téléchargée(s) seulement si la page affiche cette écriture)"
+    echo "note: $nb_autres family/families restricted by unicode-range to a non-Latin script, outside the Latin budget (downloaded only when the page displays that script)"
 fi
 if [ "$total_bytes" -gt "$SEUIL_TOTAL_OCTETS" ]; then
-    echo "poids total des polices auto-hébergées résolvables : $((total_bytes / 1024)) Ko — dépasse le seuil RGESN 4.8 de 400 Ko"
+    echo "total weight of resolvable self-hosted fonts: $((total_bytes / 1024)) KB - over the RGESN 4.8 threshold of 400 KB"
 fi

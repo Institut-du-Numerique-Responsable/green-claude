@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 193.57 100" role="img"
+     aria-label="Green Claude, un prompt de terminal dont le curseur devient une pousse verte">
+  <style>
+    /* Une regle CSS l'emporte sur un attribut de presentation : deux classes
+       plutot qu'un fill="none" sur le trace, qui serait ecrase. */
+    .trait { fill: none; stroke: #303030 }
+    .plein { fill: #303030 }
+    @media (prefers-color-scheme: dark) {
+      .trait { stroke: #e6e3d8 }
+      .plein { fill: #e6e3d8 }
+    }
+  </style>
+  <g transform="translate(79.96 28.54) scale(0.35539)">
+  <path class="trait" stroke-width="10.5" stroke-linecap="butt" stroke-linejoin="miter"
+          d="M0 54.5 L37 72.5 L0 90.5"/>
+    <rect class="plein" x="57.4" y="50" width="8" height="49.5" rx="1"/>
+    <path fill="none" stroke="#4a8a54" stroke-width="4" stroke-linecap="round"
+          d="M61.4 50 C61.4 43 65 39 65 33"/>
+    <path fill="#407850" d="M64 33 Q61.8 9.2 38 9 Q40.2 32.8 64 33 Z"/>
+    <path fill="#509058" d="M66 32 Q94.1 28.9 99 1 Q70.9 4.1 66 32 Z"/>
+  </g>
+</svg>

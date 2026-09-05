@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Vue",
+    "description": "Ecodesign rules for Vue: computed over watchers, lazy routes, shallow state for large data.",
+    "version": "1.0.0",
+    "globs": "**/*.vue",
+    "extensions": [
+      "vue"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 2,
+    "type": "code_audit"
+  },
+  "categories": {
+    "reactivite": {
+      "name": "Vue — reactivity",
+      "description": "Deep reactivity on a large object costs on every read and every write (RGESN Frontend).",
+      "rules": [
+        {
+          "id": "ECO-VUE-01",
+          "title": "Deep watcher on a large object",
+          "description": "A watcher with deep: true walks the whole object graph on every change to decide whether anything moved. On a large payload that traversal happens far more often than the change it is looking for.",
+          "impact": "Medium",
+          "patterns": [
+            "deep:[[:space:]]*true"
+          ],
+          "recommendation": "Watch the specific property that matters, or derive the value with computed. Use shallowRef for large immutable payloads.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-VUE-001 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "vue",
+            "reactivity",
+            "watchers"
+          ]
+        },
+        {
+          "id": "ECO-VUE-02",
+          "title": "Route loaded eagerly",
+          "description": "Importing every route at the top of the router ships the whole application to a visitor who opens one page.",
+          "impact": "High",
+          "patterns": [
+            "^import[[:space:]]+[A-Z][a-zA-Z]*[[:space:]]+from[[:space:]]+['\"]\\.\\./(views|pages)/"
+          ],
+          "exclude_file_patterns": [
+            "import\\(",
+            "defineAsyncComponent"
+          ],
+          "recommendation": "Load routes with a dynamic import so each page arrives when someone navigates to it.",
+          "example": {
+            "bad": "import Dashboard from '../views/Dashboard.vue'",
+            "good": "const Dashboard = () => import('../views/Dashboard.vue')"
+          },
+          "note": "One dynamic import or defineAsyncComponent anywhere in the file silences the rule. A component used on every route is legitimately imported eagerly.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-VUE-002 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "vue",
+            "routing",
+            "bundle"
+          ]
+        }
+      ]
+    }
+  }
+}

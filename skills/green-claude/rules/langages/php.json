@@ -1,10 +1,12 @@
 {
   "metadata": {
-    "name": "Éco-conception PHP",
-    "description": "Règles d'écoconception pour le code PHP : ORM sobre (Doctrine/Eloquent/PDO), générateurs, flux, OPcache, connexions réutilisées.",
+    "name": "Ecodesign for PHP",
+    "description": "Ecodesign rules for PHP code: sober ORM (Doctrine/Eloquent/PDO), generators, streams, OPcache, reused connections.",
     "version": "1.0.0",
     "globs": "**/*.php",
-    "extensions": ["php"],
+    "extensions": [
+      "php"
+    ],
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/"
@@ -14,97 +16,147 @@
   },
   "categories": {
     "donnees": {
-      "name": "PHP — accès aux données",
-      "description": "Doctrine / Eloquent / PDO : ne charger que ce qui est lu (RGESN Backend, GR491_Backend_2/3).",
+      "name": "PHP — data access",
+      "description": "Doctrine / Eloquent / PDO: load only what is read (RGESN Backend, GR491_Backend_2/3).",
       "rules": [
         {
           "id": "ECO-PHP-01",
-          "title": "Collection non bornée chargée",
-          "description": "->get()/findAll() sur une table non bornée hydrate toutes les lignes en objets : mémoire et CPU proportionnels au volume.",
-          "impact": "Élevé",
-          "patterns": ["->get\\(\\)", "->findAll\\(\\)"],
-          "recommendation": "Paginer toute liste exposée ; parcourir les gros volumes par lots avec chunk()/cursor() (Eloquent) ou toIterable() (Doctrine).",
+          "title": "Unbounded collection loaded",
+          "description": "->get() or findAll() on an unbounded table hydrates every row into objects: memory and CPU proportional to the volume.",
+          "impact": "High",
+          "patterns": [
+            "->get\\(\\)",
+            "->findAll\\(\\)"
+          ],
+          "recommendation": "Paginate every exposed list; walk large volumes in batches with chunk()/cursor() (Eloquent) or toIterable() (Doctrine).",
+          "example": {
+            "bad": "$rows = Order::all();",
+            "good": "Order::query()->select('id', 'total')->cursorPaginate(50);"
+          },
           "rgesn_ref": "7.1",
           "gr491_famille": "Backend",
-          "tags": ["php", "orm", "pagination"]
+          "tags": [
+            "php",
+            "orm",
+            "pagination"
+          ]
         },
         {
           "id": "ECO-PHP-02",
-          "title": "Association parcourue en boucle (N+1)",
-          "description": "Lire une association dans un foreach déclenche une requête par élément.",
-          "impact": "Élevé",
-          "patterns": ["foreach\\s*\\(\\s*\\$\\w+->"],
-          "recommendation": "Eager loading : with() (Eloquent) ou fetch join / jointure DQL (Doctrine) ; projeter les colonnes utiles plutôt que des entités complètes.",
+          "title": "Association walked in a loop (N+1)",
+          "description": "Reading an association inside a foreach fires one query per element.",
+          "impact": "High",
+          "patterns": [
+            "foreach\\s*\\(\\s*\\$\\w+->"
+          ],
+          "recommendation": "Eager loading: with() (Eloquent) or a fetch join / DQL join (Doctrine); project the useful columns rather than full entities.",
+          "example": {
+            "bad": "foreach ($orders as $o) { echo $o->customer->name; }",
+            "good": "$orders = Order::with('customer')->get();"
+          },
           "rgesn_ref": "7.1, 9.1",
           "gr491_famille": "Backend",
-          "tags": ["php", "orm", "n+1"]
+          "tags": [
+            "php",
+            "orm",
+            "n+1"
+          ]
         },
         {
           "id": "ECO-PHP-03",
-          "title": "Écritures ligne à ligne",
-          "description": "save() dans une boucle génère un aller-retour base par enregistrement.",
-          "impact": "Moyen",
+          "title": "Row-by-row writes",
+          "description": "save() inside a loop produces one database round trip per record.",
+          "impact": "Medium",
           "patterns": [],
-          "recommendation": "insert() multi-lignes, upsert() ou lots ; exists() plutôt que count() > 0.",
+          "recommendation": "Multi-row insert(), upsert() or batches; exists() rather than count() > 0.",
           "rgesn_ref": "7.1",
           "gr491_famille": "Backend",
-          "tags": ["php", "orm", "batch"]
+          "tags": [
+            "php",
+            "orm",
+            "batch"
+          ]
         }
       ]
     },
     "memoire": {
-      "name": "PHP — mémoire et flux",
-      "description": "Traiter en flux plutôt que de tout matérialiser (RGESN Algorithmie).",
+      "name": "PHP — memory and streams",
+      "description": "Stream rather than materialise everything (RGESN Algorithms).",
       "rules": [
         {
           "id": "ECO-PHP-04",
-          "title": "Fichier chargé entièrement en mémoire",
-          "description": "file_get_contents/file() sur un gros fichier consomme une mémoire proportionnelle à sa taille.",
-          "impact": "Moyen",
-          "patterns": ["file_get_contents\\(", "\\bfile\\s*\\("],
-          "recommendation": "Lire en flux (fopen + lecture par blocs), fputcsv/streams pour les exports ; générateurs (yield) pour produire de grandes séquences.",
+          "title": "File loaded entirely into memory",
+          "description": "file_get_contents or file() on a large file consumes memory proportional to its size.",
+          "impact": "Medium",
+          "patterns": [
+            "file_get_contents\\(",
+            "\\bfile\\s*\\("
+          ],
+          "recommendation": "Read as a stream (fopen plus block reads), fputcsv and streams for exports; generators (yield) to produce long sequences.",
           "rgesn_ref": "9.2",
           "gr491_famille": "Backend",
-          "tags": ["php", "flux", "memoire"]
+          "tags": [
+            "php",
+            "streams",
+            "memory"
+          ]
         },
         {
           "id": "ECO-PHP-05",
-          "title": "Recherche linéaire dans un grand tableau",
-          "description": "in_array/array_search parcourt tout le tableau ; répété en boucle, le traitement devient quadratique.",
-          "impact": "Moyen",
-          "patterns": ["in_array\\(", "array_search\\("],
-          "recommendation": "Indexer par clés et tester avec isset($index[$k]) (temps constant).",
+          "title": "Linear search in a large array",
+          "description": "in_array and array_search walk the whole array; repeated in a loop, the processing turns quadratic.",
+          "impact": "Medium",
+          "patterns": [
+            "in_array\\(",
+            "array_search\\("
+          ],
+          "recommendation": "Index by key and test with isset($index[$k]) (constant time).",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["php", "algorithmie"]
+          "tags": [
+            "php",
+            "algorithms"
+          ]
         }
       ]
     },
     "infra": {
-      "name": "PHP — exécution et infrastructure",
-      "description": "Réutiliser les connexions, borner les caches, alléger le graphe de dépendances (RGESN Hébergement).",
+      "name": "PHP — execution and infrastructure",
+      "description": "Reuse connections, bound caches, lighten the dependency graph (RGESN Hosting).",
       "rules": [
         {
           "id": "ECO-PHP-06",
-          "title": "Connexion HTTP par appel",
-          "description": "curl_init() par requête refait résolution DNS et poignée de main TLS à chaque appel.",
-          "impact": "Moyen",
-          "patterns": ["curl_init\\("],
-          "recommendation": "Client HTTP partagé et injecté (Guzzle), connexions PDO persistantes ou pool selon la plateforme.",
+          "title": "One HTTP connection per call",
+          "description": "curl_init() per request repeats DNS resolution and the TLS handshake on every call.",
+          "impact": "Medium",
+          "patterns": [
+            "curl_init\\("
+          ],
+          "recommendation": "A shared, injected HTTP client (Guzzle); persistent PDO connections or a pool, depending on the platform.",
           "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
-          "tags": ["php", "reseau", "connexions"]
+          "tags": [
+            "php",
+            "network",
+            "connections"
+          ]
         },
         {
           "id": "ECO-PHP-07",
-          "title": "Cache fichier sans purge",
-          "description": "Un cache écrit sur disque sans expiration ni purge croît indéfiniment : stockage et sauvegardes gonflés pour des entrées mortes.",
-          "impact": "Moyen",
-          "patterns": ["file_put_contents\\([^)]*cache"],
-          "recommendation": "Cache borné et expirant (APCu, Redis avec TTL) ; OPcache activé en production, autoload optimisé (composer dump-autoload -o).",
+          "title": "File cache with no purge",
+          "description": "A cache written to disk with neither expiry nor purge grows indefinitely: storage and backups inflated by dead entries.",
+          "impact": "Medium",
+          "patterns": [
+            "file_put_contents\\([^)]*cache"
+          ],
+          "recommendation": "A bounded, expiring cache (APCu, Redis with a TTL); OPcache enabled in production, optimised autoload (composer dump-autoload -o).",
           "rgesn_ref": "7.3",
           "gr491_famille": "Hébergement",
-          "tags": ["php", "cache", "stockage"]
+          "tags": [
+            "php",
+            "cache",
+            "storage"
+          ]
         }
       ]
     }

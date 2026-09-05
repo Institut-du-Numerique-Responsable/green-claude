@@ -19,8 +19,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - name: Installer jq
-        run: sudo apt-get install -y jq
+      # jq est préinstallé sur l'image du runner : on vérifie, on n'installe pas.
+      - name: Vérifier les prérequis
+        run: |
+          command -v jq >/dev/null || { echo "jq absent de l'image du runner"; exit 1; }
+          jq --version
       - name: Vérifier la version du tag
         run: bash scripts/check-release-version.sh "$GITHUB_REF_NAME"
       - name: Valider le JSON des règles

@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Angular",
+    "description": "Ecodesign rules for Angular: OnPush change detection, lazy routes, subscriptions torn down.",
+    "version": "1.0.0",
+    "globs": "**/*.ts",
+    "extensions": [
+      "ts",
+      "tsx"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 3,
+    "type": "code_audit"
+  },
+  "categories": {
+    "detection": {
+      "name": "Angular — change detection",
+      "description": "Default change detection re-checks every binding on every event (RGESN Frontend).",
+      "rules": [
+        {
+          "id": "ECO-NG-01",
+          "title": "Component without OnPush",
+          "description": "With the default strategy Angular re-evaluates every binding of every component after any event, anywhere. On a large page that is thousands of checks for one keystroke.",
+          "impact": "Medium",
+          "patterns": [
+            "@Component\\(\\{"
+          ],
+          "exclude_file_patterns": [
+            "OnPush",
+            "signal\\("
+          ],
+          "recommendation": "Set changeDetection: ChangeDetectionStrategy.OnPush and drive updates through immutable inputs or signals. Verify the check frequency with the profiler.",
+          "note": "A single OnPush or signal anywhere in the file silences the rule, so a file holding several components needs each one checked. Default detection is a reasonable choice on a small, rarely updated component.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-ANGULAR-001 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "angular",
+            "change-detection",
+            "cpu"
+          ]
+        },
+        {
+          "id": "ECO-NG-02",
+          "title": "Method called from a template",
+          "description": "A method in a binding runs on every change-detection pass, which is far more often than its result changes. The cost is invisible in the template and real on the device.",
+          "impact": "Medium",
+          "patterns": [
+            "\\{\\{[[:space:]]*[a-zA-Z_]+\\([^)]*\\)[[:space:]]*\\}\\}"
+          ],
+          "recommendation": "Precompute the value in the component, or expose it as a pipe with pure: true so the result is cached.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-ANGULAR-003 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "angular",
+            "templates",
+            "cpu"
+          ]
+        },
+        {
+          "id": "ECO-NG-03",
+          "title": "Subscription never torn down",
+          "description": "A subscription that outlives its component keeps the component, its template and everything they capture alive. Navigating back and forth then leaks one copy per visit.",
+          "impact": "High",
+          "patterns": [
+            "\\.subscribe\\("
+          ],
+          "exclude_file_patterns": [
+            "takeUntil",
+            "takeUntilDestroyed",
+            "async[[:space:]]*\\|",
+            "\\| async",
+            "unsubscribe\\("
+          ],
+          "recommendation": "Prefer the async pipe, which unsubscribes for you. Otherwise take until a destroy subject and complete it in ngOnDestroy.",
+          "note": "One takeUntil, one async pipe or one unsubscribe anywhere in the file silences the rule. Where several subscriptions coexist, check that each has its own teardown.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-ANGULAR-003 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "angular",
+            "rxjs",
+            "leaks"
+          ]
+        }
+      ]
+    }
+  }
+}

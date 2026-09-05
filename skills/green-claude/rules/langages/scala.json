@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Scala",
+    "description": "Ecodesign rules for Scala code: lazy transformations, bounded parallelism, no needless materialisation.",
+    "version": "1.0.0",
+    "globs": "**/*.{scala,sc}",
+    "extensions": [
+      "scala",
+      "sc"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 3,
+    "type": "code_audit"
+  },
+  "categories": {
+    "collections": {
+      "name": "Scala — collections and evaluation",
+      "description": "Do not materialise what you only traverse once (RGESN Algorithms).",
+      "rules": [
+        {
+          "id": "ECO-SCALA-01",
+          "title": "Chained transformations materialised at each step",
+          "description": "Every map or filter on a strict collection allocates a new one. Three links in the chain over a large collection means three full copies for a single result.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.map\\([^)]*\\)[[:space:]]*\\.(filter|map|flatMap)"
+          ],
+          "exclude_file_patterns": [
+            "\\.iterator",
+            "\\.view",
+            "LazyList"
+          ],
+          "recommendation": "Use .iterator or .view for the chain and materialise only the final result. On a small collection the strict version stays clearer.",
+          "example": {
+            "bad": "xs.map(_.id).filter(_ > 0).map(fetch)",
+            "good": "xs.iterator.map(_.id).filter(_ > 0).map(fetch).toList"
+          },
+          "note": "A single .view or .iterator anywhere in the file silences the rule. On a short collection the strict chain costs less than the indirection, so the volume is what settles it.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "scala",
+            "collections",
+            "allocations"
+          ]
+        },
+        {
+          "id": "ECO-SCALA-02",
+          "title": "Parallel collection without measurement",
+          "description": ".par hands the work to a shared pool for a gain that is rarely measured, and it degrades every other task sharing that pool.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.par\\b",
+            "ParVector",
+            "ParArray"
+          ],
+          "recommendation": "Stay sequential by default. Parallelise only after a benchmark, on a pool you sized yourself.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "scala",
+            "parallelism",
+            "cpu"
+          ]
+        },
+        {
+          "id": "ECO-SCALA-03",
+          "title": "Future built eagerly in a loop",
+          "description": "A Future starts as soon as it is constructed. Building them inside a loop launches every call at once, with no bound on how many run in parallel.",
+          "impact": "High",
+          "patterns": [
+            "for[[:space:]]*\\([^)]*\\)[[:space:]]*\\{[^}]*Future[[:space:]]*\\{",
+            "\\.map[[:space:]]*\\([^)]*Future[[:space:]]*\\{"
+          ],
+          "exclude_file_patterns": [
+            "Semaphore",
+            "parTraverseN",
+            "mapAsync",
+            "throttle"
+          ],
+          "recommendation": "Bound the concurrency explicitly, with a throttled traverse or a semaphore, so the number in flight stays a decision rather than a consequence of the list length.",
+          "note": "One Semaphore, parTraverseN or throttle anywhere in the file silences the rule. A Future built over a list of known, small length is bounded by construction.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "scala",
+            "futures",
+            "concurrency"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -17,17 +17,19 @@ selon [SECURITY.md](SECURITY.md).
 
 Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organisées par catégorie (une des 9 familles du RGESN 2024). Chaque règle suit ce format :
 
+**Le texte des règles s'écrit en anglais** — `title`, `description`, `recommendation`, `note` et `tags` —, comme la sortie de l'audit. Deux exceptions gardent leur libellé français : `gr491_famille`, nom officiel d'une famille du GR491, et les citations littérales d'un référentiel français.
+
 ```json
 {
-  "id": "ECO-CATEGORIE-01",
-  "title": "Titre court de la règle",
-  "description": "Ce que la règle vérifie et pourquoi ça compte.",
-  "impact": "Élevé",
-  "patterns": ["mon_motif_regex"],
-  "recommendation": "Quoi faire à la place.",
+  "id": "ECO-CATEGORY-01",
+  "title": "Short rule title",
+  "description": "What the rule checks and why it matters.",
+  "impact": "High",
+  "patterns": ["my_regex_pattern"],
+  "recommendation": "What to do instead.",
   "rgesn_ref": "N.x",
   "gr491_famille": "Nom de la famille GR491",
-  "tags": ["mots-clés"]
+  "tags": ["keywords"]
 }
 ```
 
@@ -38,7 +40,7 @@ Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organis�
 - `exclude_patterns` (facultatif) : motifs qui annulent une détection sur la même ligne. La règle ne se déclenche que s'il reste au moins une ligne détectée non exclue. Sert quand le motif cherché apparaît aussi dans du code correct : `Rails.cache.fetch` pose problème sans `expires_in`, pas avec.
 - `exclude_file_patterns` (facultatif) : motifs qui annulent la règle pour tout le fichier. Sert quand le remède ne vit pas sur la ligne détectée mais ailleurs : un `setInterval` suspendu par un `visibilitychange` trente lignes plus bas applique déjà la recommandation, et une exclusion ligne à ligne ne peut pas le voir. À réserver aux motifs qui attestent vraiment de la bonne pratique — trop large, il rend la règle muette.
 - `enrich_is_verdict` (facultatif, booléen) : à activer quand seule la mesure de `enrich` peut trancher. Détecter un `@font-face` ne dit rien en soi ; c'est le décompte des familles et le poids réel qui décident. Avec ce drapeau, une inspection sans résultat n'affiche rien au lieu de signaler la simple présence du motif — sans quoi la règle ne peut jamais être satisfaite.
-- `impact` : `Élevé`, `Moyen` ou `Faible`.
+- `impact` : `High`, `Medium` ou `Low`.
 - `rgesn_ref` renvoie au critère officiel du [RGESN 2024](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/) ; utilisez le format `N.x` si la règle relève d'une famille sans correspondre à un critère unique.
 - `gr491_famille` relie la règle au [GR491](https://gr491.isit-europe.org/).
 - Sourcez toujours la règle : citez le RGESN, le GR491, le Green Software Foundation, ou une autre référence publique reconnue. Les règles maison sans source ne sont pas acceptées.
@@ -66,9 +68,9 @@ Pour un nouveau langage, associez aussi l'extension dans `lang_file_for_ext()` (
 
 Ces règles ne sont testées que sur les fichiers de leur langage, ce qui autorise des motifs précis (`\\.iterrows\\(\\)`, `\\.parallelStream\\(\\)`) sans risque pour les autres. Écrivez-les pour ce langage seulement.
 
-## Ajouter une pratique Boris
+## Ajouter une pratique d’usage responsable
 
-Les pratiques d'usage sobre de Claude Code vivent dans `skills/green-claude/rules/boris.json`, sur le même principe. Si vous citez un outil tiers en exemple, vérifiez qu'il est open source et sous une licence permissive avant de l'ajouter.
+Les pratiques d’usage responsable de Claude Code vivent dans `skills/green-claude/rules/usage.json`. Une recommandation propre au projet doit être présentée comme telle. Toute citation ou attribution nominative exige une source primaire vérifiable et un lien précis. Si vous citez un outil tiers en exemple, vérifiez qu’il est open source et sous une licence permissive avant de l’ajouter.
 
 ## Ce que l'audit ne lit pas
 

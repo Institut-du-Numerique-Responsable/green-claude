@@ -31,6 +31,9 @@ trap 'rm -rf "$BUILD"' EXIT
 # que vérifient l'API comme l'upload Claude.ai.
 cp -r "$SKILL_DIR" "$BUILD/green-claude"
 rm -rf "$BUILD/green-claude/scripts/test-eco-audit.sh" "$BUILD/green-claude/scripts/package-skill.sh"
+# Résidus macOS et éditeurs : inutiles à l'exécution, mais embarqués dans
+# l'archive téléchargée par chaque utilisateur si on ne les retire pas ici.
+find "$BUILD/green-claude" \( -name '.DS_Store' -o -name 'Thumbs.db' -o -name '*~' \) -delete
 
 verifie_limites() { # $1 = fichier SKILL.md, $2 = limite de description
     local fichier="$1" limite="$2" desc n

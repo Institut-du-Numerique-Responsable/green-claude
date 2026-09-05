@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Julia",
+    "description": "Ecodesign rules for Julia code: type stability, allocations under control, bounded threading.",
+    "version": "1.0.0",
+    "globs": "**/*.jl",
+    "extensions": [
+      "jl"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 3,
+    "type": "code_audit"
+  },
+  "categories": {
+    "perf": {
+      "name": "Julia — allocations and types",
+      "description": "Type instability and hidden allocations dominate the cost of a hot function (RGESN Algorithms).",
+      "rules": [
+        {
+          "id": "ECO-JULIA-01",
+          "title": "Global variable read from a hot function",
+          "description": "A non-constant global has no fixed type, so the compiler cannot specialise the function that reads it and boxes every value instead. The cost is paid on every call.",
+          "impact": "High",
+          "patterns": [
+            "^[[:space:]]*global[[:space:]]",
+            "^[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*=[[:space:]]*[0-9\\[]"
+          ],
+          "exclude_file_patterns": [
+            "^const[[:space:]]",
+            "@code_warntype"
+          ],
+          "recommendation": "Pass the value as an argument, or declare it const when it genuinely never changes. Check with @code_warntype before optimising anything else.",
+          "note": "A top-level assignment is normal in a script and only costs inside a hot function. The pattern marks the place to run @code_warntype, not a defect.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "julia",
+            "types",
+            "allocations"
+          ]
+        },
+        {
+          "id": "ECO-JULIA-02",
+          "title": "Array grown by push! in a loop",
+          "description": "Growing an array by repeated push! reallocates and copies as it doubles. When the final size is known, that work is entirely avoidable.",
+          "impact": "Medium",
+          "patterns": [
+            "push!\\("
+          ],
+          "exclude_file_patterns": [
+            "sizehint!",
+            "undef"
+          ],
+          "recommendation": "Preallocate with sizehint! or Vector{T}(undef, n) when the size is known, and mutate in place. Reuse the buffer across iterations.",
+          "example": {
+            "bad": "r = []\nfor x in xs; push!(r, f(x)); end",
+            "good": "r = Vector{Float64}(undef, length(xs))\n@inbounds for i in eachindex(xs); r[i] = f(xs[i]); end"
+          },
+          "note": "One sizehint! or one undef allocation anywhere in the file silences the rule. push! on a short, unknown-length collection is perfectly reasonable; the size is what settles it.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "julia",
+            "allocations",
+            "arrays"
+          ]
+        },
+        {
+          "id": "ECO-JULIA-03",
+          "title": "Threading without a bound",
+          "description": "@threads over a large range takes every core the runtime was given, for a gain that depends on the work per item. On a shared machine it takes them from something else.",
+          "impact": "Medium",
+          "patterns": [
+            "@threads",
+            "Threads\\.@spawn"
+          ],
+          "recommendation": "Measure the sequential version first, then size the parallelism to the work per item and to what the machine can spare. Compile and warm up before comparing steady-state timings.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "julia",
+            "threads",
+            "cpu"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "name": "Ecodesign for React (and Preact)",
+    "description": "Ecodesign rules for React and Preact: avoided re-renders, split routes, virtualised lists, cleaned-up effects.",
+    "version": "1.0.0",
+    "globs": "**/*.{jsx,tsx}",
+    "extensions": [
+      "jsx",
+      "tsx"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 3,
+    "type": "code_audit"
+  },
+  "categories": {
+    "rendu": {
+      "name": "React — rendering",
+      "description": "A re-render that changes nothing still costs a diff on every visitor's device (RGESN Frontend).",
+      "rules": [
+        {
+          "id": "ECO-REACT-01",
+          "title": "Effect without a dependency array",
+          "description": "useEffect with no dependency array runs after every render. When it fetches, the component re-renders, which runs the effect again: the loop is invisible in the code and obvious in the network tab.",
+          "impact": "High",
+          "patterns": [
+            "useEffect\\([^,]*\\)[[:space:]]*$",
+            "useEffect\\([[:space:]]*\\([^)]*\\)[[:space:]]*=>[[:space:]]*\\{[^}]*\\}[[:space:]]*\\)"
+          ],
+          "recommendation": "Give every effect its dependency array, and return a cleanup that aborts the request or clears the timer.",
+          "example": {
+            "bad": "useEffect(() => { fetchData() })",
+            "good": "useEffect(() => { const c = new AbortController(); fetchData(c.signal); return () => c.abort() }, [id])"
+          },
+          "note": "An effect written across several lines is not seen by a line-based pattern; this catches the single-line form, which is the common one.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "tags": [
+            "react",
+            "effects",
+            "re-render"
+          ]
+        },
+        {
+          "id": "ECO-REACT-02",
+          "title": "Long list rendered in full",
+          "description": "Rendering ten thousand rows creates ten thousand DOM nodes for the twenty the user can see. The device pays in memory, in layout and in every subsequent interaction.",
+          "impact": "High",
+          "patterns": [
+            "\\.map\\([^)]*=>[[:space:]]*<"
+          ],
+          "exclude_file_patterns": [
+            "react-window",
+            "react-virtual",
+            "VirtualList",
+            "slice\\(",
+            "\\.length[[:space:]]*<",
+            "from[[:space:]]*['\"]solid-js",
+            "from[[:space:]]*['\"]vue"
+          ],
+          "recommendation": "Virtualise the list, or paginate it. Give the items stable keys so React can reuse nodes instead of rebuilding them.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-REACT-002 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "react",
+            "lists",
+            "dom"
+          ],
+          "note": "This rule shares an extension with another framework's rule set, so it also stays silent in a file that imports the other framework: the pattern alone cannot tell which one is in play."
+        },
+        {
+          "id": "ECO-REACT-03",
+          "title": "New object or function passed as a prop",
+          "description": "An inline object or arrow function is a new reference on every render, so every memoised child below re-renders anyway. The memoisation is paid for and does nothing.",
+          "impact": "Medium",
+          "patterns": [
+            "=\\{\\{",
+            "=\\{[[:space:]]*\\([^)]*\\)[[:space:]]*=>"
+          ],
+          "exclude_file_patterns": [
+            "useMemo",
+            "useCallback",
+            "from[[:space:]]*['\"]solid-js",
+            "from[[:space:]]*['\"]vue"
+          ],
+          "recommendation": "Hoist the value out of the component, or wrap it in useMemo or useCallback when profiling shows the child actually re-renders.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-REACT-001 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "react",
+            "memoisation",
+            "props"
+          ],
+          "note": "This rule shares an extension with another framework's rule set, so it also stays silent in a file that imports the other framework: the pattern alone cannot tell which one is in play."
+        }
+      ]
+    }
+  }
+}
