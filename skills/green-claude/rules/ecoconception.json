@@ -2191,6 +2191,10 @@
             "#.*tokens.*energy",
             "#.*tokens.*physical"
           ],
+          "example": {
+            "bad": "import torch\nmodel = torch.nn.Transformer()",
+            "good": "import torch\n# Link: fewer tokens = less water/electricity consumption\nmodel = torch.nn.Transformer()"
+          },
           "recommendation": "State the direction and refuse the ratio. Fewer tokens processed means less computation, and less computation means less energy and water. Exact ratios depend on model, hardware, batching, and datacenter location; measure your setup before claiming figures.",
           "note": "This rule underpins all AI-specific recommendations: it justifies acting on token counts while prohibiting unverified conversions to watts, joules, or grams of CO2. Patterns detect AI library usage without documented link to physical resources.",
           "rgesn_ref": "9.x",
@@ -2226,6 +2230,10 @@
             "IA_MEASUREMENTS",
             "#.*measurement"
           ],
+          "example": {
+            "bad": "import torch\n# No measurements",
+            "good": "import torch\n# See IA_MEASUREMENTS.md for token count, CPU/GPU time, electricity and water usage"
+          },
           "recommendation": "For every AI implementation, measure and document: (1) tokens processed, (2) CPU/GPU time, (3) electricity consumption (via nvidia-smi, intel_gpu_top, or cloud tools), and (4) water usage if datacenter data is available. Store results in IA_MEASUREMENTS.md.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
@@ -2260,6 +2268,10 @@
             "CodeCarbon",
             "Experiments.*Impact.*Tracker"
           ],
+          "example": {
+            "bad": "import torch\n# No budgets defined",
+            "good": "import torch\n# Budgets: < 10L water/day, < 1kWh/day using CodeCarbon"
+          },
           "recommendation": "Define maximum thresholds per project: e.g., < 10L of water/day, < 1kWh/day. Use tools like CodeCarbon or Experiments Impact Tracker to enforce these limits.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
