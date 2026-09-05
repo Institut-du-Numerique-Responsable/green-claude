@@ -10,7 +10,7 @@ This file lists all individuals who have contributed to the **Green Claude** pro
 |------|-------|------|------------|
 | Guillaume Gallon | [@gridboy](https://github.com/gridboy) | Lead Maintainer | Institut du Numérique Responsable |
 | Robin Trassard | [@robintra](https://github.com/robintra) | Core Contributor | Institut du Numérique Responsable |
-| Guillaume Bourgeois | [@Guillaume-INR](https://github.com/Guillaume-INR) | Core Contributor | Institut du Numérique Responsable |
+| Guillaume Bourgeois | [@bourgeoisguillaume01-glitch](https://github.com/bourgeoisguillaume01-glitch) | Core Contributor | Institut du Numérique Responsable |
 | Vincent Courboulay | [@vcourbou](https://github.com/vcourbou) | Core Contributor | Institut du Numérique Responsable |
 
 ---
@@ -86,7 +86,7 @@ maintainers:
     affiliation: Institut du Numérique Responsable
     role: Core Contributor
   - name: Guillaume Bourgeois
-    github: Guillaume-INR
+    github: bourgeoisguillaume01-glitch
     affiliation: Institut du Numérique Responsable
     role: Core Contributor
   - name: Vincent Courboulay
