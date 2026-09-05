@@ -149,7 +149,7 @@ Le script d'audit a besoin de `bash` et de `jq`. Là où `jq` manque, les règle
 
 ---
 
-## Les règles : 106 règles alignées sur les 9 familles du RGESN 2024
+## Les règles : 107 règles alignées sur les 9 familles du RGESN 2024
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels) **et une nouvelle catégorie "Hébergement pour l'IA"**. Chaque règle porte un renvoi RGESN (`rgesn_ref`) et une famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`).
 
@@ -174,7 +174,7 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 ## Les règles par langage : 127 règles chargées à la demande
 
-Les 106 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
+Les 107 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
 
 [`skills/green-claude/rules/langages/`](skills/green-claude/rules/langages/) descend d'un cran, avec un fichier par langage appliqué **uniquement aux fichiers de ce langage** :
 

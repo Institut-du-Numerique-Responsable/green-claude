@@ -147,7 +147,7 @@ The audit script needs `bash` and `jq`. Where `jq` is missing, the rules still a
 
 ---
 
-## The rules: 106 rules aligned with the 9 RGESN 2024 families
+## The rules: 107 rules aligned with the 9 RGESN 2024 families
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) covers all **9 families** of [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 official criteria) **plus a new "Hosting for AI" category**. Every rule carries an RGESN reference (`rgesn_ref`) and a [GR491](https://gr491.isit-europe.org/) family (`gr491_famille`).
 
@@ -172,7 +172,7 @@ Rules with no detectable pattern (process, governance) are skipped by the audit 
 
 ## Language rules: 127 rules loaded on demand
 
-The 106 rules above hold whatever the language. They set the goal without saying how to reach it in Python or in Java: "avoid N+1 queries" doesn't choose between `select_related`, `JOIN FETCH`, `Include` and `with()`.
+The 107 rules above hold whatever the language. They set the goal without saying how to reach it in Python or in Java: "avoid N+1 queries" doesn't choose between `select_related`, `JOIN FETCH`, `Include` and `with()`.
 
 [`skills/green-claude/rules/langages/`](skills/green-claude/rules/langages/) goes one level down, with one file per language, applied **only to files of that language**:
 

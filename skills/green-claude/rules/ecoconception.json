@@ -10,7 +10,7 @@
       "https://github.com/Institut-du-Numerique-Responsable/green-codex"
     ],
     "coverage_note": "The RGESN 2024 has 78 criteria across 9 families; the GR491 has 61 recommendations and 516 criteria across 8 families. This file selects 52 actionable rules without reproducing the full referential: every RGESN family is represented, and rgesn_ref points at the official criterion for further reading. An rgesn_ref shaped 'N.x' means the rule belongs to family N without matching a single criterion.",
-    "count": 106,
+    "count": 107,
     "type": "code_audit",
     "type_note": "Rules with 'patterns' are found in code by the audit (grep). Rules with 'detector' use a dedicated multi-line detector (scripts/detect-*.awk) where line-by-line grep is not enough. Rules with neither are design or process rules: they serve as a checklist through --list-rules.",
     "three_u_note": "The three_u field marks which of the three conditions of a sober digital service a rule serves, as framed by the Institut du Numerique Responsable: useful (it answers a real need, and that need calls for something digital), usable (by everyone, on modest hardware and constrained networks), used (someone actually uses it, and what nobody uses gets retired). The three hold together: a useful service nobody can use goes unused, and a used service that is not useful consumes for nothing. It is the design-review lens to apply before any code exists; rgesn_ref stays the pointer to the official criterion.",
@@ -564,6 +564,26 @@
             "fan-out",
             "retries",
             "backpressure"
+          ]
+        },
+        {
+          "id": "ECO-ARCH-12",
+          "title": "Write comments a newcomer can follow, not a transcript for yourself",
+          "description": "A comment nobody can parse gets skipped, and code nobody understands gets rewritten rather than fixed. That rewrite repeats work that a clear explanation would have made unnecessary, and it repeats it every time someone new touches the file.",
+          "impact": "Medium",
+          "patterns": [],
+          "recommendation": "Say why the code does something non-obvious, not what it does when the code already says that. Use plain words over jargon, keep sentences short, and update or remove a comment the moment the code it describes changes. The same holds for commit messages and pull request descriptions: they document intent for the next reader, human or model, and a message nobody can follow costs as much as no message at all.",
+          "rgesn_ref": "GSF",
+          "gr491_famille": "Architecture",
+          "three_u": [
+            "used"
+          ],
+          "source_note": "Extends the same Green Software Foundation thesis as ECO-ARCH-05, applied to documentation rather than test coverage: unclear code costs in rework the way untested code does.",
+          "tags": [
+            "comments",
+            "documentation",
+            "readability",
+            "commits"
           ]
         }
       ]
