@@ -1096,4 +1096,100 @@ OUT="$(GREEN_CLAUDE_IGNORE="$TMP/ign/.green-claude/ignore" bash eco-audit.sh "$T
 echo "$OUT" | grep -q 'ECO-SQL-01' && fail "exclusion : un fichier listé est encore audité"
 true
 
+# 45. Comptes annoncés contre comptes réels. Ils ont dérivé trois fois : les
+# README suivaient l'ajout de règles, SKILL.md non, et c'est SKILL.md que le
+# modèle charge. Un skill qui annonce 83 règles quand il en porte 106 se
+# trompe sur lui-même.
+RULES_DIR="../rules"
+COUNT_ECO=$(jq '[.categories[].rules[]] | length' "$RULES_DIR/ecoconception.json")
+COUNT_LANG=$(cat "$RULES_DIR"/langages/*.json | jq -s '[.[].categories[].rules[]] | length')
+COUNT_USAGE=$(jq '[.categories[].rules[]] | length' "$RULES_DIR/usage.json")
+COUNT_TOTAL=$(( COUNT_ECO + COUNT_LANG + COUNT_USAGE ))
+
+grep -q "($COUNT_ECO rules, RGESN 2024" ../SKILL.md \
+    || fail "SKILL.md annonce un nombre de règles transverses qui n'est plus $COUNT_ECO"
+grep -q "it carries $COUNT_TOTAL rules," ../SKILL.md \
+    || fail "SKILL.md annonce un total qui n'est plus $COUNT_TOTAL"
+[ "$COUNT_ECO" = "$(jq -r '.metadata.count' "$RULES_DIR/ecoconception.json")" ] \
+    || fail "ecoconception.json : metadata.count ne correspond plus au nombre de règles"
+[ "$COUNT_USAGE" = "$(jq -r '.metadata.count' "$RULES_DIR/usage.json")" ] \
+    || fail "usage.json : metadata.count ne correspond plus au nombre de règles"
+for lang_json in "$RULES_DIR"/langages/*.json; do
+    declared=$(jq -r '.metadata.count' "$lang_json")
+    actual=$(jq '[.categories[].rules[]] | length' "$lang_json")
+    [ "$declared" = "$actual" ] \
+        || fail "$(basename "$lang_json") : metadata.count vaut $declared pour $actual règles"
+done
+true
+
+# 46. Règles IA et hébergement : chacune de ces corrections vient d'un faux
+# positif constaté, pas d'une relecture. Le volet « code raisonnable » compte
+# donc autant que le volet fautif.
+mkdir -p "$TMP/ia"
+cat > "$TMP/ia/ok.py" <<'PYEOF'
+import torch
+from codecarbon import EmissionsTracker
+tracker = EmissionsTracker()
+loader = DataLoader(ds, batch_size=32)
+PYEOF
+OUT="$(bash eco-audit.sh "$TMP/ia/ok.py")"
+echo "$OUT" | grep -q 'ECO-ALGO-11' && fail "IA : un script instrumenté (CodeCarbon) est signalé comme non mesuré"
+echo "$OUT" | grep -q 'ECO-ALGO-13' && fail "IA : batch_size=32 pris pour batch_size=1"
+true
+
+# batch_size = 1 n'était pas ancré : il attrapait 16, 128, 1024.
+printf 'batch_size = 16\n' > "$TMP/ia/b16.py"
+printf 'batch_size = 1\n'  > "$TMP/ia/b1.py"
+OUT="$(bash eco-audit.sh "$TMP/ia/b16.py")"
+echo "$OUT" | grep -q 'ECO-ALGO-13' && fail "batch_size : 16 signalé comme 1"
+OUT="$(bash eco-audit.sh "$TMP/ia/b1.py")"
+echo "$OUT" | grep -q 'ECO-ALGO-13' || fail "batch_size : la vraie valeur 1 n'est plus détectée"
+true
+
+# Une fonction nommée train n'est pas un entraînement de modèle.
+printf 'def train(model, data):\n    model.step(data)\n' > "$TMP/ia/train.py"
+OUT="$(bash eco-audit.sh "$TMP/ia/train.py")"
+echo "$OUT" | grep -q 'ECO-ALGO-25' && fail "fine-tuning : toute fonction nommée train est signalée"
+printf 'trainer = Trainer(model=m)\n' > "$TMP/ia/ft.py"
+OUT="$(bash eco-audit.sh "$TMP/ia/ft.py")"
+echo "$OUT" | grep -q 'ECO-ALGO-25' || fail "fine-tuning : un Trainer n'est plus détecté"
+true
+
+# Quantifier un modèle servi par API n'a pas de sens : personne ne peut le faire.
+printf 'model = "gpt-4"\nresp = client.chat.completions.create(model=model, max_tokens=256)\n' > "$TMP/ia/api.py"
+OUT="$(bash eco-audit.sh "$TMP/ia/api.py")"
+echo "$OUT" | grep -q 'ECO-ALGO-12' && fail "quantification : recommandée sur un modèle d'API"
+true
+
+# Un accélérateur nommé ne doit pas déclencher deux règles qui disent la même
+# chose, ni une affirmation non sourcée sur le mix électrique d'une région.
+printf 'accelerator: A100\nregion: us-east-1\n' > "$TMP/ia/gpu.yml"
+OUT="$(bash eco-audit.sh "$TMP/ia/gpu.yml")"
+COUNT="$(printf '%s\n' "$OUT" | grep -c 'ECO-HOST-' || true)"
+[ "$COUNT" -le 1 ] || fail "hébergement IA : $COUNT règles se déclenchent sur un seul accélérateur nommé"
+echo "$OUT" | grep -q 'us-east-1 est' && fail "hébergement IA : affirmation non sourcée sur une région"
+true
+
+# Un champ d'exclusion sur une règle sans motif n'est jamais lu : il donne à
+# croire qu'elle détecte quelque chose.
+jq -e '[.categories[].rules[] | select(((.patterns // []) | length == 0) and ((.detector // "") == "") and (((.exclude_patterns // []) | length > 0) or ((.extensions // []) | length > 0)))] | length == 0' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "des règles sans motif portent des exclusions ou des extensions, qui ne seront jamais lues"
+true
+
+# \s n'est pas du ERE POSIX. Il passe sur les grep GNU et BSD, pas partout.
+jq -e '[.categories[].rules[] | (.patterns // []) + (.exclude_patterns // []) + (.exclude_file_patterns // []) | .[] | select(test("\\\\s"))] | length == 0' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "un motif utilise \\s au lieu de [[:space:]] : hors ERE POSIX"
+true
+
+# Deux préfixes pour l'hébergement donnaient deux règles numérotées 07.
+jq -e '[.categories[].rules[].id | capture("^(?<p>[A-Z-]+)-(?<n>[0-9]+)$") | .p + "-" + .n] | (length == (unique | length))' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "identifiants de règles en doublon"
+jq -e '[.categories[].rules[].id | select(startswith("ECO-HOST-"))] | length == 0 or (map(sub("ECO-HOST-";"") | tonumber) | min == 1)' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "ECO-HOST ne recommence pas à 01 : ses numéros chevauchent ceux d'ECO-HEB"
+true
+
 echo "OK - suite complete"
