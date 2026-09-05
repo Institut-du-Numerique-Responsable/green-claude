@@ -7,19 +7,20 @@
     "source_policy": "Any attribution to a named person requires a verifiable primary source. Commands and features mentioned here must be checked against the official documentation for the version in use.",
     "count": 15,
     "type": "practices",
-    "type_note": "These rules describe USAGE PRACTICES, not code patterns: they carry no grep-able 'patterns'. The --eco-check audit ignores them; use --list-rules to consult them as a checklist."
+    "type_note": "These rules describe USAGE PRACTICES, not code patterns: they carry no grep-able 'patterns'. The --eco-check audit ignores them; use --list-rules to consult them as a checklist.",
+    "energy_claim_policy": "This project states the direction and refuses the ratio. Fewer tokens processed means less computation, and less computation means less energy: that much holds. Converting a token count into watts, joules or grams of CO2 does not, because prompt caching, model size, batching, hardware and the grid mix each move the result more than the token count does. Earlier versions of this file carried such conversions, taken from a secondary source and never measured; they were removed. Keep the qualitative claim, keep the guard: any figure put on this link must come from a measurement of the setup it describes. A test in scripts/test-eco-audit.sh fails if the removed figures return, and this policy is checked alongside them."
   },
   "categories": {
     "contexte": {
       "name": "Manage the context",
-      "description": "The context you transmit contributes to input volume, in proportion that depends on the client, the cache and the execution mode. Keep only what remains useful.",
+      "description": "Context you transmit is context the model processes on every exchange. Less of it means less computation, and energy follows computation, so the direction of the effect is not in doubt. The ratio is what varies: prompt caching can make resent context far cheaper than fresh context, so compacting sometimes costs more than it saves; model size, batching and hardware each move the figure more than token count does; and the carbon per unit of computation depends on the grid at that moment. Reduce the context because the computation is real, and measure your own setup before putting a number on it.",
       "rules": [
         {
           "id": "USAGE-CTX-01",
           "title": "Context minimalism",
           "principle": "Supply the context that is useful and let the agent fetch the remaining details on demand.",
           "description": "Do not preload huge system prompts or exhaustive tool listings. State the goal and a way to reach the context (files, search), then let the agent work.",
-          "why_green": "Needlessly large context increases the data processed, the latency and potentially the cost; the real effect depends on the cache and the client in use.",
+          "why_green": "Needlessly large context increases the data processed on every exchange, and energy follows that processing. It also raises latency and cost. How much of each depends on the cache and the client in use, which is why the direction is worth acting on and the ratio is worth measuring rather than assuming.",
           "how": "Write a short brief with the goal and the constraints. Do not paste whole files when the model can read them itself if needed.",
           "impact": "High",
           "source_ref": "Project recommendation; measure input tokens, latency and cost in the environment you actually use.",
@@ -51,7 +52,7 @@
           "title": "/clear for a new task, /compact for a related one",
           "principle": "An unrelated task deserves a fresh context; a related one keeps only the context still needed.",
           "description": "/clear starts from nothing, so the context is exactly what you decide it is. /compact has the model summarise the conversation, which is convenient but lossy. Steer the summary: \"/compact keep the auth refactor, drop the test debugging\".",
-          "why_green": "Continuing a long conversation for an unrelated task can transmit and process history that serves no purpose.",
+          "why_green": "Continuing a long conversation for an unrelated task transmits and processes history that serves no purpose, and that processing is real computation with real energy behind it. /clear removes it outright; /compact trades a summarisation cost now against a smaller input on every later exchange, which is worth it when the conversation still has a way to run and not when it is nearly done.",
           "how": "Before each new task, ask whether you need that history. No: /clear. Partly: /compact <instruction>.",
           "impact": "High",
           "source_ref": "Client-dependent features; check the official documentation for the version in use.",

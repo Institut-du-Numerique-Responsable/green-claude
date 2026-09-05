@@ -756,6 +756,29 @@ CATALOGUE=$(jq -r '[.metadata, .categories[]?, .categories[].rules[]?] | tostrin
 printf '%s\n' "$CATALOGUE" | grep -Eqi 'majorité des tokens|optimum écologique|300-400k|10k tokens|20 lignes|10x plus|multipliée par 2 ou 3|howborisusesclaudecode' \
     && fail "affirmation quantitative ou source personnelle non vérifiée dans usage.json"
 true
+# Le pendant du garde-fou : refuser le chiffre ne doit pas revenir à taire la
+# raison. Sans le lien qualitatif tokens -> calcul -> énergie, ces règles ne
+# sont plus qu'un argument de performance dans un skill d'éco-conception, et un
+# contributeur les retirerait à juste titre.
+# L'objectif du skill doit rester énoncé : sans lui, les règles se lisent comme
+# des conseils de performance et perdent ce qui les justifie.
+jq -e '.metadata.objective | test("least energy") and test("fewest tokens")' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "ecoconception.json : l'objectif de réduction des ressources a disparu des métadonnées"
+# Le motif tient sur une ligne : le texte du SKILL est enveloppé à 80 colonnes,
+# et une chaîne à cheval sur deux lignes échapperait à grep.
+grep -q 'fewest tokens during the session' ../SKILL.md \
+    || fail "SKILL.md : l'objectif de réduction des ressources n'est plus énoncé en tête"
+true
+jq -e '.metadata.energy_claim_policy | test("less computation") and test("measurement")' \
+    ../rules/usage.json >/dev/null \
+    || fail "usage.json : la politique sur le lien tokens/énergie a disparu des métadonnées"
+jq -e '.categories.contexte.description | test("energy follows computation")' ../rules/usage.json >/dev/null \
+    || fail "usage.json : la raison environnementale du contexte minimal n'est plus énoncée"
+jq -e '[.categories[].rules[] | select(.id == "USAGE-CTX-03") | .why_green | test("energy")] | any' \
+    ../rules/usage.json >/dev/null \
+    || fail "USAGE-CTX-03 : /compact et /clear sont justifiés sans mentionner l'énergie"
+true
 OUT="$(bash eco-audit.sh --list-rules)"
 printf '%s\n' "$OUT" | grep -q "Responsible use practices" \
     || fail "intitulé neutre des pratiques absent de --list-rules"

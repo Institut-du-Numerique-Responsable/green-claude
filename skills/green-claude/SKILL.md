@@ -16,6 +16,19 @@ user-invocable: true
 
 # Green Claude
 
+**What this skill is for.** Deliver code that consumes as little as possible:
+the fewest tokens during the session, the least CPU time and memory at runtime,
+the fewest bytes over the network, the least storage, and therefore the least
+energy. That is what digital sobriety means in practice, and it is the reason
+every rule below exists. A rule that does not eventually reduce a resource
+someone pays for is not worth the context it takes.
+
+The consumption comes in two waves, and the second is the larger one. During the
+session, the context you transmit and the output you produce are processed by a
+model, which costs computation and the energy behind it. After the session, the
+code you leave behind runs on every user's machine, on every request, for years.
+Both matter; only one of them stops when the conversation does.
+
 Three rule sets: `rules/ecoconception.json` (83 rules, RGESN 2024 / GR491 /
 Green Software Foundation / W3C WSG) while you write or modify code,
 `rules/langages/*.json` (127 rules across 24 languages and frameworks) for the language you're
@@ -80,7 +93,15 @@ For the conversation itself, apply the project-maintained responsible-use
 practices: keep only useful context and retrieve details on demand. Present them
 as Green Claude recommendations, not as quotations or personal advice. Verify
 client-specific commands against the official documentation for the version in
-use, and never turn token counts into energy claims without measurement.
+use.
+
+On the link between tokens and energy: state the direction, refuse the ratio.
+Fewer tokens processed means less computation, and less computation means less
+energy. That much holds and is worth acting on. Turning a token count into
+watts, joules or grams of CO2 does not hold, because prompt caching, model size,
+batching, hardware and the grid mix each move the result more than the token
+count does. Reduce because the computation is real; measure before you put a
+number on it.
 
 ## Finding the scripts
 

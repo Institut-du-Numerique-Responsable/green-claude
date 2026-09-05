@@ -20,6 +20,9 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Modifié
 
+- Objectif du skill énoncé en tête de `SKILL.md` et dans les métadonnées des règles : livrer du code qui consomme le moins possible de tokens pendant la session, de temps CPU et de mémoire à l'exécution, d'octets sur le réseau, de stockage, et donc d'énergie.
+- Lien tokens/énergie assumé dans sa direction et refusé dans son rapport : moins de tokens traités, c'est moins de calcul, et moins de calcul, c'est moins d'énergie ; convertir un nombre de tokens en watts ou en grammes de CO2 reste interdit sans mesure, le cache de prompt, la taille du modèle, le batching, le matériel et le mix électrique pesant chacun davantage. `USAGE-CTX-01` et `USAGE-CTX-03` portent désormais cette raison, et trois tests vérifient qu'elle ne disparaît pas.
+
 - Règles et sortie de l’audit passées en anglais, pour ouvrir les contributions au-delà des francophones. `gr491_famille` garde son libellé français : c’est le nom officiel d’une famille du référentiel.
 - Coût de l’audit divisé par dix-neuf : une passe `jq` unique remplace douze appels par règle, soit 3 processus au lieu de 753 sur un fichier. Suite de tests de 77 s à 19 s avec 79 règles de plus.
 - Page de documentation : logo et favicon vectoriels servis par un seul fichier qui suit le thème système, 6,6 Ko transférés en deux requêtes contre 15,7 Ko en trois. Matomo sans cookie, chargé après le rendu.
