@@ -3,16 +3,20 @@
 ## Current Status (as of 2026-09-05)
 
 ### Secret Scanning
-- **Status**: ❌ **DISABLED**
-- **API Response**: `{"status": "disabled"}`
+- **Status**: ✅ **ENABLED**
+- **API Response**: `{"status": "enabled"}`
+- **Activated**: Immediately via GitHub API by gridboy
 
 ### Secret Scanning Push Protection
-- **Status**: ❌ **DISABLED**
-- **API Response**: `{"status": "disabled"}`
+- **Status**: ✅ **ENABLED**
+- **API Response**: `{"status": "enabled"}`
+- **Activated**: Immediately via GitHub API by gridboy
 
 ### Organization Defaults (Institut-du-Numerique-Responsable)
 - `secret_scanning_enabled_for_new_repositories: false`
 - `secret_scanning_push_protection_enabled_for_new_repositories: false`
+
+**Note**: Organization defaults remain disabled, but this repository has been individually configured with Secret Scanning + Push Protection enabled.
 
 ## Recommendations
 
