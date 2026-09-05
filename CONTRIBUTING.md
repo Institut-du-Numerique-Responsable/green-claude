@@ -26,12 +26,25 @@ Les règles vivent dans `skills/green-claude/rules/ecoconception.json`, organis�
   "description": "What the rule checks and why it matters.",
   "impact": "High",
   "patterns": ["my_regex_pattern"],
+  "exclude_patterns": ["already_applies_the_practice"],
   "recommendation": "What to do instead.",
+  "example": {
+    "bad":  "the faulty form, one or two lines",
+    "good": "the corrected form, same shape"
+  },
+  "note": "What the pattern cannot see, and what a hit does not prove.",
   "rgesn_ref": "N.x",
   "gr491_famille": "Nom de la famille GR491",
+  "three_u": ["useful"],
   "tags": ["keywords"]
 }
 ```
+
+- `example` (facultatif, vivement recommandé sur les règles à impact élevé) : `bad` et `good`, une ou deux lignes chacun. L'audit affiche `good` sous `Write`. Une recommandation en prose oblige à reconstruire la forme attendue à chaque signalement ; l'exemple l'évite. Un test échoue si une règle transverse à impact élevé et détectable n'en porte pas.
+- `three_u` (facultatif) : à quel volet du cadre 3U de l'INR la règle répond, parmi `useful`, `usable` et `used`. Un service n'est sobre que s'il est utile, utilisable et utilisé, et les trois se tiennent : un service utile que personne ne peut utiliser n'est pas utilisé. C'est la grille de la revue de conception, avant qu'une ligne existe.
+- `source_note` (obligatoire si la règle est adaptée d'un autre projet) : nommer le projet, la règle d'origine et sa licence. Green Codex est en CC BY 4.0, donc l'attribution est due, et un test vérifie qu'elle ne disparaît pas.
+
+**Le texte des règles s'écrit en anglais**, motifs en ERE POSIX. Pas de `\s` ni de lookahead : `grep -E` ne les connaît pas partout, la négation vit dans `exclude_patterns`. Une règle sans `patterns` ni `detector` est une checklist : lui donner des `exclude_patterns` ou des `extensions` ne sert à rien, ils ne seront jamais lus, et un test le refuse.
 
 - `patterns` : expressions régulières `grep -E` qui détectent le problème dans le code. Une liste vide fait de la règle une checklist de démarche/gouvernance, ignorée par l'audit automatique — sauf si un `detector` est défini (voir ci-dessous).
 - `detector` (optionnel) : nom d'un détecteur dédié dans `scripts/detect-<nom>.awk`, pour les cas que grep ne peut pas voir car répartis sur plusieurs lignes (ex. `nested_loops` pour les boucles imbriquées). N'utilisez ce mécanisme que si `patterns` ne peut vraiment pas suffire.

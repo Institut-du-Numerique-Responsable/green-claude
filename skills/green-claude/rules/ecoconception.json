@@ -290,9 +290,9 @@
           "description": "A heavy framework for a brochure site means JavaScript downloaded, parsed and executed by every visitor for nothing.",
           "impact": "High",
           "patterns": [
-            "from\\s+['\"](react|react-dom|vue|@angular/[a-z]+|next)['\"]",
-            "require\\(\\s*['\"](react|react-dom|vue|@angular/[a-z]+|next)['\"]",
-            "\"(react|react-dom|vue|@angular/core|next|nuxt)\"\\s*:\\s*['\"]?[\\^~0-9]"
+            "from[[:space:]]+['\"](react|react-dom|vue|@angular/[a-z]+|next)['\"]",
+            "require\\([[:space:]]*['\"](react|react-dom|vue|@angular/[a-z]+|next)['\"]",
+            "\"(react|react-dom|vue|@angular/core|next|nuxt)\"[[:space:]]*:[[:space:]]*['\"]?[\\^~0-9]"
           ],
           "recommendation": "Before adopting a framework, check whether static HTML/CSS, vanilla JS or HTMX would meet the real need.",
           "example": {
@@ -579,7 +579,7 @@
           "impact": "High",
           "patterns": [
             "<(video|audio|iframe)[^>]*autoplay",
-            "autoplay\\s*[=:]",
+            "autoplay[[:space:]]*[=:]",
             "autoPlay"
           ],
           "recommendation": "Replace autoplay with a clickable cover image (a facade); load the media only on click.",
@@ -792,15 +792,15 @@
             "\\.webp",
             "\\.avif",
             "srcset",
-            "loading\\s*=\\s*[\"']lazy",
-            "type\\s*=\\s*[\"']image/(webp|avif)",
+            "loading[[:space:]]*=[[:space:]]*[\"']lazy",
+            "type[[:space:]]*=[[:space:]]*[\"']image/(webp|avif)",
             "og:image",
             "twitter:image",
-            "rel\\s*=\\s*[\"']icon",
+            "rel[[:space:]]*=[[:space:]]*[\"']icon",
             "apple-touch-icon",
-            "rel\\s*=\\s*[\"']manifest",
-            "\"logo\"\\s*:",
-            "\"image\"\\s*:"
+            "rel[[:space:]]*=[[:space:]]*[\"']manifest",
+            "\"logo\"[[:space:]]*:",
+            "\"image\"[[:space:]]*:"
           ],
           "enrich": "image",
           "enrich_note": "A pattern cannot tell whether an image is already compressed or correctly sized. scripts/inspect-image.sh resolves the real file when it can (not a remote URL) and adds its actual weight and dimensions to the report, asserting nothing when the file cannot be resolved.",
@@ -1017,7 +1017,7 @@
           "description": "A synchronous XMLHttpRequest (third argument of .open() set to false) freezes the main thread until the network responds: nothing else runs, page rendering included.",
           "impact": "High",
           "patterns": [
-            "\\.open\\([^,]+,[^,]+,\\s*false\\s*\\)"
+            "\\.open\\([^,]+,[^,]+,[[:space:]]*false[[:space:]]*\\)"
           ],
           "recommendation": "Use fetch() or an asynchronous XHR (true, the default). There is no legitimate frontend use case for it today.",
           "example": {
@@ -1134,8 +1134,8 @@
           "description": "Hacks targeting old Internet Explorer versions (star html, the \\9 escape) add CSS weight for browsers that now account for a minute share of traffic, when they account for any at all.",
           "impact": "Low",
           "patterns": [
-            "\\*\\s+html\\b",
-            "\\\\9\\s*;"
+            "\\*[[:space:]]+html\\b",
+            "\\\\9[[:space:]]*;"
           ],
           "recommendation": "Check your actual audience statistics before keeping these hacks; remove them when IE6/7/8 support is no longer a justified need.",
           "rgesn_ref": "6.x",
@@ -1218,8 +1218,8 @@
           "description": "SELECT *, functions inside WHERE clauses and random ordering make the database work far beyond the need.",
           "impact": "High",
           "patterns": [
-            "SELECT\\s+\\*",
-            "WHERE\\s+1\\s*=\\s*1",
+            "SELECT[[:space:]]+\\*",
+            "WHERE[[:space:]]+1[[:space:]]*=[[:space:]]*1",
             "ORDER BY.*RAND(OM)?\\(\\)"
           ],
           "recommendation": "Select only the columns you need, index the filtered columns, and avoid functions in WHERE clauses and N+1 queries.",
@@ -1242,11 +1242,11 @@
           "description": "Opening a database connection for every query is costly in CPU and latency, on the application side as much as on the server.",
           "impact": "High",
           "patterns": [
-            "new\\s+[A-Za-z_$][\\w$]*Connection\\s*\\(",
-            "\\bcreateConnection\\s*\\(",
+            "new[[:space:]]+[A-Za-z_$][\\w$]*Connection[[:space:]]*\\(",
+            "\\bcreateConnection[[:space:]]*\\(",
             "\\bpsycopg2\\.connect\\b",
             "\\bDriverManager\\.getConnection\\b",
-            "\\bmysqli_connect\\s*\\("
+            "\\bmysqli_connect[[:space:]]*\\("
           ],
           "recommendation": "Configure a connection pool (pg-pool, HikariCP, mysql2/promise).",
           "example": {
@@ -2175,28 +2175,13 @@
           "title": "Link tokens to physical resources",
           "description": "Tokens are a proxy for computation, but the real impact is in water, electricity, and hardware usage. Without this link, token counts remain abstract.",
           "impact": "High",
-          "patterns": [
-            "import\\s+torch",
-            "import\\s+transformers",
-            "import\\s+tensorflow",
-            "import\\s+keras",
-            "from\\s+torch",
-            "from\\s+transformers",
-            "from\\s+tensorflow",
-            "from\\s+keras"
-          ],
-          "exclude_patterns": [
-            "#.*tokens.*water",
-            "#.*tokens.*electricity",
-            "#.*tokens.*energy",
-            "#.*tokens.*physical"
-          ],
+          "patterns": [],
           "example": {
             "bad": "import torch\nmodel = torch.nn.Transformer()",
             "good": "import torch\n# Link: fewer tokens = less water/electricity consumption\nmodel = torch.nn.Transformer()"
           },
           "recommendation": "State the direction and refuse the ratio. Fewer tokens processed means less computation, and less computation means less energy and water. Exact ratios depend on model, hardware, batching, and datacenter location; measure your setup before claiming figures.",
-          "note": "This rule underpins all AI-specific recommendations: it justifies acting on token counts while prohibiting unverified conversions to watts, joules, or grams of CO2. Patterns detect AI library usage without documented link to physical resources.",
+          "note": "No pattern: whether a team has connected its token counts to physical resources is a property of its documentation and its measurements, not of a line of code. This is a review question.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
           "tags": [
@@ -2215,21 +2200,7 @@
           "title": "Require real measurements for AI systems",
           "description": "Without actual measurements, you cannot know where the consumption goes, let alone reduce it. Token counts alone are insufficient.",
           "impact": "High",
-          "patterns": [
-            "import\\s+torch",
-            "import\\s+transformers",
-            "import\\s+tensorflow",
-            "import\\s+keras",
-            "from\\s+torch",
-            "from\\s+transformers",
-            "from\\s+tensorflow",
-            "from\\s+keras"
-          ],
-          "exclude_patterns": [
-            "IA_MEASUREMENTS\\.md",
-            "IA_MEASUREMENTS",
-            "#.*measurement"
-          ],
+          "patterns": [],
           "example": {
             "bad": "import torch\n# No measurements",
             "good": "import torch\n# See IA_MEASUREMENTS.md for token count, CPU/GPU time, electricity and water usage"
@@ -2245,34 +2216,25 @@
           ],
           "three_u": [
             "used"
-          ]
+          ],
+          "note": "No pattern: the presence of real measurements is established by reading the measurement report, not by grepping the source. ECO-ALGO-11 detects the absence of instrumentation, which is the part a pattern can see."
         },
         {
           "id": "ECO-ALGO-11",
-          "title": "Set water and electricity budgets",
-          "description": "A budget that only limits tokens does not account for the model size, the hardware, or the datacenter efficiency.",
+          "title": "Measure the energy of an AI workload, do not estimate it",
+          "description": "A training or inference script that loads a framework and measures nothing tells you what it produced and never what it cost. Energy, and the water used to cool the machines that supplied it, are the part nobody sees on a dashboard and the part that grows fastest as the workload scales.",
           "impact": "High",
           "patterns": [
-            "import\\s+torch",
-            "import\\s+transformers",
-            "import\\s+tensorflow",
-            "import\\s+keras",
-            "from\\s+torch",
-            "from\\s+transformers",
-            "from\\s+tensorflow",
-            "from\\s+keras"
-          ],
-          "exclude_patterns": [
-            "water.*budget",
-            "electricity.*budget",
-            "CodeCarbon",
-            "Experiments.*Impact.*Tracker"
+            "import[[:space:]]+torch",
+            "import[[:space:]]+tensorflow",
+            "from[[:space:]]+transformers[[:space:]]+import",
+            "import[[:space:]]+keras"
           ],
           "example": {
             "bad": "import torch\n# No budgets defined",
             "good": "import torch\n# Budgets: < 10L water/day, < 1kWh/day using CodeCarbon"
           },
-          "recommendation": "Define maximum thresholds per project: e.g., < 10L of water/day, < 1kWh/day. Use tools like CodeCarbon or Experiments Impact Tracker to enforce these limits.",
+          "recommendation": "Instrument the run with a measurement library (CodeCarbon, Zeus, carbontracker, or pynvml directly), record the hardware, the duration and the region, and set a budget the job refuses to exceed. Estimate only what you cannot measure, and say which is which.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
           "tags": [
@@ -2280,29 +2242,30 @@
             "budget",
             "water",
             "electricity"
-          ]
+          ],
+          "exclude_file_patterns": [
+            "codecarbon",
+            "CodeCarbon",
+            "experiment_impact_tracker",
+            "eco2ai",
+            "carbontracker",
+            "pynvml",
+            "nvidia-smi",
+            "zeus",
+            "perun"
+          ],
+          "note": "The rule fires on a file that loads an ML framework and mentions no measurement tooling anywhere. A library module that neither trains nor infers is a false positive; the file that runs the job is the one that should carry the instrumentation."
         },
         {
           "id": "ECO-ALGO-12",
-          "title": "Use quantified models when possible",
-          "description": "Quantized models (int8, int4) reduce memory usage and compute requirements by 4-8x with minimal quality loss.",
+          "title": "Quantise a self-hosted model before buying more hardware",
+          "description": "A model served in full precision uses memory and bandwidth that quantisation often halves for a quality difference the task cannot detect. This applies to what you host yourself: a model served through an API is quantised, or not, by whoever runs it.",
           "impact": "High",
           "patterns": [
-            "model\\s*=\\s*[\"']([^\"']*gpt-4)",
-            "model\\s*=\\s*[\"']([^\"']*claude-3-opus)",
-            "model\\s*=\\s*[\"']([^\"']*llama-2-70b)",
-            "model\\s*=\\s*[\"']([^\"']*mistral-8x7b)"
-          ],
-          "exclude_patterns": [
-            "int8",
-            "int4",
-            "bitsandbytes",
-            "GGML",
-            "ggml",
-            "quantized",
-            "quantization",
-            "\\.gguf",
-            "\\.safetensors"
+            "from_pretrained[[:space:]]*\\(",
+            "AutoModelFor",
+            "\\.half[[:space:]]*\\(\\)",
+            "torch_dtype[[:space:]]*=[[:space:]]*torch\\.float32"
           ],
           "extensions": [
             "py",
@@ -2313,7 +2276,7 @@
             "rs",
             "rb"
           ],
-          "recommendation": "Prefer int8/int4 quantified versions (e.g., 'mistral-7b-instruct-v0.1-int4') to reduce memory and compute by 4-8x. Use libraries like bitsandbytes or GGML.",
+          "recommendation": "Measure quality, latency and memory before and after quantisation on your own test set, then keep the smallest representation that clears the bar. INT8 is not automatically better; it is automatically worth measuring.",
           "example": {
             "bad": "model = 'mistral-7b-instruct-v0.1'",
             "good": "model = 'mistral-7b-instruct-v0.1-int4'"
@@ -2328,7 +2291,19 @@
           ],
           "three_u": [
             "useful"
-          ]
+          ],
+          "exclude_file_patterns": [
+            "int8",
+            "int4",
+            "bitsandbytes",
+            "gguf",
+            "GGML",
+            "quantiz",
+            "awq",
+            "gptq",
+            "onnx"
+          ],
+          "note": "Scoped to loading a self-hosted model. The earlier version flagged the strings gpt-4 and claude-3-opus and recommended quantising them, which nobody consuming an API can do."
         },
         {
           "id": "ECO-ALGO-13",
@@ -2336,13 +2311,12 @@
           "description": "Single requests underutilize GPUs. Batching maximizes throughput and reduces overhead.",
           "impact": "High",
           "patterns": [
-            "batch_size\\s*=\\s*1",
-            "batch_size=1",
-            "max_batch_size\\s*=\\s*1"
+            "batch_size[[:space:]]*=[[:space:]]*1[[:space:]]*($|[,)}#])",
+            "max_batch_size[[:space:]]*=[[:space:]]*1[[:space:]]*($|[,)}#])"
           ],
           "exclude_patterns": [
-            "batch_size\\s*>\\s*1",
-            "max_batch_size\\s*>\\s*1"
+            "batch_size[[:space:]]*>[[:space:]]*1",
+            "max_batch_size[[:space:]]*>[[:space:]]*1"
           ],
           "extensions": [
             "py",
@@ -2366,7 +2340,8 @@
           ],
           "three_u": [
             "useful"
-          ]
+          ],
+          "note": "The pattern is anchored on the value: without the trailing boundary it matched batch_size = 16, 128 and 1024. A batch of one is legitimate for latency-critical inference, so the question is whether throughput or latency governs here."
         },
         {
           "id": "ECO-ALGO-14",
@@ -2374,16 +2349,6 @@
           "description": "Streaming releases the GPU between tokens, reducing memory pressure.",
           "impact": "Medium",
           "patterns": [],
-          "exclude_patterns": [
-            "stream\\s*=\\s*True",
-            "stream=True",
-            "streaming\\s*=\\s*True"
-          ],
-          "extensions": [
-            "py",
-            "js",
-            "ts"
-          ],
           "recommendation": "Enable streaming (stream=True) for long generations to free GPU memory between tokens.",
           "example": {
             "bad": "response = client.generate(prompt)",
@@ -2404,7 +2369,7 @@
           "description": "Recomputing embeddings for the same documents wastes CPU/GPU cycles.",
           "impact": "High",
           "patterns": [
-            "embed\\s*\\("
+            "embed[[:space:]]*\\("
           ],
           "exclude_patterns": [
             "cache",
@@ -2444,16 +2409,6 @@
           "description": "Recomputing the same prompts increases latency and energy consumption.",
           "impact": "High",
           "patterns": [],
-          "exclude_patterns": [
-            "cache_prompt",
-            "prompt_cache",
-            "cached_prompt"
-          ],
-          "extensions": [
-            "py",
-            "js",
-            "ts"
-          ],
           "recommendation": "Enable prompt caching (cache_prompt=True) to avoid recomputing identical prompts.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
@@ -2508,15 +2463,6 @@
           "description": "Tokenization, decoding, and post-processing can run on CPU, freeing GPU.",
           "impact": "Medium",
           "patterns": [],
-          "exclude_patterns": [
-            "device\\s*=\\s*\\\"cpu\\\"",
-            "to\\s*\\\\('cpu'\\\""
-          ],
-          "extensions": [
-            "py",
-            "js",
-            "ts"
-          ],
           "recommendation": "Move tokenization, decoding, and post-processing to CPU to free GPU resources.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
@@ -2584,16 +2530,6 @@
           "description": "Unbounded memory leads to swapping, multiplying energy by 10x.",
           "impact": "Medium",
           "patterns": [],
-          "exclude_patterns": [
-            "max_memory",
-            "max_ram",
-            "memory_limit"
-          ],
-          "extensions": [
-            "py",
-            "js",
-            "ts"
-          ],
           "recommendation": "Configure max_memory or max_ram to prevent swapping (e.g., max_memory=8GiB in vLLM).",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
@@ -2610,16 +2546,6 @@
           "description": "High GPU temperatures increase energy consumption and reduce lifespan.",
           "impact": "Medium",
           "patterns": [],
-          "exclude_patterns": [
-            "nvidia-smi",
-            "TEMPERATURE",
-            "gpu_temp",
-            "thermal"
-          ],
-          "extensions": [
-            "py",
-            "sh"
-          ],
           "recommendation": "Stop tasks if GPU temperature exceeds 80C. Monitor with nvidia-smi -q -d TEMPERATURE.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
@@ -2636,14 +2562,6 @@
           "description": "Swapping to disk multiplies energy consumption by 10x.",
           "impact": "High",
           "patterns": [],
-          "exclude_patterns": [
-            "swappiness",
-            "vm\\.swappiness"
-          ],
-          "extensions": [
-            "sh",
-            "py"
-          ],
           "recommendation": "Set swappiness=10 and monitor swap usage with free -h.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
@@ -2660,10 +2578,12 @@
           "description": "Fine-tuning consumes orders of magnitude more than inference. Often RAG suffices.",
           "impact": "High",
           "patterns": [
-            "\\.fine_tune\\s*\\\"",
+            "fine_tune",
             "FineTuningJob",
-            "train\\s*\\(",
-            "trainer\\s*="
+            "Trainer[[:space:]]*\\(",
+            "\\.fit[[:space:]]*\\(",
+            "peft",
+            "LoraConfig"
           ],
           "exclude_patterns": [
             "# No fine-tuning",
@@ -2692,7 +2612,8 @@
           "example": {
             "bad": "trainer = Trainer(model=base_model)\ntrainer.fine_tune(dataset)",
             "good": "# Use RAG instead of fine-tuning for knowledge updates\nvector_store = FAISS.from_documents(documents)\nretriever = vector_store.as_retriever()"
-          }
+          },
+          "note": "A bare train() call was matching any function named train, so the patterns now name the fine-tuning APIs. Fine-tuning is the right answer when the task needs a behaviour the base model does not have; it is the wrong one when the task needs knowledge, which retrieval supplies without a training run."
         },
         {
           "id": "ECO-ALGO-26",
@@ -2700,16 +2621,6 @@
           "description": "Training on unfiltered datasets wastes compute on irrelevant or duplicate data.",
           "impact": "High",
           "patterns": [],
-          "exclude_patterns": [
-            "deduplicate",
-            "filter",
-            "prune",
-            "clean",
-            "dataset\\.filter"
-          ],
-          "extensions": [
-            "py"
-          ],
           "recommendation": "Reduce dataset size by: (1) deduplicating, (2) filtering irrelevant examples, (3) sampling.",
           "rgesn_ref": "3.1",
           "gr491_famille": "Architecture",
@@ -2729,19 +2640,6 @@
           "description": "RAG adds knowledge without retraining, saving massive compute.",
           "impact": "High",
           "patterns": [],
-          "exclude_patterns": [
-            "RAG",
-            "retrieval",
-            "RetrievalAugmented",
-            "vector_store",
-            "FAISS",
-            "faiss"
-          ],
-          "extensions": [
-            "py",
-            "js",
-            "ts"
-          ],
           "recommendation": "For adding knowledge, use RAG (Retrieval-Augmented Generation) instead of fine-tuning. It's cheaper, faster, and dynamically updatable.",
           "rgesn_ref": "3.1",
           "gr491_famille": "Architecture",
@@ -2762,20 +2660,16 @@
       "description": "Rules for choosing energy-efficient hardware, datacenters, and deployment strategies for AI workloads.",
       "rules": [
         {
-          "id": "ECO-HOST-07",
-          "title": "Prefer inference-optimized GPUs",
-          "description": "Inference-optimized GPUs (e.g., NVIDIA L40S, T4) consume 40% less power than training GPUs (A100, H100).",
+          "id": "ECO-HOST-01",
+          "title": "Size the accelerator to the workload",
+          "description": "A training-class accelerator running inference spends most of its power idle between requests, because the memory bandwidth it was built for is not what inference needs. The gap shows up as a utilisation figure nobody looks at and an energy bill everybody pays.",
           "impact": "High",
           "patterns": [
             "A100",
             "H100",
-            "V100"
-          ],
-          "exclude_patterns": [
-            "L40S",
-            "T4",
-            "L4",
-            "inference"
+            "V100",
+            "MI300",
+            "TPU[[:space:]]*v[45]"
           ],
           "extensions": [
             "py",
@@ -2783,7 +2677,7 @@
             "yaml",
             "yml"
           ],
-          "recommendation": "Use NVIDIA L40S or T4 for inference tasks; they consume 40% less power. Benchmark with MLPerf Inference.",
+          "recommendation": "Measure utilisation and latency on the actual workload before choosing the class. Inference-oriented parts (L4, L40S, T4, Inferentia) often serve the same traffic for less power; training-class parts earn their cost when the job actually saturates them.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
           "tags": [
@@ -2798,29 +2692,23 @@
           "example": {
             "bad": "gpu_type = \"A100\"  # For inference workload",
             "good": "gpu_type = \"L40S\"  # Inference-optimized, 40% less power"
-          }
+          },
+          "exclude_file_patterns": [
+            "utilization",
+            "utilisation",
+            "nvidia-smi",
+            "dcgm",
+            "profil"
+          ],
+          "note": "Naming a training-class accelerator is the candidate, not the defect: the same part is the right answer for a job that saturates it. A file that already reports utilisation stays silent."
         },
         {
-          "id": "ECO-HOST-08",
-          "title": "Avoid oversized GPUs for small tasks",
-          "description": "Using A100/H100 for models < 10B parameters wastes energy.",
+          "id": "ECO-HOST-02",
+          "title": "Justify accelerator capacity with a utilisation measurement",
+          "description": "Capacity is usually chosen once, from what was available or what a benchmark suggested, and then never revisited. A machine at fifteen percent utilisation draws most of its idle power for nothing, and the fix is a smaller instance rather than a better model.",
           "impact": "High",
-          "patterns": [
-            "A100",
-            "H100"
-          ],
-          "exclude_patterns": [
-            "L40S",
-            "T4",
-            "L4"
-          ],
-          "extensions": [
-            "py",
-            "sh",
-            "yaml",
-            "yml"
-          ],
-          "recommendation": "For models < 10B parameters, use L40S or T4 instead of A100/H100. Use quantified models on lighter GPUs.",
+          "patterns": [],
+          "recommendation": "Record utilisation, memory headroom and queue depth over a representative period, then resize. Scale to zero where the traffic allows it, and prefer several small instances to one idle large one when the workload divides.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
           "tags": [
@@ -2832,32 +2720,16 @@
           "example": {
             "bad": "gpu_type = \"A100\"  # For 7B parameter model",
             "good": "gpu_type = \"T4\"  # Sufficient for models < 10B parameters"
-          }
+          },
+          "note": "No pattern: a utilisation figure lives in monitoring, not in the source. This is a review question."
         },
         {
-          "id": "ECO-HOST-09",
-          "title": "Deploy in green datacenters",
-          "description": "Datacenters vary in energy efficiency and renewable usage.",
+          "id": "ECO-HOST-03",
+          "title": "Place an AI workload where the grid is cleanest, with a source",
+          "description": "Carbon intensity varies by a large factor between regions and across the day, and an accelerator draws enough power for that factor to dominate the footprint of a training run. The region is usually picked for latency or price and never revisited.",
           "impact": "Medium",
-          "patterns": [
-            "us-east-1",
-            "us-west-1"
-          ],
-          "exclude_patterns": [
-            "europe-west1",
-            "europe-west4",
-            "asia-southeast1",
-            "canada-central1",
-            "sweden-central1",
-            "germany-west2"
-          ],
-          "extensions": [
-            "yaml",
-            "yml",
-            "sh",
-            "py"
-          ],
-          "recommendation": "Choose regions with >80% renewable energy and PUE < 1.2. Examples: Google Oregon, AWS Sweden, OVH Gravelines.",
+          "patterns": [],
+          "recommendation": "Compare regions on published grid intensity for the period you will actually run, cite the source and its date, and weigh it against latency, residency and cost. Defer what can wait to a cleaner window. See ECO-HEB-09 for the general case and ECO-HEB-08 for the timing.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
           "tags": [
@@ -2865,25 +2737,15 @@
             "renewable",
             "PUE",
             "energy"
-          ]
+          ],
+          "note": "No pattern: the earlier version flagged us-east-1 and treated a list of European regions as clean. Grid intensity does not divide that way, it changes over time, and the project does not make that kind of claim without a current source."
         },
         {
-          "id": "ECO-HOST-10",
+          "id": "ECO-HOST-04",
           "title": "Use CPU for small models",
           "description": "For models < 1B parameters, CPU inference can be more energy-efficient.",
           "impact": "Medium",
           "patterns": [],
-          "exclude_patterns": [
-            "device\\s*=\\s*\"cpu\"",
-            "device='cpu'",
-            "GGML",
-            "ONNX"
-          ],
-          "extensions": [
-            "py",
-            "sh",
-            "yaml"
-          ],
           "recommendation": "For models < 1B parameters, prefer CPU inference using GGML or ONNX Runtime. CPU reduces power for small workloads.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
@@ -2892,7 +2754,8 @@
             "gpu",
             "inference",
             "energy"
-          ]
+          ],
+          "note": "No pattern: whether a model fits on CPU depends on its size and the latency you owe, neither of which is visible in a line. Measure both paths on the real model before deciding."
         }
       ]
     }

@@ -151,7 +151,7 @@ The audit script needs `bash` and `jq`. Where `jq` is missing, the rules still a
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) covers all **9 families** of [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 official criteria) **plus a new "Hosting for AI" category**. Every rule carries an RGESN reference (`rgesn_ref`) and a [GR491](https://gr491.isit-europe.org/) family (`gr491_famille`).
 
-How precise that reference currently is: **18 rules** point at the exact criterion (families 1 to 4, e.g. `4.8`), **33 rules** only point at their family (`5.x` to `9.x`) because that mapping has not been done yet, and one rule follows the Green Software Foundation rather than the RGESN. Refining families 5 to 9 is open work — the field states what it knows, never more.
+How precise that reference currently is: **38 rules** point at the exact criterion (families 1 to 4, e.g. `4.8`), **67 rules** only point at their family (`5.x` to `9.x`) because that mapping has not been done yet, and one rule follows the Green Software Foundation rather than the RGESN. Refining families 5 to 9 is open work — the field states what it knows, never more.
 
 | RGESN family | Rules | Examples |
 |---|---|---|
@@ -241,11 +241,36 @@ Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/
 
 ## What a skill can't do (and how it's covered anyway)
 
-A skill runs *during* a session that's already started, and the model decides whether to apply it. So it can't pick the starting model, can't intercept a call before it leaves, and can't guarantee a rule gets checked every single time. Three levers therefore live outside the skill, in [`hooks/`](hooks/), optional and offered at install time:
+A skill runs *during* a session that's already started, and the model decides whether to apply it. So it can't pick the starting model, can't intercept a call before it leaves, and can't guarantee a rule gets checked every single time. Four levers therefore live outside the skill, in [`hooks/`](hooks/), optional and offered at install time:
 
 - **Systematic audit** (`hooks/green-claude-audit.sh`): wired as `PostToolUse` on `Write|Edit|MultiEdit`. Claude Code runs it after every code file written, without asking the model. It audits what was just added and hands the findings back to Claude, who fixes them before moving on.
 - **Local cache** (`hooks/green-claude-cache.sh`): a question already asked gets served again without calling the model — zero tokens spent.
 - **Off-peak warning** (same hook): flags peak hours (outside 22:00-06:00 UTC) without ever blocking.
+- **Framing before writing** (`hooks/green-claude-brief.sh`): wired as `UserPromptSubmit`. On a request to produce code, it recalls the three rules that decide what gets written at all — the least code that solves the problem, challenge the request and the model, ask before you build. On a question, it stays quiet. Those rules also live in the skill, but a skill is read when the session loads: three turns later it weighs nothing.
+
+## Two files that silence what should not speak
+
+A candidate you dismiss once comes back on the next run, and the one after that. Dismissed six times, it teaches the whole team to skim past the audit, which costs more than the rule ever saved. Two versioned files close the question, at the repository root.
+
+`.green-claude/decisions.md` holds what the team has settled:
+
+```
+ECO-CONT-01  docs/index.html  ACCEPTED  logo.jpg kept as the og:image fallback
+ECO-SH-05    install.sh       TODO      two mktemp with no trap
+```
+
+`ACCEPTED` silences that rule for that file, and only there. `TODO` stays visible: a debt taken on deliberately is not an exemption. The audit reports how many findings it hid and where the file lives, so nothing vanishes without a trace. The rest of the file is free prose; only lines in the right shape are read.
+
+`.green-claude/ignore` takes files out of scope, one pattern per line:
+
+```
+skills/green-claude/scripts/test-eco-audit.sh
+skills/green-claude/rules/
+```
+
+A test suite and a rule corpus **contain** faulty code without ever running it. Flagging them is a false positive by construction, and it produced more noise than anything else while this repository was written.
+
+Both locations can be overridden with `GREEN_CLAUDE_DECISIONS` and `GREEN_CLAUDE_IGNORE`.
 
 These hooks wire into `~/.claude/settings.json`. If you answer "y", `install.sh` adds them there (other settings are preserved, and a backup of the original file is left at `settings.json.green-claude.bak`). Without `jq`, it prints the config to paste in by hand. To remove them: delete the `green-claude-*` entries from the file.
 

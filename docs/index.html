@@ -212,7 +212,7 @@
   <div class="duo">
     <div class="card">
       <h3>Pendant que Claude code</h3>
-      <p>83 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : renvoi au critère officiel près pour les familles 1 à 4, renvoi à la famille pour les suivantes. Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
+      <p>106 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : renvoi au critère officiel près pour les familles 1 à 4, renvoi à la famille pour les suivantes. Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
     </div>
     <div class="card">
       <h3>Sur demande, un audit</h3>
@@ -271,18 +271,21 @@ cd green-claude && ./install.sh</code></pre>
   <h2>Ce que contient le projet</h2>
   <ul>
     <li>Un skill Claude Code qui s'invoque tout seul dès qu'il s'agit d'écrire ou de revoir du code.</li>
-    <li>83 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
+    <li>106 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
     <li>127 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
     <li>15 pratiques d’usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
-    <li>Des hooks optionnels, proposés à l'installation et jamais imposés : audit après chaque écriture de code, audit avant commit, cache local des réponses, avertissement aux heures de pointe.</li>
+    <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des réponses, avertissement aux heures de pointe.</li>
     <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
   </ul>
 
   <h2>Pourquoi c'est important</h2>
   <p>Le code généré par l'IA va tourner pendant des années chez des utilisateurs qu'on ne verra jamais. C'est là que se joue l'essentiel de l'empreinte du « coder avec l'IA », pas pendant la session de génération. Green Claude s'attaque à ce moment précis, en s'appuyant sur des référentiels publics français et internationaux plutôt que sur des règles maison.</p>
 
-  <h2>Pourquoi un skill, pas une checklist</h2>
-  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 225 règles à chaque échange, et vérifie le code déjà produit via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
+    <h2>Ce que l'équipe décide, l'audit s'en souvient</h2>
+  <p>Un candidat écarté une fois revient au tour suivant. Écarté six fois, il apprend à toute l'équipe à survoler l'audit, ce qui coûte plus cher que la règle ne rapporte. Deux fichiers versionnés à la racine du dépôt ferment la question : <code>.green-claude/decisions.md</code> pour ce qui a été tranché, où <code>ACCEPTED</code> fait taire une règle sur un fichier précis et <code>TODO</code> garde la dette visible, et <code>.green-claude/ignore</code> pour les fichiers hors périmètre, comme une suite de tests ou un corpus de règles qui contiennent du code fautif sans jamais l'exécuter. L'audit annonce combien de constats il a tus et où, donc rien ne disparaît sans trace.</p>
+
+<h2>Pourquoi un skill, pas une checklist</h2>
+  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 248 règles à chaque échange, et vérifie le code déjà produit via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
 
   <p>Reste que charger un skill est une décision du modèle. Pour les équipes qui veulent une vérification qui ne dépende de personne, le hook d'audit s'exécute après chaque écriture de fichier de code et renvoie ses trouvailles à Claude, qui corrige avant de continuer.</p>
 

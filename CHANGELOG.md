@@ -30,6 +30,19 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Corrigé
 
+- Règles IA ajoutées après coup : `ECO-ALGO-09`, `10` et `11` partageaient les mêmes motifs et signalaient trois fois en impact élevé tout fichier important PyTorch, sans décrire un seul défaut de son code. Une seule garde une détection, et elle détecte l'absence d'instrumentation de mesure.
+- `batch_size = 1` attrapait `batch_size = 16`, `128` et `1024` : le motif n'était pas ancré.
+- `ECO-ALGO-25` se déclenchait sur toute fonction nommée `train` ; les motifs nomment désormais les API de fine-tuning.
+- `ECO-ALGO-12` recommandait de quantifier `gpt-4` et `claude-3-opus`, que personne consommant une API ne peut quantifier ; la règle est recadrée sur le chargement d'un modèle auto-hébergé.
+- `ECO-HOST-07` et `08` se déclenchaient tous deux sur `A100` en disant presque la même chose.
+- `ECO-HOST-09` affirmait sans source que `us-east-1` est carboné et une liste de régions européennes propre, et doublait `ECO-HEB-09`.
+- Huit règles portaient `exclude_patterns` et `extensions` sans aucun motif : ces champs ne sont jamais lus.
+- Vingt-et-un motifs utilisaient `\s`, hors ERE POSIX, là où le reste du dépôt utilise `[[:space:]]`.
+- `ECO-HOST-07..10` renumérotées en `ECO-HOST-01..04` : deux règles numérotées `07` coexistaient avec `ECO-HEB`.
+- Comptes de règles réalignés : `SKILL.md` annonçait 83 transverses et 225 au total pour 106 et 248 réelles, et c'est le fichier que le modèle charge. Un test compare désormais les chiffres annoncés aux règles présentes.
+- Documentation : le hook de cadrage, le registre de décisions et le fichier d'exclusion n'étaient décrits nulle part hors du skill ; `CONTRIBUTING.md` ne documentait ni `example`, ni `three_u`, ni `source_note`, ni l'interdiction de `\s` et des lookaheads.
+
+
 - `grep` prenait un motif d’exclusion commençant par `--` pour une option : la règle échouait en silence, ce qui ressemble à un fichier propre.
 - `set -o pipefail` combiné à `grep -q` produisait des faux négatifs sur les fichiers assez gros pour remplir le tube, donc précisément là où il y a le plus à trouver.
 - Résolution d’extension d’un fichier sans point : `Dockerfile` n’était jamais routé vers ses règles.
