@@ -2175,9 +2175,24 @@
           "title": "Link tokens to physical resources",
           "description": "Tokens are a proxy for computation, but the real impact is in water, electricity, and hardware usage. Without this link, token counts remain abstract.",
           "impact": "High",
-          "patterns": [],
+          "patterns": [
+            "import\\s+torch",
+            "import\\s+transformers",
+            "import\\s+tensorflow",
+            "import\\s+keras",
+            "from\\s+torch",
+            "from\\s+transformers",
+            "from\\s+tensorflow",
+            "from\\s+keras"
+          ],
+          "exclude_patterns": [
+            "#.*tokens.*water",
+            "#.*tokens.*electricity",
+            "#.*tokens.*energy",
+            "#.*tokens.*physical"
+          ],
           "recommendation": "State the direction and refuse the ratio. Fewer tokens processed means less computation, and less computation means less energy and water. Exact ratios depend on model, hardware, batching, and datacenter location; measure your setup before claiming figures.",
-          "note": "This rule underpins all AI-specific recommendations: it justifies acting on token counts while prohibiting unverified conversions to watts, joules, or grams of CO2.",
+          "note": "This rule underpins all AI-specific recommendations: it justifies acting on token counts while prohibiting unverified conversions to watts, joules, or grams of CO2. Patterns detect AI library usage without documented link to physical resources.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
           "tags": [
@@ -2196,7 +2211,21 @@
           "title": "Require real measurements for AI systems",
           "description": "Without actual measurements, you cannot know where the consumption goes, let alone reduce it. Token counts alone are insufficient.",
           "impact": "High",
-          "patterns": [],
+          "patterns": [
+            "import\\s+torch",
+            "import\\s+transformers",
+            "import\\s+tensorflow",
+            "import\\s+keras",
+            "from\\s+torch",
+            "from\\s+transformers",
+            "from\\s+tensorflow",
+            "from\\s+keras"
+          ],
+          "exclude_patterns": [
+            "IA_MEASUREMENTS\\.md",
+            "IA_MEASUREMENTS",
+            "#.*measurement"
+          ],
           "recommendation": "For every AI implementation, measure and document: (1) tokens processed, (2) CPU/GPU time, (3) electricity consumption (via nvidia-smi, intel_gpu_top, or cloud tools), and (4) water usage if datacenter data is available. Store results in IA_MEASUREMENTS.md.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
@@ -2215,7 +2244,22 @@
           "title": "Set water and electricity budgets",
           "description": "A budget that only limits tokens does not account for the model size, the hardware, or the datacenter efficiency.",
           "impact": "High",
-          "patterns": [],
+          "patterns": [
+            "import\\s+torch",
+            "import\\s+transformers",
+            "import\\s+tensorflow",
+            "import\\s+keras",
+            "from\\s+torch",
+            "from\\s+transformers",
+            "from\\s+tensorflow",
+            "from\\s+keras"
+          ],
+          "exclude_patterns": [
+            "water.*budget",
+            "electricity.*budget",
+            "CodeCarbon",
+            "Experiments.*Impact.*Tracker"
+          ],
           "recommendation": "Define maximum thresholds per project: e.g., < 10L of water/day, < 1kWh/day. Use tools like CodeCarbon or Experiments Impact Tracker to enforce these limits.",
           "rgesn_ref": "9.x",
           "gr491_famille": "Backend",
