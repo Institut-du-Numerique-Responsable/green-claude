@@ -1,0 +1,11 @@
+# Fichiers hors périmètre de l'audit.
+# Un motif par ligne (grep -E sur le chemin). Ces fichiers CONTIENNENT du code
+# fautif sans jamais l'exécuter : les signaler est un faux positif par
+# construction, et c'est ce bruit-là qui apprend à ignorer l'outil.
+
+# La suite de tests est un catalogue de code fautif : c'est son travail.
+skills/green-claude/scripts/test-eco-audit.sh
+scripts/test-.*\.sh$
+
+# Les fichiers de règles décrivent les défauts qu'ils cherchent.
+skills/green-claude/rules/

@@ -1,10 +1,12 @@
 {
   "metadata": {
-    "name": "Éco-conception Java",
-    "description": "Règles d'écoconception pour le code Java : JPA/Hibernate sobre, mémoire, batch, sérialisation, logs.",
+    "name": "Ecodesign for Java",
+    "description": "Ecodesign rules for Java code: sober JPA/Hibernate, memory, batching, serialisation, logging.",
     "version": "1.0.0",
     "globs": "**/*.java",
-    "extensions": ["java"],
+    "extensions": [
+      "java"
+    ],
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/"
@@ -14,108 +16,162 @@
   },
   "categories": {
     "donnees": {
-      "name": "Java — accès aux données (JPA / Hibernate / JDBC)",
-      "description": "Ne charger que le nécessaire, en un minimum d'allers-retours (RGESN Backend, GR491_Backend_2/3).",
+      "name": "Java — data access (JPA / Hibernate / JDBC)",
+      "description": "Load only what is needed, in as few round trips as possible (RGESN Backend, GR491_Backend_2/3).",
       "rules": [
         {
           "id": "ECO-JAVA-01",
-          "title": "findAll() sur une table non bornée",
-          "description": "Charge toutes les lignes et les gère comme entités managées : mémoire, CPU et réseau proportionnels au volume de la table.",
-          "impact": "Élevé",
-          "patterns": ["\\.findAll\\(\\s*\\)"],
-          "recommendation": "Paginer systématiquement (Pageable, setMaxResults) ; traiter les gros volumes par chunks.",
+          "title": "findAll() on an unbounded table",
+          "description": "Loads every row and manages them as managed entities: memory, CPU and network proportional to the table size.",
+          "impact": "High",
+          "patterns": [
+            "\\.findAll\\(\\s*\\)"
+          ],
+          "recommendation": "Paginate as a matter of course (Pageable, setMaxResults); process large volumes in chunks.",
+          "example": {
+            "bad": "List<Order> all = repo.findAll();",
+            "good": "Page<Order> page = repo.findAll(PageRequest.of(0, 100));"
+          },
           "rgesn_ref": "7.1",
           "gr491_famille": "Backend",
-          "tags": ["java", "jpa", "pagination"]
+          "tags": [
+            "java",
+            "jpa",
+            "pagination"
+          ]
         },
         {
           "id": "ECO-JAVA-02",
-          "title": "Association lazy parcourue en boucle (N+1)",
-          "description": "Une collection @OneToMany/@ManyToMany parcourue en lazy déclenche une requête par élément parent.",
-          "impact": "Élevé",
-          "patterns": ["@OneToMany", "@ManyToMany"],
-          "recommendation": "Charger explicitement les associations parcourues avec JOIN FETCH ou @EntityGraph ; projeter en DTO pour la lecture seule.",
+          "title": "Lazy association walked in a loop (N+1)",
+          "description": "A @OneToMany or @ManyToMany collection walked lazily fires one query per parent element.",
+          "impact": "High",
+          "patterns": [
+            "@OneToMany",
+            "@ManyToMany"
+          ],
+          "recommendation": "Load the associations you walk explicitly with JOIN FETCH or @EntityGraph; project into a DTO for read-only access.",
+          "example": {
+            "bad": "for (Order o : orders) { o.getCustomer().getName(); }",
+            "good": "@Query(\"select o from Order o join fetch o.customer\")"
+          },
           "rgesn_ref": "7.1, 9.1",
           "gr491_famille": "Backend",
-          "tags": ["java", "jpa", "n+1"]
+          "tags": [
+            "java",
+            "jpa",
+            "n+1"
+          ]
         },
         {
           "id": "ECO-JAVA-03",
-          "title": "Écritures entité par entité",
-          "description": "Un save() par entité génère un aller-retour base par ligne, sans batch JDBC.",
-          "impact": "Moyen",
+          "title": "Writes one entity at a time",
+          "description": "One save() per entity produces one database round trip per row, with no JDBC batching.",
+          "impact": "Medium",
           "patterns": [],
-          "recommendation": "Batch JDBC (hibernate.jdbc.batch_size, saveAll par tranches), Spring Batch pour les traitements longs ; dimensionner le pool HikariCP au besoin réel.",
+          "recommendation": "JDBC batching (hibernate.jdbc.batch_size, saveAll in slices), Spring Batch for long jobs; size the HikariCP pool to the real need.",
           "rgesn_ref": "7.1",
           "gr491_famille": "Backend",
-          "tags": ["java", "jpa", "batch"]
+          "tags": [
+            "java",
+            "jpa",
+            "batch"
+          ]
         }
       ]
     },
     "memoire": {
-      "name": "Java — mémoire et CPU",
-      "description": "Limiter allocations, parallélisme non mesuré et caches non bornés (RGESN Algorithmie, GR491_Backend_4).",
+      "name": "Java — memory and CPU",
+      "description": "Limit allocations, unmeasured parallelism and unbounded caches (RGESN Algorithms, GR491_Backend_4).",
       "rules": [
         {
           "id": "ECO-JAVA-04",
-          "title": "parallelStream() par défaut",
-          "description": "parallelStream mobilise tous les cœurs du ForkJoinPool commun pour un gain rarement mesuré, et dégrade les traitements concurrents.",
-          "impact": "Moyen",
-          "patterns": ["\\.parallelStream\\(\\)"],
-          "recommendation": "Rester en stream séquentiel par défaut ; ne paralléliser qu'après mesure, sur un pool dédié.",
+          "title": "parallelStream() by default",
+          "description": "parallelStream takes over every core of the common ForkJoinPool for a gain that is rarely measured, and degrades concurrent processing.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.parallelStream\\(\\)"
+          ],
+          "recommendation": "Stay on a sequential stream by default; parallelise only after measurement, on a dedicated pool.",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["java", "cpu", "parallelisme"]
+          "tags": [
+            "java",
+            "cpu",
+            "parallelism"
+          ]
         },
         {
           "id": "ECO-JAVA-05",
-          "title": "Concaténation de chaînes en boucle",
-          "description": "`s += ...` alloue une nouvelle String à chaque tour : pression mémoire et GC inutiles dans les boucles chaudes.",
-          "impact": "Faible",
-          "patterns": ["\\+=\\s*\""],
-          "recommendation": "StringBuilder pour les concaténations répétées ; éviter le boxing dans les pipelines (IntStream plutôt que Stream<Integer>).",
+          "title": "String concatenation in a loop",
+          "description": "`s += ...` allocates a new String on every iteration: needless memory and GC pressure in hot loops.",
+          "impact": "Low",
+          "patterns": [
+            "\\+=\\s*\""
+          ],
+          "recommendation": "StringBuilder for repeated concatenation; avoid boxing in pipelines (IntStream rather than Stream<Integer>).",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["java", "memoire", "chaines"]
+          "tags": [
+            "java",
+            "memory",
+            "strings"
+          ]
         },
         {
           "id": "ECO-JAVA-06",
-          "title": "Cache statique non borné",
-          "description": "Une Map statique utilisée comme cache grossit sans limite : mémoire retenue jusqu'au redémarrage, voire OOM.",
-          "impact": "Moyen",
-          "patterns": ["static\\s+(final\\s+)?(Map|HashMap|ConcurrentHashMap)"],
-          "recommendation": "Caffeine avec maximumSize + expireAfterWrite, ou cache externe avec TTL.",
+          "title": "Unbounded static cache",
+          "description": "A static Map used as a cache grows without limit: memory held until restart, and possibly an OOM.",
+          "impact": "Medium",
+          "patterns": [
+            "static\\s+(final\\s+)?(Map|HashMap|ConcurrentHashMap)"
+          ],
+          "recommendation": "Caffeine with maximumSize plus expireAfterWrite, or an external cache with a TTL.",
           "rgesn_ref": "7.3",
           "gr491_famille": "Backend",
-          "tags": ["java", "cache", "memoire"]
+          "tags": [
+            "java",
+            "cache",
+            "memory"
+          ]
         }
       ]
     },
     "logs_taches": {
-      "name": "Java — API, logs et tâches",
-      "description": "Sérialiser peu, journaliser sobrement, ne pas scruter (RGESN Backend/Hébergement).",
+      "name": "Java — APIs, logging and scheduled tasks",
+      "description": "Serialise little, log soberly, do not poll (RGESN Backend/Hosting).",
       "rules": [
         {
           "id": "ECO-JAVA-07",
-          "title": "Log concaténé au lieu de paramétré",
-          "description": "Une concaténation dans un appel de log est évaluée même si le niveau est désactivé : CPU et allocations pour une ligne jamais écrite.",
-          "impact": "Faible",
-          "patterns": ["log(ger)?\\.(debug|info|trace)\\([^,)]*\\+"],
-          "recommendation": "Logging paramétré (log.debug(\"x={}\", x)) ; pas de log dans les boucles serrées ; niveaux de production sobres.",
+          "title": "Concatenated log instead of a parameterised one",
+          "description": "A concatenation inside a log call is evaluated even when the level is disabled: CPU and allocations for a line never written.",
+          "impact": "Low",
+          "patterns": [
+            "log(ger)?\\.(debug|info|trace)\\([^,)]*\\+"
+          ],
+          "recommendation": "Parameterised logging (log.debug(\"x={}\", x)); no logging inside tight loops; sober production levels.",
           "rgesn_ref": "7.3",
           "gr491_famille": "Backend",
-          "tags": ["java", "logs"]
+          "tags": [
+            "java",
+            "logging"
+          ]
         },
         {
           "id": "ECO-JAVA-08",
-          "title": "Tâche planifiée à haute fréquence",
-          "description": "Un @Scheduled qui interroge un état en boucle consomme CPU et base en continu pour détecter un changement rare.",
-          "impact": "Moyen",
-          "patterns": ["@Scheduled"],
-          "recommendation": "Déclenchement événementiel (listener, message) quand c'est possible ; sinon espacer l'intervalle et sérialiser les exécutions.",
+          "title": "High-frequency scheduled task",
+          "description": "A @Scheduled job polling a state in a loop consumes CPU and database capacity continuously to catch a rare change.",
+          "impact": "Medium",
+          "patterns": [
+            "@Scheduled"
+          ],
+          "recommendation": "Event-driven triggering (listener, message) where possible; failing that, widen the interval and serialise the runs.",
           "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
-          "tags": ["java", "polling", "taches"]
+          "tags": [
+            "java",
+            "polling",
+            "tasks"
+          ]
         }
       ]
     }

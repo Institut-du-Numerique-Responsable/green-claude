@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Swift",
+    "description": "Ecodesign rules for Swift code: battery-aware background work, reused sessions, streamed data, no blocking of the main thread.",
+    "globs": "**/*.swift",
+    "extensions": [
+      "swift"
+    ],
+    "version": "1.0.0",
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 5,
+    "type": "code_audit"
+  },
+  "categories": {
+    "energie": {
+      "name": "Swift — device energy",
+      "description": "On a phone the energy is the user's battery, and the sensors are the expensive part (RGESN UX/Algorithms).",
+      "rules": [
+        {
+          "id": "ECO-SW-01",
+          "title": "Sensor left running",
+          "description": "Location, motion and Bluetooth scanning keep power-hungry hardware awake. Started and never stopped, they drain a battery in the background for a screen the user closed an hour ago.",
+          "impact": "High",
+          "patterns": [
+            "startUpdatingLocation\\(",
+            "startUpdatingHeading\\(",
+            "startDeviceMotionUpdates",
+            "scanForPeripherals"
+          ],
+          "exclude_file_patterns": [
+            "stopUpdatingLocation",
+            "stopUpdatingHeading",
+            "stopDeviceMotionUpdates",
+            "stopScan"
+          ],
+          "recommendation": "Stop the updates as soon as the screen or the task that needed them goes away, ask for the coarsest accuracy that works, and prefer significant-change monitoring over continuous updates.",
+          "example": {
+            "bad": "manager.startUpdatingLocation()",
+            "good": "manager.startUpdatingLocation()\n// viewDidDisappear: manager.stopUpdatingLocation()"
+          },
+          "note": "One stop call anywhere in the file silences the rule. That is usually right, since start and stop are normally written as a pair, but a file starting several sensors needs each one stopped.",
+          "rgesn_ref": "4.x",
+          "gr491_famille": "UX/UI",
+          "tags": [
+            "swift",
+            "ios",
+            "battery",
+            "sensors"
+          ]
+        },
+        {
+          "id": "ECO-SW-02",
+          "title": "Timer used to poll",
+          "description": "A repeating timer that re-fetches state runs whether or not anything changed, wakes the radio, and prevents the device from settling into a low-power state.",
+          "impact": "Medium",
+          "patterns": [
+            "Timer\\.scheduledTimer",
+            "DispatchSourceTimer"
+          ],
+          "exclude_file_patterns": [
+            "invalidate\\(\\)"
+          ],
+          "recommendation": "Drive the refresh from an event: a push notification, a WebSocket, a delegate callback. Where a timer is unavoidable, invalidate it when the view disappears and widen the interval.",
+          "note": "One invalidate() anywhere in the file silences the rule. Check that the timer flagged here is the one being invalidated, and that it happens when the view goes away.",
+          "rgesn_ref": "7.x",
+          "gr491_famille": "UX/UI",
+          "tags": [
+            "swift",
+            "ios",
+            "polling"
+          ]
+        }
+      ]
+    },
+    "ressources": {
+      "name": "Swift — resources and I/O",
+      "description": "Reuse sessions, stream large data, keep the main thread free (RGESN Backend/Frontend).",
+      "rules": [
+        {
+          "id": "ECO-SW-03",
+          "title": "Main thread blocked",
+          "description": "A synchronous wait on the main thread freezes the interface: nothing renders, nothing responds, and the user taps again, which queues more work for the same result.",
+          "impact": "High",
+          "patterns": [
+            "DispatchQueue\\.main\\.sync",
+            "\\.waitUntilFinished\\(\\)",
+            "semaphore\\.wait\\(\\)"
+          ],
+          "recommendation": "Keep the main thread for the interface. Move the work to a background queue or an async task, and update the UI when it returns.",
+          "example": {
+            "bad": "DispatchQueue.main.sync { render() }",
+            "good": "Task { let d = await load(); await MainActor.run { render(d) } }"
+          },
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Frontend",
+          "tags": [
+            "swift",
+            "ios",
+            "blocking"
+          ]
+        },
+        {
+          "id": "ECO-SW-04",
+          "title": "Whole file or response held in memory",
+          "description": "Data(contentsOf:) loads everything before anything can be used. On a large download that is a memory spike, and on a slow connection it is a wait with nothing on screen.",
+          "impact": "Medium",
+          "patterns": [
+            "Data\\(contentsOf:",
+            "String\\(contentsOf:"
+          ],
+          "recommendation": "Use URLSession download or stream tasks, decode incrementally, and bound what you keep.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "swift",
+            "memory",
+            "streams"
+          ]
+        },
+        {
+          "id": "ECO-SW-05",
+          "title": "URLSession built per request",
+          "description": "A session created for each call loses its connection pool and its cache: every request redoes DNS and the TLS handshake, on a radio that costs more energy the longer it stays awake.",
+          "impact": "Medium",
+          "patterns": [
+            "URLSession\\(configuration:"
+          ],
+          "exclude_file_patterns": [
+            "static[[:space:]]+let",
+            "lazy[[:space:]]+var"
+          ],
+          "recommendation": "Share one session for the app or the service, configured once with its cache policy and timeouts.",
+          "note": "A session held in a static let or a lazy var is exactly the recommendation, so the rule stays silent as soon as the file declares one.",
+          "rgesn_ref": "7.2",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "swift",
+            "network",
+            "connections"
+          ]
+        }
+      ]
+    }
+  }
+}

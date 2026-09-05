@@ -1,0 +1,156 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Shell (sh, bash, zsh)",
+    "description": "Ecodesign rules for shell scripts: no process spawned per line, no polling, streamed data, temporary files cleaned up.",
+    "globs": "**/*.{sh,bash,zsh}",
+    "extensions": [
+      "sh",
+      "bash",
+      "zsh"
+    ],
+    "version": "1.0.0",
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 6,
+    "type": "code_audit"
+  },
+  "categories": {
+    "processus": {
+      "name": "Shell — processes",
+      "description": "A shell script pays for every process it starts; in a loop, that is the whole cost (RGESN Algorithms).",
+      "rules": [
+        {
+          "id": "ECO-SH-01",
+          "title": "Command substitution inside a loop",
+          "description": "Every $(...) forks a process, and a fork costs more than the work most of these commands do. In a loop over a thousand lines that is a thousand processes to compute what one awk pass would have produced in one.",
+          "impact": "High",
+          "patterns": [
+            "^[[:space:]]*(for|while)[[:space:]].*\\$\\("
+          ],
+          "recommendation": "Do the work in one pass: awk, sed or a single pipeline. Where the loop must stay, hoist whatever does not depend on the iteration out of it.",
+          "example": {
+            "bad": "for f in $(ls); do wc -l \"$f\"; done",
+            "good": "find . -type f -print0 | xargs -0 wc -l"
+          },
+          "note": "A substitution in the loop header is evaluated once and is fine; one in the body runs on every iteration. The pattern sees the line, not the position, so check which of the two you have.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "shell",
+            "processes",
+            "cpu"
+          ]
+        },
+        {
+          "id": "ECO-SH-02",
+          "title": "Useless use of cat",
+          "description": "cat file | command starts a process and a pipe to hand over what the command can open by itself. It is small, and it is in every script, run every time.",
+          "impact": "Low",
+          "patterns": [
+            "cat[[:space:]]+[^|]*\\|[[:space:]]*(grep|awk|sed|sort|wc|head|tail)"
+          ],
+          "recommendation": "Redirect instead: command < file, or pass the filename as an argument.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "shell",
+            "processes"
+          ],
+          "exclude_patterns": [
+            "xargs"
+          ]
+        },
+        {
+          "id": "ECO-SH-03",
+          "title": "Chained greps and cuts",
+          "description": "grep | grep | cut | awk starts four processes and copies the data through three pipes, where a single awk reads it once.",
+          "impact": "Low",
+          "patterns": [
+            "grep[^|]*\\|[[:space:]]*(grep|cut|awk|sed)[^|]*\\|"
+          ],
+          "recommendation": "Collapse the chain into one awk or sed pass, as long as it stays readable. Readability wins over a saved fork.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "shell",
+            "processes",
+            "pipelines"
+          ],
+          "exclude_patterns": [
+            "grep[[:space:]]+-[a-zA-Z]*v"
+          ]
+        }
+      ]
+    },
+    "attente": {
+      "name": "Shell — waiting and I/O",
+      "description": "Never wait actively, never grow a file without bound (RGESN Backend/Hosting).",
+      "rules": [
+        {
+          "id": "ECO-SH-04",
+          "title": "Polling loop",
+          "description": "A loop that sleeps and re-tests keeps a shell, and often a subprocess, alive doing nothing. Left in a cron job or a container entrypoint, it runs for the lifetime of the machine.",
+          "impact": "Medium",
+          "patterns": [
+            "sleep[[:space:]]+[0-9]"
+          ],
+          "exclude_file_patterns": [
+            "inotifywait",
+            "^[[:space:]]*wait[[:space:]]*$",
+            "trap[[:space:]]"
+          ],
+          "recommendation": "Block on the event instead: wait for the PID, inotifywait, a queue, or a signal. Where polling is the only option, widen the interval and give the loop a bound.",
+          "note": "Only sleep is looked for: a while loop reading a stream is not polling, and flagging it would fire on every read loop in a repository. A sleep between retries with a bounded count is legitimate, so read the loop before acting.",
+          "rgesn_ref": "7.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "shell",
+            "polling",
+            "cpu"
+          ]
+        },
+        {
+          "id": "ECO-SH-05",
+          "title": "Temporary file with no cleanup",
+          "description": "A temporary file created without a trap survives every early exit and every failure. On a build agent or a container they accumulate until the disk fills.",
+          "impact": "Medium",
+          "patterns": [
+            "mktemp"
+          ],
+          "exclude_file_patterns": [
+            "trap[[:space:]].*rm",
+            "trap[[:space:]].*EXIT"
+          ],
+          "recommendation": "Pair every mktemp with a trap that removes it on EXIT, so the cleanup happens on the error paths too.",
+          "note": "A single trap anywhere in the file silences the rule, even when another mktemp goes uncleaned. Check that every temporary path is covered, not just the first.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "shell",
+            "storage",
+            "cleanup"
+          ]
+        },
+        {
+          "id": "ECO-SH-06",
+          "title": "Unbounded output to a log or a file",
+          "description": "A command appending to a file with no rotation and no bound fills the disk slowly and invisibly, and the backups carry it too.",
+          "impact": "Low",
+          "patterns": [
+            ">>[[:space:]]*[^[:space:]]*\\.log"
+          ],
+          "recommendation": "Bound what you write: a log level, rotation, or a retention job. A script that writes a log should also say who deletes it.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "shell",
+            "logging",
+            "storage"
+          ]
+        }
+      ]
+    }
+  }
+}

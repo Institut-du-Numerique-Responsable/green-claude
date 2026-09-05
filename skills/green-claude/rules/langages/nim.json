@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Nim",
+    "description": "Ecodesign rules for Nim code: bounded compile-time work, no needless sequence copies, deterministic cleanup.",
+    "version": "1.0.0",
+    "globs": "**/*.nim",
+    "extensions": [
+      "nim"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 3,
+    "type": "code_audit"
+  },
+  "categories": {
+    "perf": {
+      "name": "Nim — memory and build",
+      "description": "Keep copies and generated code under control (RGESN Algorithms/Architecture).",
+      "rules": [
+        {
+          "id": "ECO-NIM-01",
+          "title": "Sequence copied instead of borrowed",
+          "description": "Assigning a seq copies it. Passing one by value into a proc copies it again. On a large sequence in a loop those copies dominate the work the proc actually does.",
+          "impact": "Medium",
+          "patterns": [
+            "proc[[:space:]]+[a-zA-Z_]+\\([^)]*:[[:space:]]*seq\\["
+          ],
+          "exclude_file_patterns": [
+            "openArray",
+            "lent ",
+            "var seq"
+          ],
+          "recommendation": "Take openArray[T] or a var/lent parameter so the caller's memory is used in place, and reserve with newSeqOfCap when the size is known.",
+          "note": "One openArray or lent parameter anywhere in the file silences the rule. Passing a small seq by value costs nothing measurable, so the size and the call frequency decide.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "nim",
+            "copies",
+            "allocations"
+          ]
+        },
+        {
+          "id": "ECO-NIM-02",
+          "title": "Resource closed only on the happy path",
+          "description": "A file or socket closed at the end of a proc is never closed when an exception leaves early, which is exactly when the system is already struggling.",
+          "impact": "Medium",
+          "patterns": [
+            "open\\(",
+            "newSocket\\("
+          ],
+          "exclude_file_patterns": [
+            "defer:",
+            "finally:"
+          ],
+          "recommendation": "Wrap the acquisition in a defer or a try/finally so the close runs on every exit path.",
+          "note": "One defer or finally anywhere in the file silences the rule, even when another resource goes unclosed. Count the acquisitions against the releases before concluding.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "nim",
+            "resources",
+            "cleanup"
+          ]
+        },
+        {
+          "id": "ECO-NIM-03",
+          "title": "Unbounded compile-time generation",
+          "description": "Macros and static blocks run at build time and can generate more code than anyone reads. The build slows for everyone, and the binary carries the result to every deployment.",
+          "impact": "Low",
+          "patterns": [
+            "macro[[:space:]]+[a-zA-Z_]+",
+            "static:"
+          ],
+          "recommendation": "Keep generated code bounded and inspect it when it affects build time or binary size. A template is often enough where a macro was reached for.",
+          "rgesn_ref": "3.1",
+          "gr491_famille": "Architecture",
+          "tags": [
+            "nim",
+            "macros",
+            "build"
+          ]
+        }
+      ]
+    }
+  }
+}

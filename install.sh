@@ -22,6 +22,7 @@ SETTINGS_FILE="$HOME/.claude/settings.json"
 CACHE_HOOK="~/.claude/hooks/green-claude-cache.sh"
 SAVE_HOOK="~/.claude/hooks/green-claude-cache-save.sh"
 AUDIT_HOOK="~/.claude/hooks/green-claude-audit.sh"
+BRIEF_HOOK="~/.claude/hooks/green-claude-brief.sh"
 
 # Idempotent : un hook déjà déclaré, sous n'importe quelle forme de chemin,
 # n'est pas réajouté. Les hooks existants sont préservés. $4 (facultatif) est
@@ -47,7 +48,7 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 # =============================================================================
-# Étape 1 : Skill (éco-conception du code + pratiques Boris)
+# Étape 1 : Skill (éco-conception du code + pratiques d'usage responsable)
 # =============================================================================
 print_info "Installation du skill dans $SKILLS_DIR..."
 mkdir -p "$SKILLS_DIR"
@@ -145,6 +146,47 @@ if [[ $REPLY =~ ^[OoYy]$ ]]; then
     fi
 else
     print_info "Hook d'audit ignoré — installable plus tard depuis $SCRIPT_DIR/hooks/"
+fi
+
+# =============================================================================
+# Étape 4 : hook de cadrage (UserPromptSubmit)
+# Les trois règles qui décident de ce qui sera écrit (moins de code, challenger
+# le modèle, poser la question avant de coder) ne valent qu'avant la première
+# ligne. Le skill les porte, mais il est lu au chargement de la session : trois
+# tours plus tard elles ne pèsent plus. Ce hook les rappelle à chaque demande
+# de production de code, et se tait sur tout le reste.
+# =============================================================================
+print_info ""
+read -p "Installer le hook de cadrage avant écriture de code (UserPromptSubmit) ? (o/n) : " -n 1 -r
+echo
+if [[ $REPLY =~ ^[OoYy]$ ]]; then
+    mkdir -p "$HOOKS_DIR"
+    cp "$SCRIPT_DIR/hooks/green-claude-brief.sh" "$HOOKS_DIR/"
+    chmod +x "$HOOKS_DIR/green-claude-brief.sh"
+    print_success "Script de cadrage copié dans $HOOKS_DIR"
+
+    BRIEF_WIRED=0
+    if command -v jq >/dev/null 2>&1; then
+        [ -s "$SETTINGS_FILE" ] || echo '{}' > "$SETTINGS_FILE"
+        TMP="$(mktemp)"
+        if wire_hook "UserPromptSubmit" "$BRIEF_HOOK" "$SETTINGS_FILE" > "$TMP" && [ -s "$TMP" ]; then
+            [ -f "$SETTINGS_FILE.green-claude.bak" ] || cp "$SETTINGS_FILE" "$SETTINGS_FILE.green-claude.bak"
+            mv "$TMP" "$SETTINGS_FILE"
+            BRIEF_WIRED=1
+            print_success "Hook de cadrage câblé dans $SETTINGS_FILE"
+            print_info "Redémarre Claude Code pour l'activer."
+        else
+            print_error "jq n'a pas pu traiter $SETTINGS_FILE, fichier laissé intact."
+        fi
+        rm -f "$TMP"
+    fi
+
+    if [ "$BRIEF_WIRED" -eq 0 ]; then
+        print_warning "Câblage à faire à la main dans $SETTINGS_FILE :"
+        printf '\n  {\n    "hooks": {\n      "UserPromptSubmit": [\n        { "hooks": [{ "type": "command", "command": "%s" }] }\n      ]\n    }\n  }\n\n' "$BRIEF_HOOK"
+    fi
+else
+    print_info "Hook de cadrage ignoré — installable plus tard depuis $SCRIPT_DIR/hooks/"
 fi
 
 # =============================================================================
