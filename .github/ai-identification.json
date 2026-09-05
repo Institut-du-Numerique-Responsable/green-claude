@@ -1,0 +1,169 @@
+{
+  "name": "Green Claude",
+  "description": "Eco-design skill for Claude Code that promotes digital sobriety, eco-conception (RGESN, GR491, Green Software Foundation) and AI sobriety practices.",
+  "version": "3.0.0",
+  "type": "skill",
+  "platform": "Claude Code",
+  "license": "MIT",
+  "organization": {
+    "name": "Institut du Numérique Responsable",
+    "alias": "INR",
+    "website": "https://institutnr.org",
+    "description": "French non-profit organization promoting responsible digital practices"
+  },
+  "maintainers": [
+    {
+      "name": "Guillaume Gallon",
+      "github": "gridboy",
+      "role": "Lead Maintainer",
+      "affiliation": "Institut du Numérique Responsable"
+    },
+    {
+      "name": "Robin Trassard",
+      "github": "robintra",
+      "role": "Core Contributor",
+      "affiliation": "Institut du Numérique Responsable"
+    },
+    {
+      "name": "Guillaume Bourgeois",
+      "github": "Guillaume-INR",
+      "role": "Core Contributor",
+      "affiliation": "Institut du Numérique Responsable"
+    },
+    {
+      "name": "Vincent Courboulay",
+      "github": "vcourbou",
+      "role": "Core Contributor",
+      "affiliation": "Institut du Numérique Responsable"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Guillaume Gallon",
+      "github": "gridboy",
+      "contributions": ["code", "documentation", "project-lead", "rules", "scripts"]
+    },
+    {
+      "name": "Robin Trassard",
+      "github": "robintra",
+      "contributions": ["code", "reviews"]
+    },
+    {
+      "name": "Guillaume Bourgeois",
+      "github": "Guillaume-INR",
+      "contributions": ["governance", "strategy"]
+    },
+    {
+      "name": "Vincent Courboulay",
+      "github": "vcourbou",
+      "contributions": ["research", "ai-sobriety"]
+    }
+  ],
+  "keywords": [
+    "ai",
+    "eco-design",
+    "digital-sobriety",
+    "green-it",
+    "sustainable-software",
+    "rgesn",
+    "gr491",
+    "claude-code",
+    "claude-code-plugin",
+    "eco-conception",
+    "frugal-ai",
+    "carbon-footprint",
+    "green-software-foundation",
+    "numerique-responsable",
+    "sobriete-numerique",
+    "sustainability",
+    "web-sustainability",
+    "energy-efficiency",
+    "water-usage",
+    "cpu-optimization",
+    "gpu-optimization",
+    "token-counting",
+    "responsible-ai"
+  ],
+  "standards": [
+    {
+      "name": "RGESN 2024",
+      "description": "Référentiel Général d'Écoconception de Services Numériques",
+      "url": "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "family_count": 9,
+      "criteria_count": 78
+    },
+    {
+      "name": "GR491",
+      "description": "Guide de référence pour la conception de services numériques responsables",
+      "url": "https://gr491.isit-europe.org/",
+      "recommendations_count": 61,
+      "criteria_count": 516
+    },
+    {
+      "name": "Green Software Foundation",
+      "description": "Software eco-design patterns and best practices",
+      "url": "https://greensoftware.foundation/"
+    },
+    {
+      "name": "W3C Web Sustainability Guidelines",
+      "description": "Web sustainability guidelines",
+      "url": "https://w3c.github.io/sustainableweb-wsg/"
+    }
+  ],
+  "features": {
+    "rules": {
+      "total": 225,
+      "ecoconception": 106,
+      "language_specific": 127,
+      "ai_specific": 23,
+      "hosting_for_ai": 4
+    },
+    "languages": [
+      "python", "javascript", "java", "csharp", "php", "ruby", "rust", "go", 
+      "sql", "c", "cpp", "swift", "kotlin", "scala", "julia", "nim", 
+      "zig", "shell", "angular", "react", "vue", "svelte", "astro", 
+      "solid", "typescript"
+    ],
+    "standards_compliance": ["RGESN", "GR491", "GSF", "W3C WSG"],
+    "security": {
+      "secret_scanning": "enabled",
+      "push_protection": "enabled",
+      "branch_protection": "enabled"
+    }
+  },
+  "documentation": {
+    "readme": "README.md",
+    "readme_fr": "README.fr.md",
+    "contributing": "CONTRIBUTING.md",
+    "changelog": "CHANGELOG.md",
+    "license": "LICENSE",
+    "code_of_conduct": "CODE_OF_CONDUCT.md",
+    "governance": "GOVERNANCE.md",
+    "language_docs": "docs/languages/",
+    "contributors": "CONTRIBUTORS.md",
+    "citation": "CITATION.cff"
+  },
+  "links": {
+    "repository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
+    "documentation": "https://institut-du-numerique-responsable.github.io/green-claude/",
+    "organization": "https://institutnr.org",
+    "plugin_marketplace": "Institut-du-Numerique-Responsable/green-claude",
+    "issues": "https://github.com/Institut-du-Numerique-Responsable/green-claude/issues",
+    "pull_requests": "https://github.com/Institut-du-Numerique-Responsable/green-claude/pulls"
+  },
+  "ai_specific": {
+    "objective": "Deliver code that consumes as little as possible: the fewest tokens during the session, the least CPU time and memory at runtime, the fewest bytes over the network, the least storage, and therefore the least energy.",
+    "rules": [
+      "ECO-ALGO-09: Link tokens to physical resources (water, electricity, hardware)",
+      "ECO-ALGO-10: Require real measurements for AI systems",
+      "ECO-ALGO-11: Set water and electricity budgets",
+      "ECO-HOST-07: Prefer inference-optimized GPUs",
+      "ECO-HOST-08: Avoid oversized GPUs for small tasks",
+      "ECO-HOST-09: Deploy in green datacenters",
+      "ECO-HOST-10: Use CPU for small models"
+    ],
+    "measurement_tools": ["CodeCarbon", "Experiments Impact Tracker", "nvidia-smi", "intel_gpu_top"]
+  },
+  "last_updated": "2026-09-05T00:00:00Z",
+  "generated_by": "gridboy"
+}

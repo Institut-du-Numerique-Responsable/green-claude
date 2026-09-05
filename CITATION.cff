@@ -14,6 +14,14 @@ authors:
     family-names: "Trassard"
     alias: "robintra"
     # 3 contribution(s)
+  - given-names: "Guillaume"
+    family-names: "Bourgeois"
+    alias: "Guillaume-INR"
+    affiliation: "Institut du Numérique Responsable"
+  - given-names: "Vincent"
+    family-names: "Courboulay"
+    alias: "vcourbou"
+    affiliation: "Institut du Numérique Responsable"
 contact:
   - given-names: "Guillaume"
     family-names: "Gallon"
