@@ -64,7 +64,7 @@
           "description": "Count() walks and counts every row when an existence test can stop at the first one.",
           "impact": "Low",
           "patterns": [
-            "\\.Count\\(\\)\\s*[><=]"
+            "\\.Count\\(\\)[[:space:]]*[><=]"
           ],
           "recommendation": "Any() for an existence test; avoid enumerating the same IEnumerable several times (materialise once when reused).",
           "rgesn_ref": "9.1",
@@ -107,7 +107,7 @@
           "description": "One HttpClient per call exhausts sockets and repeats the TLS handshake on every request.",
           "impact": "Medium",
           "patterns": [
-            "new\\s+HttpClient\\("
+            "new[[:space:]]+HttpClient\\("
           ],
           "recommendation": "IHttpClientFactory (connections reused); enable response compression and cache headers (ResponseCache, ETag).",
           "rgesn_ref": "7.2",
@@ -147,7 +147,7 @@
           "description": "A static Dictionary used as a cache grows without limit until the process restarts.",
           "impact": "Medium",
           "patterns": [
-            "static\\s+(readonly\\s+)?(Dictionary|ConcurrentDictionary)"
+            "static[[:space:]]+(readonly[[:space:]]+)?(Dictionary|ConcurrentDictionary)"
           ],
           "recommendation": "IMemoryCache with SizeLimit/AbsoluteExpiration, or a distributed cache with a TTL.",
           "rgesn_ref": "7.3",
@@ -164,7 +164,7 @@
           "description": "`s += ...` allocates a new string on every iteration: needless GC pressure on hot paths.",
           "impact": "Low",
           "patterns": [
-            "\\+=\\s*\""
+            "\\+=[[:space:]]*\""
           ],
           "recommendation": "StringBuilder for repeated concatenation; Span<T>/Memory<T> for heavy parsing; parameterised structured logging (_logger.LogDebug(\"x={X}\", x)).",
           "rgesn_ref": "9.1",

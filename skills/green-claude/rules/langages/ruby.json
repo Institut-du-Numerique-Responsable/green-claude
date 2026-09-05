@@ -64,7 +64,7 @@
           "description": "count > 0, or any? on a relation, runs a full count when the database could stop at the first row.",
           "impact": "Low",
           "patterns": [
-            "\\.count\\s*>\\s*0"
+            "\\.count[[:space:]]*>[[:space:]]*0"
           ],
           "recommendation": "exists? for an existence test; update_all/insert_all for bulk writes, never save inside a loop.",
           "rgesn_ref": "9.1",
@@ -102,7 +102,7 @@
           "description": "`s += ...` allocates a new string on every iteration, where mutation reuses the buffer.",
           "impact": "Low",
           "patterns": [
-            "\\+=\\s*['\"]"
+            "\\+=[[:space:]]*['\"]"
           ],
           "recommendation": "Build with << (mutation); lazy enumerators (.lazy) and each_slice for long transformation chains.",
           "rgesn_ref": "9.1",

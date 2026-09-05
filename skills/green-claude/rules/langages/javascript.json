@@ -30,8 +30,8 @@
           "description": "`import * as x`, or importing a monolithic library such as lodash or moment, defeats tree-shaking: the entire package ends up in the bundle.",
           "impact": "High",
           "patterns": [
-            "import\\s+\\*\\s+as\\s+\\w+\\s+from",
-            "from\\s+['\"](lodash|moment)['\"]",
+            "import[[:space:]]+\\*[[:space:]]+as[[:space:]]+\\w+[[:space:]]+from",
+            "from[[:space:]]+['\"](lodash|moment)['\"]",
             "require\\(['\"](lodash|moment)['\"]\\)"
           ],
           "recommendation": "Targeted imports (import { x } from 'lib/x'); native APIs first (fetch, Intl, URL, structuredClone, Date/Temporal) before adding a dependency.",
@@ -106,7 +106,7 @@
           "description": "scroll, resize, mousemove and input fire dozens of times per second: a costly handler there monopolises the device's CPU.",
           "impact": "Medium",
           "patterns": [
-            "addEventListener\\(\\s*['\"](scroll|resize|mousemove|input|pointermove)['\"]"
+            "addEventListener\\([[:space:]]*['\"](scroll|resize|mousemove|input|pointermove)['\"]"
           ],
           "exclude_file_patterns": [
             "requestAnimationFrame\\(",
@@ -131,7 +131,7 @@
           "description": "includes/indexOf/find inside a loop gives quadratic processing on unbounded collections.",
           "impact": "Medium",
           "patterns": [
-            "for\\s*\\(.*\\)\\s*\\{?.*\\.(includes|indexOf|find)\\("
+            "for[[:space:]]*\\(.*\\)[[:space:]]*\\{?.*\\.(includes|indexOf|find)\\("
           ],
           "recommendation": "Index into a Map or a Set before the loop.",
           "rgesn_ref": "9.1",
@@ -171,7 +171,7 @@
           "description": "A client created for every request repeats DNS resolution and the TLS handshake: latency and CPU paid again each time.",
           "impact": "Medium",
           "patterns": [
-            "new\\s+(HttpClient|XMLHttpRequest)\\(",
+            "new[[:space:]]+(HttpClient|XMLHttpRequest)\\(",
             "axios\\.create\\("
           ],
           "recommendation": "A shared HTTP client with a keep-alive agent; a reused database connection pool.",
@@ -194,7 +194,7 @@
           "exclude_file_patterns": [
             "removeEventListener",
             "AbortController",
-            "\\bsignal\\s*:",
+            "\\bsignal[[:space:]]*:",
             "\\bonUnmounted\\b",
             "\\bngOnDestroy\\b"
           ],
