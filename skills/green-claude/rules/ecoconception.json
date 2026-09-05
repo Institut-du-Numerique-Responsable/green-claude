@@ -10,7 +10,7 @@
       "https://github.com/Institut-du-Numerique-Responsable/green-codex"
     ],
     "coverage_note": "The RGESN 2024 has 78 criteria across 9 families; the GR491 has 61 recommendations and 516 criteria across 8 families. This file selects 52 actionable rules without reproducing the full referential: every RGESN family is represented, and rgesn_ref points at the official criterion for further reading. An rgesn_ref shaped 'N.x' means the rule belongs to family N without matching a single criterion.",
-    "count": 83,
+    "count": 106,
     "type": "code_audit",
     "type_note": "Rules with 'patterns' are found in code by the audit (grep). Rules with 'detector' use a dedicated multi-line detector (scripts/detect-*.awk) where line-by-line grep is not enough. Rules with neither are design or process rules: they serve as a checklist through --list-rules.",
     "three_u_note": "The three_u field marks which of the three conditions of a sober digital service a rule serves, as framed by the Institut du Numerique Responsable: useful (it answers a real need, and that need calls for something digital), usable (by everyone, on modest hardware and constrained networks), used (someone actually uses it, and what nobody uses gets retired). The three hold together: a useful service nobody can use goes unused, and a used service that is not useful consumes for nothing. It is the design-review lens to apply before any code exists; rgesn_ref stays the pointer to the official criterion.",
@@ -2169,8 +2169,677 @@
             "challenge",
             "proportionality"
           ]
+        },
+        {
+          "id": "ECO-ALGO-09",
+          "title": "Link tokens to physical resources",
+          "description": "Tokens are a proxy for computation, but the real impact is in water, electricity, and hardware usage. Without this link, token counts remain abstract.",
+          "impact": "High",
+          "patterns": [],
+          "recommendation": "State the direction and refuse the ratio. Fewer tokens processed means less computation, and less computation means less energy and water. Exact ratios depend on model, hardware, batching, and datacenter location; measure your setup before claiming figures.",
+          "note": "This rule underpins all AI-specific recommendations: it justifies acting on token counts while prohibiting unverified conversions to watts, joules, or grams of CO2.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "tokens",
+            "energy",
+            "water",
+            "measurement"
+          ],
+          "three_u": [
+            "used"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-10",
+          "title": "Require real measurements for AI systems",
+          "description": "Without actual measurements, you cannot know where the consumption goes, let alone reduce it. Token counts alone are insufficient.",
+          "impact": "High",
+          "patterns": [],
+          "recommendation": "For every AI implementation, measure and document: (1) tokens processed, (2) CPU/GPU time, (3) electricity consumption (via nvidia-smi, intel_gpu_top, or cloud tools), and (4) water usage if datacenter data is available. Store results in IA_MEASUREMENTS.md.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "measurement",
+            "electricity",
+            "water"
+          ],
+          "three_u": [
+            "used"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-11",
+          "title": "Set water and electricity budgets",
+          "description": "A budget that only limits tokens does not account for the model size, the hardware, or the datacenter efficiency.",
+          "impact": "High",
+          "patterns": [],
+          "recommendation": "Define maximum thresholds per project: e.g., < 10L of water/day, < 1kWh/day. Use tools like CodeCarbon or Experiments Impact Tracker to enforce these limits.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "budget",
+            "water",
+            "electricity"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-12",
+          "title": "Use quantified models when possible",
+          "description": "Quantized models (int8, int4) reduce memory usage and compute requirements by 4-8x with minimal quality loss.",
+          "impact": "High",
+          "patterns": [
+            "model\\s*=\\s*[\"']([^\"']*gpt-4)",
+            "model\\s*=\\s*[\"']([^\"']*claude-3-opus)",
+            "model\\s*=\\s*[\"']([^\"']*llama-2-70b)",
+            "model\\s*=\\s*[\"']([^\"']*mistral-8x7b)"
+          ],
+          "exclude_patterns": [
+            "int8",
+            "int4",
+            "bitsandbytes",
+            "GGML",
+            "ggml",
+            "quantized",
+            "quantization",
+            "\\.gguf",
+            "\\.safetensors"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts",
+            "java",
+            "go",
+            "rs",
+            "rb"
+          ],
+          "recommendation": "Prefer int8/int4 quantified versions (e.g., 'mistral-7b-instruct-v0.1-int4') to reduce memory and compute by 4-8x. Use libraries like bitsandbytes or GGML.",
+          "example": {
+            "bad": "model = 'mistral-7b-instruct-v0.1'",
+            "good": "model = 'mistral-7b-instruct-v0.1-int4'"
+          },
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "quantization",
+            "memory",
+            "compute"
+          ],
+          "three_u": [
+            "useful"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-13",
+          "title": "Batch requests to maximize GPU utilization",
+          "description": "Single requests underutilize GPUs. Batching maximizes throughput and reduces overhead.",
+          "impact": "High",
+          "patterns": [
+            "batch_size\\s*=\\s*1",
+            "batch_size=1",
+            "max_batch_size\\s*=\\s*1"
+          ],
+          "exclude_patterns": [
+            "batch_size\\s*>\\s*1",
+            "max_batch_size\\s*>\\s*1"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts",
+            "java",
+            "go"
+          ],
+          "recommendation": "Group requests into batches (e.g., batch_size=32) to maximize GPU utilization. Avoid single calls in production.",
+          "example": {
+            "bad": "inference(model, prompt, batch_size=1)",
+            "good": "inference(model, prompts, batch_size=32)"
+          },
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "batching",
+            "gpu",
+            "throughput"
+          ],
+          "three_u": [
+            "useful"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-14",
+          "title": "Use streaming for long outputs",
+          "description": "Streaming releases the GPU between tokens, reducing memory pressure.",
+          "impact": "Medium",
+          "patterns": [],
+          "exclude_patterns": [
+            "stream\\s*=\\s*True",
+            "stream=True",
+            "streaming\\s*=\\s*True"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Enable streaming (stream=True) for long generations to free GPU memory between tokens.",
+          "example": {
+            "bad": "response = client.generate(prompt)",
+            "good": "for chunk in client.generate(prompt, stream=True): process(chunk)"
+          },
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "streaming",
+            "gpu",
+            "memory"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-15",
+          "title": "Cache embeddings for repeated documents",
+          "description": "Recomputing embeddings for the same documents wastes CPU/GPU cycles.",
+          "impact": "High",
+          "patterns": [
+            "embed\\s*\\("
+          ],
+          "exclude_patterns": [
+            "cache",
+            "Cache",
+            "FAISS",
+            "faiss",
+            "Milvus",
+            "milvus",
+            "vector_store",
+            "get_or_compute"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Cache embeddings of frequent documents using FAISS or Milvus. Recompute only when the document changes.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "embeddings",
+            "cache",
+            "rag"
+          ],
+          "three_u": [
+            "useful"
+          ],
+          "example": {
+            "bad": "embeddings = model.embed(documents)",
+            "good": "if (cache_key := hash(doc)) not in embed_cache:\n    embed_cache[cache_key] = model.embed(doc)\nembeddings = [embed_cache[hash(d)] for d in documents]"
+          }
+        },
+        {
+          "id": "ECO-ALGO-16",
+          "title": "Avoid redundant prompt processing",
+          "description": "Recomputing the same prompts increases latency and energy consumption.",
+          "impact": "High",
+          "patterns": [],
+          "exclude_patterns": [
+            "cache_prompt",
+            "prompt_cache",
+            "cached_prompt"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Enable prompt caching (cache_prompt=True) to avoid recomputing identical prompts.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "cache",
+            "prompt",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-17",
+          "title": "Prefer distilled models",
+          "description": "Distilled models offer 90-95% quality with fewer parameters and less compute.",
+          "impact": "Medium",
+          "patterns": [
+            "bert-base-uncased",
+            "roberta-base",
+            "llama-2-7b",
+            "mistral-7b"
+          ],
+          "exclude_patterns": [
+            "distilbert",
+            "DistilBERT",
+            "TinyLlama",
+            "tiny-llama",
+            "distilled",
+            "Distilled"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Use distilled versions (e.g., DistilBERT, TinyLlama) when they meet the quality bar.",
+          "example": {
+            "bad": "model = 'bert-base-uncased'",
+            "good": "model = 'distilbert-base-uncased'"
+          },
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "distillation",
+            "models",
+            "efficiency"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-18",
+          "title": "Offload preprocessing to CPU",
+          "description": "Tokenization, decoding, and post-processing can run on CPU, freeing GPU.",
+          "impact": "Medium",
+          "patterns": [],
+          "exclude_patterns": [
+            "device\\s*=\\s*\\\"cpu\\\"",
+            "to\\s*\\\\('cpu'\\\""
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Move tokenization, decoding, and post-processing to CPU to free GPU resources.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "cpu",
+            "gpu",
+            "offloading"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-19",
+          "title": "Avoid LLMs for deterministic tasks",
+          "description": "LLMs are overkill for tasks solvable with regex, rules, or lightweight classifiers.",
+          "impact": "High",
+          "patterns": [],
+          "recommendation": "Replace LLMs with: (1) regular expressions, (2) lightweight classifiers (scikit-learn, FastText), (3) rule engines (Drools), (4) exact search (Elasticsearch).",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "deterministic",
+            "alternatives",
+            "regex"
+          ],
+          "three_u": [
+            "useful"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-20",
+          "title": "Use LLMs only for truly ambiguous tasks",
+          "description": "LLMs should be reserved for NLP, creative generation, or multi-step reasoning.",
+          "impact": "High",
+          "patterns": [],
+          "recommendation": "Use an LLM only if the task involves: (1) natural language understanding, (2) creative generation, or (3) multi-step reasoning. Otherwise, use a deterministic alternative.",
+          "rgesn_ref": "9.1",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "ambiguity",
+            "tasks",
+            "classification"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-21",
+          "title": "Benchmark LLM vs non-LLM solutions",
+          "description": "Before integrating an LLM, compare against non-LLM on accuracy, latency, and resources.",
+          "impact": "Medium",
+          "patterns": [],
+          "recommendation": "Benchmark against non-LLM on: (1) accuracy, (2) latency, (3) CPU/GPU consumption. Document results.",
+          "rgesn_ref": "9.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "ai",
+            "benchmark",
+            "comparison",
+            "alternatives"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-22",
+          "title": "Limit memory usage",
+          "description": "Unbounded memory leads to swapping, multiplying energy by 10x.",
+          "impact": "Medium",
+          "patterns": [],
+          "exclude_patterns": [
+            "max_memory",
+            "max_ram",
+            "memory_limit"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Configure max_memory or max_ram to prevent swapping (e.g., max_memory=8GiB in vLLM).",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "ai",
+            "memory",
+            "swap",
+            "performance"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-23",
+          "title": "Monitor GPU temperature",
+          "description": "High GPU temperatures increase energy consumption and reduce lifespan.",
+          "impact": "Medium",
+          "patterns": [],
+          "exclude_patterns": [
+            "nvidia-smi",
+            "TEMPERATURE",
+            "gpu_temp",
+            "thermal"
+          ],
+          "extensions": [
+            "py",
+            "sh"
+          ],
+          "recommendation": "Stop tasks if GPU temperature exceeds 80C. Monitor with nvidia-smi -q -d TEMPERATURE.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "gpu",
+            "temperature",
+            "monitoring",
+            "hardware"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-24",
+          "title": "Avoid swapping at all costs",
+          "description": "Swapping to disk multiplies energy consumption by 10x.",
+          "impact": "High",
+          "patterns": [],
+          "exclude_patterns": [
+            "swappiness",
+            "vm\\.swappiness"
+          ],
+          "extensions": [
+            "sh",
+            "py"
+          ],
+          "recommendation": "Set swappiness=10 and monitor swap usage with free -h.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "memory",
+            "swap",
+            "performance",
+            "energy"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-25",
+          "title": "Avoid fine-tuning when not necessary",
+          "description": "Fine-tuning consumes orders of magnitude more than inference. Often RAG suffices.",
+          "impact": "High",
+          "patterns": [
+            "\\.fine_tune\\s*\\\"",
+            "FineTuningJob",
+            "train\\s*\\(",
+            "trainer\\s*="
+          ],
+          "exclude_patterns": [
+            "# No fine-tuning",
+            "RAG",
+            "retrieval",
+            "pre-trained",
+            "pretrained"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "Avoid fine-tuning if: (1) a pre-trained model covers the task, (2) base performance is >90% of target. Prefer RAG for knowledge updates.",
+          "rgesn_ref": "3.1",
+          "gr491_famille": "Architecture",
+          "tags": [
+            "ai",
+            "fine-tuning",
+            "training",
+            "rag"
+          ],
+          "three_u": [
+            "useful"
+          ],
+          "example": {
+            "bad": "trainer = Trainer(model=base_model)\ntrainer.fine_tune(dataset)",
+            "good": "# Use RAG instead of fine-tuning for knowledge updates\nvector_store = FAISS.from_documents(documents)\nretriever = vector_store.as_retriever()"
+          }
+        },
+        {
+          "id": "ECO-ALGO-26",
+          "title": "Use filtered datasets",
+          "description": "Training on unfiltered datasets wastes compute on irrelevant or duplicate data.",
+          "impact": "High",
+          "patterns": [],
+          "exclude_patterns": [
+            "deduplicate",
+            "filter",
+            "prune",
+            "clean",
+            "dataset\\.filter"
+          ],
+          "extensions": [
+            "py"
+          ],
+          "recommendation": "Reduce dataset size by: (1) deduplicating, (2) filtering irrelevant examples, (3) sampling.",
+          "rgesn_ref": "3.1",
+          "gr491_famille": "Architecture",
+          "tags": [
+            "ai",
+            "datasets",
+            "filtering",
+            "efficiency"
+          ],
+          "three_u": [
+            "useful"
+          ]
+        },
+        {
+          "id": "ECO-ALGO-27",
+          "title": "Prefer RAG over fine-tuning for knowledge",
+          "description": "RAG adds knowledge without retraining, saving massive compute.",
+          "impact": "High",
+          "patterns": [],
+          "exclude_patterns": [
+            "RAG",
+            "retrieval",
+            "RetrievalAugmented",
+            "vector_store",
+            "FAISS",
+            "faiss"
+          ],
+          "extensions": [
+            "py",
+            "js",
+            "ts"
+          ],
+          "recommendation": "For adding knowledge, use RAG (Retrieval-Augmented Generation) instead of fine-tuning. It's cheaper, faster, and dynamically updatable.",
+          "rgesn_ref": "3.1",
+          "gr491_famille": "Architecture",
+          "tags": [
+            "ai",
+            "rag",
+            "retrieval",
+            "fine-tuning"
+          ],
+          "three_u": [
+            "useful"
+          ]
+        }
+      ]
+    },
+    "hebergement_ia": {
+      "name": "Hosting for AI",
+      "description": "Rules for choosing energy-efficient hardware, datacenters, and deployment strategies for AI workloads.",
+      "rules": [
+        {
+          "id": "ECO-HOST-07",
+          "title": "Prefer inference-optimized GPUs",
+          "description": "Inference-optimized GPUs (e.g., NVIDIA L40S, T4) consume 40% less power than training GPUs (A100, H100).",
+          "impact": "High",
+          "patterns": [
+            "A100",
+            "H100",
+            "V100"
+          ],
+          "exclude_patterns": [
+            "L40S",
+            "T4",
+            "L4",
+            "inference"
+          ],
+          "extensions": [
+            "py",
+            "sh",
+            "yaml",
+            "yml"
+          ],
+          "recommendation": "Use NVIDIA L40S or T4 for inference tasks; they consume 40% less power. Benchmark with MLPerf Inference.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "gpu",
+            "inference",
+            "energy",
+            "hardware"
+          ],
+          "three_u": [
+            "useful"
+          ],
+          "example": {
+            "bad": "gpu_type = \"A100\"  # For inference workload",
+            "good": "gpu_type = \"L40S\"  # Inference-optimized, 40% less power"
+          }
+        },
+        {
+          "id": "ECO-HOST-08",
+          "title": "Avoid oversized GPUs for small tasks",
+          "description": "Using A100/H100 for models < 10B parameters wastes energy.",
+          "impact": "High",
+          "patterns": [
+            "A100",
+            "H100"
+          ],
+          "exclude_patterns": [
+            "L40S",
+            "T4",
+            "L4"
+          ],
+          "extensions": [
+            "py",
+            "sh",
+            "yaml",
+            "yml"
+          ],
+          "recommendation": "For models < 10B parameters, use L40S or T4 instead of A100/H100. Use quantified models on lighter GPUs.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "gpu",
+            "sizing",
+            "energy",
+            "models"
+          ],
+          "example": {
+            "bad": "gpu_type = \"A100\"  # For 7B parameter model",
+            "good": "gpu_type = \"T4\"  # Sufficient for models < 10B parameters"
+          }
+        },
+        {
+          "id": "ECO-HOST-09",
+          "title": "Deploy in green datacenters",
+          "description": "Datacenters vary in energy efficiency and renewable usage.",
+          "impact": "Medium",
+          "patterns": [
+            "us-east-1",
+            "us-west-1"
+          ],
+          "exclude_patterns": [
+            "europe-west1",
+            "europe-west4",
+            "asia-southeast1",
+            "canada-central1",
+            "sweden-central1",
+            "germany-west2"
+          ],
+          "extensions": [
+            "yaml",
+            "yml",
+            "sh",
+            "py"
+          ],
+          "recommendation": "Choose regions with >80% renewable energy and PUE < 1.2. Examples: Google Oregon, AWS Sweden, OVH Gravelines.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "datacenter",
+            "renewable",
+            "PUE",
+            "energy"
+          ]
+        },
+        {
+          "id": "ECO-HOST-10",
+          "title": "Use CPU for small models",
+          "description": "For models < 1B parameters, CPU inference can be more energy-efficient.",
+          "impact": "Medium",
+          "patterns": [],
+          "exclude_patterns": [
+            "device\\s*=\\s*\"cpu\"",
+            "device='cpu'",
+            "GGML",
+            "ONNX"
+          ],
+          "extensions": [
+            "py",
+            "sh",
+            "yaml"
+          ],
+          "recommendation": "For models < 1B parameters, prefer CPU inference using GGML or ONNX Runtime. CPU reduces power for small workloads.",
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Hébergement",
+          "tags": [
+            "cpu",
+            "gpu",
+            "inference",
+            "energy"
+          ]
         }
       ]
     }
-  }
+  },
+  "attribution_note": "\n\nRules ECO-ALGO-09 to ECO-ALGO-27 and ECO-HOST-07 to ECO-HOST-10 are original contributions to Green Claude, designed to address the physical resource impact of AI systems (water, electricity, CPU, GPU)."
 }
