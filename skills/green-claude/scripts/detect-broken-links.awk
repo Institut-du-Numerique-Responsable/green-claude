@@ -14,13 +14,23 @@
 {
     # FILENAME n'est pas fiable dans BEGIN (pas encore défini à ce stade en
     # awk) : le répertoire est calculé ici, au premier enregistrement lu.
+    #
+    # `basedir` prime quand il est fourni : le hook PostToolUse audite le
+    # fragment qui vient d'être écrit, copié dans un fichier temporaire. Sans
+    # cette base, "assets/logo.webp" est résolu depuis /tmp, n'existe pas, et
+    # toute référence relative devient un faux « lien cassé ». La base à
+    # utiliser est celle du fichier réel, pas celle de la copie.
     if (!dir_computed) {
-        dir = FILENAME
-        slash = 0
-        for (i = length(dir); i > 0; i--) {
-            if (substr(dir, i, 1) == "/") { slash = i; break }
+        if (basedir != "") {
+            dir = basedir
+        } else {
+            dir = FILENAME
+            slash = 0
+            for (i = length(dir); i > 0; i--) {
+                if (substr(dir, i, 1) == "/") { slash = i; break }
+            }
+            dir = (slash > 0) ? substr(dir, 1, slash - 1) : "."
         }
-        dir = (slash > 0) ? substr(dir, 1, slash - 1) : "."
         dir_computed = 1
     }
 

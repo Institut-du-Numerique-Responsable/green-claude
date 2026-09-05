@@ -1,10 +1,12 @@
 {
   "metadata": {
-    "name": "Éco-conception Rust",
-    "description": "Règles d'écoconception pour le code Rust : allocations maîtrisées, itérateurs sans matérialisation, async non bloquant, dépendances sobres.",
+    "name": "Ecodesign for Rust",
+    "description": "Ecodesign rules for Rust code: allocations under control, iterators without materialisation, non-blocking async, sober dependencies.",
     "version": "1.0.0",
     "globs": "**/*.rs",
-    "extensions": ["rs"],
+    "extensions": [
+      "rs"
+    ],
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
       "https://gr491.isit-europe.org/"
@@ -14,97 +16,139 @@
   },
   "categories": {
     "allocations": {
-      "name": "Rust — allocations et copies",
-      "description": "Rust est sobre par conception ; l'enjeu est de ne pas gaspiller cet avantage (RGESN Algorithmie, GR491_Backend_4).",
+      "name": "Rust — allocations and copies",
+      "description": "Rust is sober by design; the point is not to squander that advantage (RGESN Algorithms, GR491_Backend_4).",
       "rules": [
         {
           "id": "ECO-RS-01",
-          "title": "clone() de confort",
-          "description": "Cloner pour contourner l'emprunteur alloue et copie des données que l'on aurait pu emprunter.",
-          "impact": "Moyen",
-          "patterns": ["\\.clone\\(\\)", "\\.to_owned\\(\\)"],
-          "recommendation": "Emprunter (&) quand la possession n'est pas nécessaire ; Cow<str> pour les cas « parfois possédé » ; exposer &str/&[T] dans les signatures.",
+          "title": "Convenience clone()",
+          "description": "Cloning to work around the borrow checker allocates and copies data you could have borrowed.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.clone\\(\\)",
+            "\\.to_owned\\(\\)"
+          ],
+          "recommendation": "Borrow (&) when ownership is not required; Cow<str> for the sometimes-owned cases; expose &str and &[T] in signatures.",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["rust", "allocations"]
+          "tags": [
+            "rust",
+            "allocations"
+          ]
         },
         {
           "id": "ECO-RS-02",
-          "title": "collect() intermédiaire dans une chaîne d'itérateurs",
-          "description": "Chaque collect matérialise un Vec temporaire : allocation et copie pour une valeur immédiatement reconsommée.",
-          "impact": "Moyen",
-          "patterns": ["\\.collect::<Vec"],
-          "recommendation": "Chaîner les itérateurs sans collect intermédiaire ; ne matérialiser que le résultat final, avec with_capacity si la taille est connue.",
+          "title": "Intermediate collect() in an iterator chain",
+          "description": "Every collect materialises a temporary Vec: an allocation and a copy for a value consumed immediately afterwards.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.collect::<Vec"
+          ],
+          "recommendation": "Chain the iterators without an intermediate collect; materialise only the final result, with with_capacity when the size is known.",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["rust", "iterateurs"]
+          "tags": [
+            "rust",
+            "iterators"
+          ]
         },
         {
           "id": "ECO-RS-03",
-          "title": "Vec sans capacité pré-réservée",
-          "description": "Un Vec qui grossit par réallocations successives recopie son contenu à chaque doublement.",
-          "impact": "Faible",
-          "patterns": ["Vec::new\\(\\)"],
-          "recommendation": "Vec::with_capacity(n) quand la taille est prévisible ; réutiliser les buffers dans les boucles chaudes (clear() conserve la capacité).",
+          "title": "Vec with no pre-reserved capacity",
+          "description": "A Vec growing through successive reallocations copies its content at every doubling.",
+          "impact": "Low",
+          "patterns": [
+            "Vec::new\\(\\)"
+          ],
+          "recommendation": "Vec::with_capacity(n) when the size is predictable; reuse buffers in hot loops (clear() keeps the capacity).",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["rust", "allocations"]
+          "tags": [
+            "rust",
+            "allocations"
+          ]
         }
       ]
     },
     "async": {
-      "name": "Rust — async et I/O",
-      "description": "Ne pas bloquer l'exécuteur, réutiliser les clients, borner les files (RGESN Backend).",
+      "name": "Rust — async and I/O",
+      "description": "Do not block the executor, reuse clients, bound the queues (RGESN Backend).",
       "rules": [
         {
           "id": "ECO-RS-04",
-          "title": "Appel bloquant dans une tâche async",
-          "description": "Un sleep ou un calcul long dans une tâche async bloque un worker de l'exécuteur et fige les autres tâches.",
-          "impact": "Élevé",
-          "patterns": ["std::thread::sleep", "\\.block_on\\("],
-          "recommendation": "spawn_blocking ou thread dédié pour le CPU long ; tokio::time::sleep côté async ; I/O bufferisées (BufReader/BufWriter) et streaming pour les gros volumes.",
+          "title": "Blocking call inside an async task",
+          "description": "A sleep or a long computation inside an async task blocks an executor worker and freezes the other tasks.",
+          "impact": "High",
+          "patterns": [
+            "std::thread::sleep",
+            "\\.block_on\\("
+          ],
+          "recommendation": "spawn_blocking or a dedicated thread for long CPU work; tokio::time::sleep on the async side; buffered I/O (BufReader/BufWriter) and streaming for large volumes.",
+          "example": {
+            "bad": "async fn run() { std::thread::sleep(d); }",
+            "good": "async fn run() { tokio::time::sleep(d).await; }"
+          },
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
-          "tags": ["rust", "async"]
+          "tags": [
+            "rust",
+            "async"
+          ]
         },
         {
           "id": "ECO-RS-05",
-          "title": "Client réseau créé par requête",
-          "description": "reqwest::Client::new() par appel refait la poignée de main TLS et perd le pool de connexions.",
-          "impact": "Moyen",
-          "patterns": ["Client::new\\(\\)"],
-          "recommendation": "Créer un client une fois et le cloner (le pool est partagé) ; canaux et caches bornés pour éviter toute croissance mémoire non maîtrisée.",
+          "title": "Network client created per request",
+          "description": "reqwest::Client::new() per call repeats the TLS handshake and loses the connection pool.",
+          "impact": "Medium",
+          "patterns": [
+            "Client::new\\(\\)"
+          ],
+          "recommendation": "Create the client once and clone it (the pool is shared); bounded channels and caches to avoid uncontrolled memory growth.",
           "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
-          "tags": ["rust", "reseau", "connexions"]
+          "tags": [
+            "rust",
+            "network",
+            "connections"
+          ]
         }
       ]
     },
     "build": {
-      "name": "Rust — dépendances et build",
-      "description": "Alléger le graphe de dépendances et éviter les redémarrages inutiles (RGESN Architecture/Hébergement).",
+      "name": "Rust — dependencies and build",
+      "description": "Lighten the dependency graph and avoid needless restarts (RGESN Architecture/Hosting).",
       "rules": [
         {
           "id": "ECO-RS-06",
-          "title": "unwrap() sur un chemin d'erreur attendu",
-          "description": "Une panique sur une erreur prévisible fait redémarrer le service : reprise, cache froid et calcul refait à chaque incident.",
-          "impact": "Moyen",
-          "patterns": ["\\.unwrap\\(\\)", "\\.expect\\("],
-          "recommendation": "Gérer l'erreur (Result, ?) sur les chemins attendus ; réserver unwrap aux invariants réellement garantis.",
+          "title": "unwrap() on an expected error path",
+          "description": "A panic on a foreseeable error restarts the service: recovery, a cold cache, and computation redone at every incident.",
+          "impact": "Medium",
+          "patterns": [
+            "\\.unwrap\\(\\)",
+            "\\.expect\\("
+          ],
+          "recommendation": "Handle the error (Result, ?) on expected paths; keep unwrap for invariants that are genuinely guaranteed.",
           "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
-          "tags": ["rust", "robustesse"]
+          "tags": [
+            "rust",
+            "robustness"
+          ]
         },
         {
           "id": "ECO-RS-07",
-          "title": "Graphe de dépendances non justifié",
-          "description": "Chaque crate et chaque feature activée par défaut alourdit compilation, binaire et surface de maintenance.",
-          "impact": "Faible",
+          "title": "Unjustified dependency graph",
+          "description": "Every crate, and every feature enabled by default, weighs on compilation, on the binary and on the maintenance surface.",
+          "impact": "Low",
           "patterns": [],
-          "recommendation": "Justifier chaque crate, désactiver les features inutiles (default-features = false), vérifier avec cargo tree ; compiler la production en --release.",
+          "recommendation": "Justify each crate, disable unused features (default-features = false), check with cargo tree; build production with --release.",
           "rgesn_ref": "3.1",
           "gr491_famille": "Architecture",
-          "tags": ["rust", "dependances", "build"]
+          "tags": [
+            "rust",
+            "dependencies",
+            "build"
+          ]
         }
       ]
     }

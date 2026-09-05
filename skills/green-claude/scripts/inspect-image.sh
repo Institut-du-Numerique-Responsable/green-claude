@@ -12,7 +12,11 @@
 set -euo pipefail
 
 FILE="$1"
-DIR="$(dirname "$FILE")"
+# Base de résolution des chemins relatifs. Vaut le répertoire du fichier
+# dans le cas courant ; l'appelant peut la forcer quand il audite une copie
+# du contenu plutôt que le fichier lui-même (hook PostToolUse), sans quoi
+# « assets/logo.webp » serait cherché dans /tmp et jamais trouvé.
+DIR="${GREEN_CLAUDE_BASE_DIR:-$(dirname "$FILE")}"
 
 command -v file >/dev/null 2>&1 || exit 0
 
@@ -35,8 +39,8 @@ grep -oiE '[^"'"'"'() >]+\.(png|jpe?g)' "$FILE" 2>/dev/null | sort -u | while re
     dims=$(file -b "$candidate" 2>/dev/null | grep -oE '[0-9]+ ?x ?[0-9]+' | tail -1 | tr -d ' ')
 
     if [ -n "$dims" ]; then
-        echo "$ref : ${dims}px, ${size_ko} Ko réels — vérifie que ça correspond à la taille affichée"
+        echo "$ref: ${dims}px, ${size_ko} KB on disk - check that this matches the displayed size"
     else
-        echo "$ref : ${size_ko} Ko réels"
+        echo "$ref: ${size_ko} KB on disk"
     fi
 done

@@ -88,16 +88,28 @@ app.get('/api/users', (req, res) => {
 });
 ```
 
-`eco-audit.sh api.js` (sortie réelle, non retouchée) :
+`eco-audit.sh api.js` (sortie réelle, non retouchée ; les règles sont en anglais) :
 
 ```
-[Élevé] ECO-FRONT-01 — Pas de bibliothèque lourde pour un besoin mineur
-  Recommandation : Préférer les fonctions natives du langage ou des alternatives légères (date-fns, Alpine.js).
+[High] ECO-FRONT-01 — No heavy library for a minor need
+  File           : api.js
+  Category       : 6. Frontend
+  RGESN          : 6.x
+  Recommendation : Prefer the language's native functions or lighter alternatives (date-fns, Alpine.js).
 
-[Élevé] ECO-BACK-01 — Optimiser les requêtes SQL
-  Recommandation : Sélectionner uniquement les colonnes nécessaires, indexer les colonnes filtrées, éviter les fonctions dans les clauses WHERE et les requêtes N+1.
+[High] ECO-BACK-01 — Optimise SQL queries
+  File           : api.js
+  Category       : 7. Backend
+  RGESN          : 7.x
+  Recommendation : Select only the columns you need, index the filtered columns, and avoid functions in WHERE clauses and N+1 queries.
 
-2 issue(s) d'éco-conception détectée(s).
+[High] ECO-JS-01 — Whole-library import
+  File           : api.js
+  Category       : JS/TS — dependencies and weight
+  RGESN          : 6.1, 6.2
+  Recommendation : Targeted imports (import { x } from 'lib/x'); native APIs first (fetch, Intl, URL, structuredClone, Date/Temporal) before adding a dependency.
+
+3 ecodesign issue(s) found.
 ```
 
 En pratique, tu n'as pas besoin de lancer l'audit toi-même sur ce genre de code : en mode proactif, Claude évite `lodash` pour une seule fonction et `SELECT *` dès l'écriture, avant même qu'un audit ait lieu.
@@ -131,9 +143,11 @@ Le script d'audit a besoin de `bash` et de `jq`. Là où `jq` manque, les règle
 
 ---
 
-## Les règles : 52 règles alignées sur les 9 familles du RGESN 2024
+## Les règles : 83 règles alignées sur les 9 familles du RGESN 2024
 
-[`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle référence le critère RGESN correspondant (`rgesn_ref`) et la famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`) :
+[`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels). Chaque règle porte un renvoi RGESN (`rgesn_ref`) et une famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`).
+
+Précision du renvoi RGESN, en l'état : **18 règles** pointent le critère exact (familles 1 à 4, ex. `4.8`), **33 règles** ne pointent que leur famille (`5.x` à `9.x`) faute d'un mappage encore fait, et une règle relève de la Green Software Foundation plutôt que du RGESN. L'affinage des familles 5 à 9 est un chantier ouvert — le champ dit ce qu'il sait, jamais plus.
 
 | Famille RGESN | Règles | Exemples |
 |---|---|---|
@@ -151,9 +165,9 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 ---
 
-## Les règles par langage : 80 règles chargées à la demande
+## Les règles par langage : 127 règles chargées à la demande
 
-Les 52 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
+Les 83 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
 
 [`skills/green-claude/rules/langages/`](skills/green-claude/rules/langages/) descend d'un cran, avec un fichier par langage appliqué **uniquement aux fichiers de ce langage** :
 
@@ -195,11 +209,11 @@ Deux autres points de contrôle, tous deux optionnels :
 - `hooks/green-claude-pre-commit.sh` audite les fichiers mis en index. Là où le hook Claude Code ne voit que ce que Claude écrit, celui-ci voit aussi ce que vous écrivez. Il signale sans bloquer, sauf si vous passez `GREEN_CLAUDE_STRICT=1`.
 - `.github/workflows/eco-audit.yml` fait tourner la suite de tests des règles sur chaque PR, et publie la densité du dépôt dans le résumé du job.
 
-## Les pratiques Boris : utiliser Claude sobrement et avec bon sens
+## Pratiques d’usage responsable de Claude Code
 
-Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête consomme de l'énergie. [Boris Cherny](https://howborisusesclaudecode.com/), créateur de Claude Code, documente des pratiques d'usage efficace. Un usage efficace est aussi un usage sobre : chaque aller-retour évité économise des tokens, chaque contexte allégé aussi.
+Coder avec l’IA mobilise des ressources pendant la session. Green Claude maintient donc ses propres recommandations pour limiter les contextes, sorties, reprises et calculs inutiles. Le nombre de tokens reste un indicateur d’activité, pas une mesure directe de l’énergie ou des émissions : toute affirmation environnementale doit être mesurée dans son contexte d’exécution.
 
-[`skills/green-claude/rules/boris.json`](skills/green-claude/rules/boris.json) en reprend 14, dont deux ajoutées avec des exemples d'outils open source vérifiés :
+[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contient 14 recommandations éditoriales du projet, dont deux illustrées par des outils open source vérifiés :
 
 | Pratique | Le geste |
 |---|---|
@@ -211,10 +225,10 @@ Coder avec l'IA a aussi un coût pendant la session elle-même : chaque requête
 | Écrire la règle, pas re-corriger | « Ajoute ça à CLAUDE.md » répare une fois pour toutes |
 | Une skill pour ce qui se répète | Un workflow quotidien devient une slash command |
 | Donner un moyen de vérifier | Tests, commande, navigateur : moins de cycles de correction |
-| Adapter le niveau d'effort | `/effort low/high/max` selon la tâche, jamais par défaut au maximum |
-| `--bare` pour les scripts | Démarrage sans contexte projet, pour l'automatisation |
+| Adapter le niveau d'effort | Utiliser les réglages disponibles et vérifier leur effet par des évaluations |
+| Mode minimal pour les scripts | Éviter les personnalisations inutiles lorsque le client le permet |
 
-Détail complet : [`skills/green-claude/rules/boris.json`](skills/green-claude/rules/boris.json).
+Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
 
 > Les outils tiers cités (graphify, caveman) sont des exemples illustratifs vérifiés (open source, licence MIT). Le projet ne les audite pas et n'en dépend pas.
 
@@ -240,14 +254,14 @@ Ajoute un fichier JSON dans `skills/green-claude/rules/`, structuré comme `ecoc
 {
   "id": "CUSTOM-001",
   "title": "Ma règle",
-  "impact": "Élevé",
+  "impact": "High",
   "patterns": ["mon_motif_regex"],
   "recommendation": "Quoi faire à la place."
 }
 ```
 
 - `patterns` : expressions régulières `grep -E` détectant le problème. **Liste vide = pratique** (checklist, ignorée par l'audit).
-- `impact` : `Élevé`, `Moyen` ou `Faible`.
+- `impact` : `High`, `Medium` ou `Low`.
 - `rgesn_ref` / `gr491_famille` (optionnels) : renvoi vers les référentiels officiels.
 - `detector` / `enrich` (optionnels) : pour les cas qu'un pattern seul ne peut pas voir (imbrication multi-lignes, comptage, poids réel d'un fichier référencé...), un script dédié dans `scripts/`. Détail complet dans [CONTRIBUTING.md](CONTRIBUTING.md).
 - `note` (optionnel) : mise en garde affichée dans le résultat de l'audit (faux positif connu, seuil, portée limitée) — l'endroit où documenter les pièges d'interprétation d'une règle, pas dans le skill lui-même.
@@ -291,7 +305,6 @@ vérification de sa version, des tests et des archives produites.
 - [Green Software Foundation](https://greensoftware.foundation/) : patterns d'éco-conception logicielle
 - [W3C Web Sustainability Guidelines](https://w3c.github.io/sustainableweb-wsg/) : recommandations de durabilité web (UX, développement, hébergement, stratégie)
 - [YellowLabTools](https://github.com/YellowLabTools/YellowLabTools) : outil open source d'audit de qualité front-end, source de plusieurs seuils (DOM, CSS, polices)
-- [How Boris uses Claude Code](https://howborisusesclaudecode.com/) : les pratiques de Boris Cherny, créateur de Claude Code
 - [Anthropic](https://www.anthropic.com/) : Claude et Claude Code
 
 ## Mainteneurs

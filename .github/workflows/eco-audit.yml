@@ -12,37 +12,47 @@ concurrency:
   group: eco-audit-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Un seul job, donc un seul runner et un seul checkout. La mesure de densité
+# tenait auparavant dans un job séparé : deux machines démarrées pour deux
+# secondes de travail utile. Pas de filtre `paths` en revanche — la validation
+# porte sur les README, le CHANGELOG, SKILL.md et les fichiers communautaires,
+# et le score audite docs/index.html : il ne reste aucun chemin inerte à ignorer.
 jobs:
-  tests:
-    name: Suite de tests de l'audit
+  audit:
+    name: Tests et densité
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - name: Installer jq
-        run: sudo apt-get install -y jq
+
+      # jq est préinstallé sur les images `ubuntu-latest` et `macos-latest` :
+      # un `apt-get install` ne fait qu'ajouter un aller-retour réseau. On
+      # vérifie sa présence plutôt que de l'installer.
+      - name: Vérifier les prérequis
+        run: |
+          command -v jq >/dev/null || { echo "jq absent de l'image du runner"; exit 1; }
+          jq --version
+
       - name: Valider le JSON des règles
         run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
+
       - name: Vérifier la cohérence de la release
         run: bash scripts/test-release-version.sh
+
       - name: Valider les fichiers communautaires
         run: |
           bash scripts/test-community-files.sh
           bash scripts/check-community-files.sh
+
       - name: Lancer la suite de tests
         run: bash skills/green-claude/scripts/test-eco-audit.sh
 
-  score:
-    name: Densité d'issues
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - name: Installer jq
-        run: sudo apt-get install -y jq
       # Informatif, jamais bloquant : un audit qui fait échouer la CI sur un
-      # candidat non confirmé apprend surtout à ignorer la CI.
+      # candidat non confirmé apprend surtout à ignorer la CI. `always()` pour
+      # que la densité soit publiée même quand un test échoue — c'est
+      # précisément là qu'on veut la voir.
       - name: Mesurer la densité du dépôt
+        if: always()
         run: |
           bash skills/green-claude/scripts/eco-score.sh | tee score.txt
           {

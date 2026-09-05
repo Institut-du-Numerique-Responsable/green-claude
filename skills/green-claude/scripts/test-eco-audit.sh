@@ -41,7 +41,7 @@ for (const user of users) {
 EOF
 OUT="$(bash eco-audit.sh "$TMP/nested.js")"
 echo "$OUT" | grep -q 'ECO-BACK-03' || fail "boucle imbriquée non détectée (détecteur awk)"
-echo "$OUT" | grep -q 'Ligne ' || fail "numéro de ligne absent de la sortie du détecteur"
+echo "$OUT" | grep -q 'Line ' || fail "numéro de ligne absent de la sortie du détecteur"
 
 # 4. Pas de faux positif du détecteur sur des boucles séquentielles (pas
 # imbriquées) ni sur une boucle simple contenant un if.
@@ -127,10 +127,10 @@ cat >> "$TMP/fonts.css" <<EOF
 }
 EOF
 OUT="$(bash eco-audit.sh "$TMP/fonts.css")"
-echo "$OUT" | grep -q '3 famille(s)' || fail "polices : comptage des familles distinctes incorrect"
-echo "$OUT" | grep -q '4 variante(s)' || fail "polices : comptage des variantes incorrect"
-echo "$OUT" | grep -q 'big.woff2.*40 Ko' || fail "polices : excès au-delà de 40 Ko non détecté"
-echo "$OUT" | grep -q 'legacy.ttf.*non compressé' || fail "polices : format TTF non signalé"
+echo "$OUT" | grep -q '3 self-hosted Latin family' || fail "polices : comptage des familles distinctes incorrect"
+echo "$OUT" | grep -q '4 variant(s)' || fail "polices : comptage des variantes incorrect"
+echo "$OUT" | grep -q 'big.woff2.*40 KB' || fail "polices : excès au-delà de 40 Ko non détecté"
+echo "$OUT" | grep -q 'legacy.ttf.*uncompressed' || fail "polices : format TTF non signalé"
 echo "$OUT" | grep -q 'small.woff2' && fail "polices : ne doit rien signaler sur une police déjà conforme (woff2, < 40 Ko)"
 true
 
@@ -172,7 +172,7 @@ cat > "$TMP/fonts-ar.css" <<EOF
 }
 EOF
 OUT="$(bash eco-audit.sh "$TMP/fonts-ar.css")"
-echo "$OUT" | grep -q 'dépasse le seuil RGESN 4.8' && fail "polices : une famille non latine scopée par unicode-range ne doit pas peser sur le budget latin"
+echo "$OUT" | grep -q 'over the RGESN 4.8 threshold' && fail "polices : une famille non latine scopée par unicode-range ne doit pas peser sur le budget latin"
 true
 
 cat > "$TMP/google-fonts.html" <<EOF
@@ -180,7 +180,7 @@ cat > "$TMP/google-fonts.html" <<EOF
 EOF
 OUT="$(bash eco-audit.sh "$TMP/google-fonts.html")"
 echo "$OUT" | grep -q 'ECO-UX-05' || fail "polices : Google Fonts (CDN tiers) non détecté du tout"
-echo "$OUT" | grep -q 'non mesurables sans requête réseau' || fail "polices : absence de la mise en garde sur le CDN tiers"
+echo "$OUT" | grep -q 'not measurable without a network request' || fail "polices : absence de la mise en garde sur le CDN tiers"
 
 # 9. ECO-FRONT-05 (code mort) : détecte le vrai code inatteignable après un
 # return/throw, sans se faire piéger par les cas très courants où le bloc
@@ -428,7 +428,7 @@ EOF
 OUT="$(bash eco-audit.sh "$TMP/links.html")"
 echo "$OUT" | grep -q 'ghost.css' || fail "lien local cassé non détecté"
 echo "$OUT" | grep -q 'real.css' && fail "faux positif sur un fichier local qui existe bien"
-echo "$OUT" | grep -q 'external' && fail "faux positif sur une URL externe (non vérifiable sans réseau)"
+echo "$OUT" | grep -q 'example.com' && fail "faux positif sur une URL externe (non vérifiable sans réseau)"
 true
 
 # 22. Règles propres à un langage : un motif Python se déclenche sur du Python.
@@ -460,7 +460,7 @@ true
 
 # 25. Les langages sont annonçables et consultables sans auditer de fichier.
 OUT="$(bash eco-audit.sh --list-langs)"
-echo "$OUT" | grep -q 'Éco-conception Python' || fail "--list-langs ne liste pas les langages"
+echo "$OUT" | grep -q 'Ecodesign for Python' || fail "--list-langs ne liste pas les langages"
 OUT="$(bash eco-audit.sh --list-rules python)"
 echo "$OUT" | grep -q 'ECO-PY-01' || fail "--list-rules python ne sort pas la checklist du langage"
 
@@ -625,6 +625,8 @@ if command -v zip >/dev/null 2>&1; then
 
     unzip -p "$DIST/green-claude-api.zip" green-claude/rules/langages/python.json >/dev/null 2>&1 \
         || fail "les règles par langage manquent dans l'archive"
+    unzip -p "$DIST/green-claude-api.zip" green-claude/rules/usage.json >/dev/null 2>&1 \
+        || fail "les pratiques d'usage responsable manquent dans l'archive"
 fi
 
 # Retour d'objet littéral : l'accolade fermante de `return { a: 1 };` ne
@@ -736,5 +738,339 @@ if OUT="$(GREEN_CLAUDE_SHA256_TOOL=absent bash eco-audit.sh "$TMP/collision/src/
 fi
 printf '%s\n' "$OUT" | grep -Fq 'Outil SHA-256 inconnu' \
     || fail "outil SHA-256 invalide : diagnostic absent"
+
+# Les pratiques conversationnelles sont des recommandations du projet, pas des
+# citations attribuées à une personne. Leur fichier et leurs identifiants
+# doivent refléter cette responsabilité éditoriale.
+[ -f ../rules/usage.json ] \
+    || fail "référentiel neutre rules/usage.json absent"
+[ ! -e ../rules/boris.json ] \
+    || fail "ancien référentiel personnel rules/boris.json encore présent"
+IDS_NON_NEUTRES=$(jq -r '[.categories[].rules[].id | select(startswith("USAGE-") | not)] | join(", ")' ../rules/usage.json)
+[ -z "$IDS_NON_NEUTRES" ] \
+    || fail "identifiants de pratiques non neutres : $IDS_NON_NEUTRES"
+PRINCIPES_CITES=$(jq -r '[.categories[].rules[].principle | select(startswith("«"))] | join(" | ")' ../rules/usage.json)
+[ -z "$PRINCIPES_CITES" ] \
+    || fail "recommandations éditoriales encore présentées comme des citations : $PRINCIPES_CITES"
+CATALOGUE=$(jq -r '[.metadata, .categories[]?, .categories[].rules[]?] | tostring' ../rules/usage.json)
+printf '%s\n' "$CATALOGUE" | grep -Eqi 'majorité des tokens|optimum écologique|300-400k|10k tokens|20 lignes|10x plus|multipliée par 2 ou 3|howborisusesclaudecode' \
+    && fail "affirmation quantitative ou source personnelle non vérifiée dans usage.json"
+true
+OUT="$(bash eco-audit.sh --list-rules)"
+printf '%s\n' "$OUT" | grep -q "Responsible use practices" \
+    || fail "intitulé neutre des pratiques absent de --list-rules"
+printf '%s\n' "$OUT" | grep -qi 'Boris' \
+    && fail "--list-rules attribue encore les pratiques à Boris Cherny"
+true
+
+# 32. Langages ajoutés (Go, Kotlin, Swift, Shell) : chaque règle se déclenche sur
+# du code fautif et se tait sur l'équivalent corrigé. Le second volet compte
+# autant que le premier : une règle qui signale les deux n'aide personne.
+mkdir -p "$TMP/langs"
+cat > "$TMP/langs/bad.go" <<'EOF'
+package main
+func handle() {
+	go func() { work() }()
+	resp, _ := http.Get("https://x")
+	body, _ := io.ReadAll(resp.Body)
+	c := &http.Client{}
+	req, _ := http.NewRequest("GET", "https://y", nil)
+	time.Sleep(2 * time.Second)
+}
+EOF
+cat > "$TMP/langs/good.go" <<'EOF'
+package main
+var client = &http.Client{Timeout: 5 * time.Second}
+func handle(ctx context.Context) {
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error { return work(ctx) })
+	req, _ := http.NewRequestWithContext(ctx, "GET", "https://y", nil)
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+	json.NewDecoder(resp.Body).Decode(&out)
+	t := time.NewTicker(time.Minute)
+	select { case <-t.C: case <-ctx.Done(): }
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/langs/bad.go")"
+for r in ECO-GO-01 ECO-GO-02 ECO-GO-03 ECO-GO-04 ECO-GO-05 ECO-GO-06; do
+    echo "$OUT" | grep -q "$r" || fail "Go : $r non détectée sur du code fautif"
+done
+OUT="$(bash eco-audit.sh "$TMP/langs/good.go")"
+echo "$OUT" | grep -q 'ECO-GO-' && fail "Go : faux positif sur du code corrigé"
+true
+
+cat > "$TMP/langs/bad.kt" <<'EOF'
+fun load() {
+    GlobalScope.launch { fetch() }
+    runBlocking { delay(10) }
+    val ch = Channel<Int>(Channel.UNLIMITED)
+    val out = items.map { it.id }.filter { it > 0 }
+    fun check(ids: List<String>, all: List<String>) = ids.filter { all.contains(it) }
+}
+EOF
+cat > "$TMP/langs/good.kt" <<'EOF'
+fun load(scope: CoroutineScope) {
+    scope.launch { withContext(Dispatchers.IO) { fetch() } }
+    val ch = Channel<Int>(capacity = 64)
+    val out = items.asSequence().map { it.id }.filter { it > 0 }.toList()
+    fun check(ids: List<String>, all: Set<String>) = ids.filter { all.contains(it) }
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/langs/bad.kt")"
+for r in ECO-KT-01 ECO-KT-02 ECO-KT-03 ECO-KT-04 ECO-KT-05; do
+    echo "$OUT" | grep -q "$r" || fail "Kotlin : $r non détectée sur du code fautif"
+done
+OUT="$(bash eco-audit.sh "$TMP/langs/good.kt")"
+echo "$OUT" | grep -q 'ECO-KT-' && fail "Kotlin : faux positif sur du code corrigé"
+true
+
+cat > "$TMP/langs/bad.swift" <<'EOF'
+func start() {
+    locationManager.startUpdatingLocation()
+    Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in refresh() }
+    DispatchQueue.main.sync { render() }
+    let d = Data(contentsOf: url)
+    let s = URLSession(configuration: .default)
+}
+EOF
+cat > "$TMP/langs/good.swift" <<'EOF'
+static let session = URLSession(configuration: .default)
+func start() { locationManager.startUpdatingLocation() }
+func stop() { locationManager.stopUpdatingLocation() }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/langs/bad.swift")"
+for r in ECO-SW-01 ECO-SW-02 ECO-SW-03 ECO-SW-04 ECO-SW-05; do
+    echo "$OUT" | grep -q "$r" || fail "Swift : $r non détectée sur du code fautif"
+done
+OUT="$(bash eco-audit.sh "$TMP/langs/good.swift")"
+echo "$OUT" | grep -q 'ECO-SW-' && fail "Swift : faux positif sur du code corrigé"
+true
+
+# Shell : la règle de scrutation ne doit PAS confondre une boucle de lecture de
+# flux avec du polling. C'est le faux positif qui a coûté le plus cher à écrire.
+cat > "$TMP/langs/bad.sh" <<'EOF'
+#!/bin/bash
+while true; do
+  sleep 5
+  check_status
+done
+T=$(mktemp)
+EOF
+cat > "$TMP/langs/good.sh" <<'EOF'
+#!/bin/bash
+T=$(mktemp)
+trap 'rm -f "$T"' EXIT
+while IFS= read -r line; do
+  printf '%s\n' "$line"
+done < "$T"
+EOF
+OUT="$(bash eco-audit.sh "$TMP/langs/bad.sh")"
+echo "$OUT" | grep -q 'ECO-SH-04' || fail "Shell : boucle de scrutation non détectée"
+echo "$OUT" | grep -q 'ECO-SH-05' || fail "Shell : mktemp sans trap non détecté"
+OUT="$(bash eco-audit.sh "$TMP/langs/good.sh")"
+echo "$OUT" | grep -q 'ECO-SH-04' && fail "Shell : faux positif, une boucle de lecture de flux n'est pas du polling"
+echo "$OUT" | grep -q 'ECO-SH-05' && fail "Shell : faux positif, mktemp avec trap"
+true
+
+# 33. Règles transverses ajoutées : accessibilité, média, CI et images de
+# conteneur. Le Dockerfile vérifie aussi la résolution d'extension d'un fichier
+# qui n'en a pas : "Dockerfile" doit router vers les règles dockerfile.
+cat > "$TMP/langs/bad.html" <<'EOF'
+<img src="a.png">
+<div onclick="go()">x</div>
+<video src="v.mp4"></video>
+EOF
+cat > "$TMP/langs/good.html" <<'EOF'
+<img src="a.png" alt="a">
+<button onclick="go()">x</button>
+<video src="v.mp4" preload="none" poster="p.webp"></video>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/langs/bad.html")"
+echo "$OUT" | grep -q 'ECO-UX-08' || fail "accessibilité : défauts mécaniques non détectés"
+echo "$OUT" | grep -q 'ECO-CONT-02' || fail "média : vidéo sans preload ni poster non détectée"
+OUT="$(bash eco-audit.sh "$TMP/langs/good.html")"
+echo "$OUT" | grep -q 'ECO-UX-08' && fail "accessibilité : faux positif sur du balisage correct"
+echo "$OUT" | grep -q 'ECO-CONT-02' && fail "média : faux positif sur une vidéo déjà sobre"
+true
+
+printf 'jobs:\n  build:\n    steps:\n      - run: sudo apt-get install -y jq\n' > "$TMP/langs/bad.yml"
+printf 'jobs:\n  build:\n    steps:\n      - uses: actions/cache@v4\n      - run: npm install\n' > "$TMP/langs/good.yml"
+OUT="$(bash eco-audit.sh "$TMP/langs/bad.yml")"
+echo "$OUT" | grep -q 'ECO-ARCH-06' || fail "CI : installation sans cache non détectée"
+OUT="$(bash eco-audit.sh "$TMP/langs/good.yml")"
+echo "$OUT" | grep -q 'ECO-ARCH-06' && fail "CI : faux positif sur un workflow qui met en cache"
+true
+
+printf 'FROM ubuntu\nRUN apt-get install -y curl\n' > "$TMP/langs/Dockerfile"
+printf 'FROM golang:1.23-alpine AS builder\nRUN go build -o /app\n\nFROM gcr.io/distroless/static:nonroot\nCOPY --from=builder /app /app\n' > "$TMP/langs/Dockerfile.good"
+OUT="$(bash eco-audit.sh "$TMP/langs/Dockerfile")"
+echo "$OUT" | grep -q 'ECO-HEB-07' || fail "conteneur : image de base non épinglée non détectée (routage d'un fichier sans extension)"
+OUT="$(bash eco-audit.sh "$TMP/langs/Dockerfile.good")"
+echo "$OUT" | grep -q 'ECO-HEB-07' && fail "conteneur : faux positif sur un build multi-étages distroless"
+true
+
+# 34. Un motif d'exclusion commençant par un tiret ne doit pas être pris pour une
+# option par grep. Sans le `--`, la règle échouait en silence, ce qui ressemble
+# à un fichier propre : le pire mode de défaillance pour un audit.
+jq -e '[.categories[].rules[] | select((.exclude_patterns // []) | map(startswith("-")) | any)] | length > 0' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "plus aucune règle ne teste le cas d'un motif d'exclusion commençant par un tiret"
+true
+
+# 35. Le cadre 3U couvre bien les trois conditions, et chaque valeur est connue.
+for u in useful usable used; do
+    jq -e --arg u "$u" '[.categories[].rules[] | select((.three_u // []) | index($u))] | length >= 3' \
+        ../rules/ecoconception.json >/dev/null || fail "3U : moins de trois règles pour « $u »"
+done
+jq -e '[.categories[].rules[] | (.three_u // [])[] | select(. != "useful" and . != "usable" and . != "used")] | length == 0' \
+    ../rules/ecoconception.json >/dev/null || fail "3U : valeur inconnue dans un champ three_u"
+true
+
+# 36. Règles portées depuis green-codex : le volet « code correct » compte
+# autant que le volet fautif. ECO-BACK-10 s'est déclenchée sur une requête
+# paramétrée pendant l'écriture, parce que le motif cherchait « %s », qui est
+# justement la forme correcte. Le test fige la correction.
+cat > "$TMP/langs/port_bad.py" <<'PYEOF'
+import requests
+while True:
+    r = requests.get("https://api.example.com/items?limit=50000")
+    print_r(r)
+    cur.execute("SELECT * FROM t WHERE id = " + str(uid))
+    resp = client.messages.create(model="m", messages=msgs)
+PYEOF
+cat > "$TMP/langs/port_good.py" <<'PYEOF'
+import logging, requests
+logger = logging.getLogger(__name__)
+session = requests.Session()
+def fetch(uid, cursor=None, page_size=100):
+    r = session.get("https://api.example.com/items", timeout=5, params={"limit": page_size, "after": cursor})
+    logger.debug("fetched %s", r.status_code)
+    cur.execute("SELECT id, name FROM t WHERE id = %s", (uid,))
+    return client.messages.create(model="m", messages=msgs, max_tokens=512)
+PYEOF
+OUT="$(bash eco-audit.sh "$TMP/langs/port_bad.py")"
+for r in ECO-BACK-05 ECO-BACK-06 ECO-BACK-08 ECO-BACK-09 ECO-BACK-10 ECO-ALGO-07; do
+    echo "$OUT" | grep -q "$r" || fail "portage : $r non détectée sur du code fautif"
+done
+OUT="$(bash eco-audit.sh "$TMP/langs/port_good.py")"
+for r in ECO-BACK-05 ECO-BACK-06 ECO-BACK-08 ECO-BACK-09 ECO-BACK-10 ECO-ALGO-07; do
+    echo "$OUT" | grep -q "$r" && fail "portage : faux positif de $r sur du code correct"
+done
+true
+
+printf '<img src="hero.jpg" loading="lazy">\n' > "$TMP/langs/lazy_bad.html"
+printf '<img src="hero.jpg" fetchpriority="high" alt="hero">\n<img src="b.jpg" loading="lazy" alt="b">\n' > "$TMP/langs/lazy_good.html"
+OUT="$(bash eco-audit.sh "$TMP/langs/lazy_bad.html")"
+echo "$OUT" | grep -q 'ECO-FRONT-14' || fail "LCP : page qui diffère tout sans rien prioriser non détectée"
+OUT="$(bash eco-audit.sh "$TMP/langs/lazy_good.html")"
+echo "$OUT" | grep -q 'ECO-FRONT-14' && fail "LCP : faux positif sur une page qui priorise déjà une image"
+true
+
+# 37. Attribution CC BY : toute règle adaptée de green-codex doit citer sa
+# source. C'est une obligation de licence, pas une politesse.
+jq -e '[.categories[].rules[] | select((.source_note // "") | test("Green Codex"))] | length >= 14' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "attribution : moins de 14 règles citent Green Codex alors qu'on en a porté 14"
+jq -e '.metadata.attribution_note | test("CC BY 4.0")' ../rules/ecoconception.json >/dev/null \
+    || fail "attribution : la note de licence CC BY 4.0 a disparu des métadonnées"
+true
+
+# 38. Les règles en amont du code existent et restent des règles de démarche :
+# leur valeur est d'être lues, pas grepées.
+for r in ECO-ARCH-07 ECO-ALGO-08; do
+    jq -e --arg r "$r" '[.categories[].rules[] | select(.id == $r and ((.patterns // []) | length == 0))] | length == 1' \
+        ../rules/ecoconception.json >/dev/null || fail "$r absente ou dotée de motifs alors que c'est une règle de démarche"
+done
+jq -e '[.categories.brief.rules[] | select(.id == "USAGE-BRIEF-03")] | length == 1' \
+    ../rules/usage.json >/dev/null || fail "USAGE-BRIEF-03 (poser la question avant de coder) absente"
+true
+
+# 39. Registre de décisions : ce que l'équipe a tranché ne doit pas revenir.
+# Un candidat écarté six fois de suite apprend à tout le monde à ignorer
+# l'audit, donc la suppression doit marcher et doit se dire.
+mkdir -p "$TMP/dec/.green-claude"
+cat > "$TMP/dec/bad.sql" <<'EOF'
+SELECT * FROM commandes;
+EOF
+OUT="$(GREEN_CLAUDE_DECISIONS=/dev/null bash eco-audit.sh "$TMP/dec/bad.sql")"
+echo "$OUT" | grep -q 'ECO-SQL-01' || fail "décisions : le cas de base ne se déclenche plus"
+printf 'ECO-SQL-01  bad.sql  ACCEPTED  requête de migration ponctuelle\n' > "$TMP/dec/.green-claude/decisions.md"
+OUT="$(GREEN_CLAUDE_DECISIONS="$TMP/dec/.green-claude/decisions.md" bash eco-audit.sh "$TMP/dec/bad.sql")"
+echo "$OUT" | grep -q 'ECO-SQL-01' && fail "décisions : une règle acceptée est encore signalée"
+echo "$OUT" | grep -q 'hidden by decisions' || fail "décisions : la suppression n'est pas annoncée dans le rapport"
+printf 'ECO-SQL-01  bad.sql  TODO  à corriger avant la release\n' > "$TMP/dec/.green-claude/decisions.md"
+OUT="$(GREEN_CLAUDE_DECISIONS="$TMP/dec/.green-claude/decisions.md" bash eco-audit.sh "$TMP/dec/bad.sql")"
+echo "$OUT" | grep -q 'ECO-SQL-01' || fail "décisions : TODO ne doit pas faire taire la règle, c'est une dette assumée"
+true
+
+# 40. Exemples avant/après : présents sur les règles à impact élevé détectables,
+# et effectivement rendus par l'audit. Une recommandation en prose oblige à
+# reconstruire la forme attendue à chaque signalement ; l'exemple l'évite.
+jq -e '[.categories[].rules[] | select(.impact == "High" and (((.patterns // []) | length > 0) or ((.detector // "") != "")) and (.example.good // "") == "")] | length == 0' \
+    ../rules/ecoconception.json >/dev/null \
+    || fail "exemples : une règle transverse High détectable n'a pas d'exemple corrigé"
+OUT="$(GREEN_CLAUDE_DECISIONS=/dev/null bash eco-audit.sh "$TMP/dec/bad.sql")"
+echo "$OUT" | grep -q 'Write          :' || fail "exemples : l'audit n'affiche pas la forme corrigée"
+echo "$OUT" | grep -q 'Instead of     :' || fail "exemples : l'audit n'affiche pas la forme fautive"
+true
+
+# 41. Hook de cadrage : se déclenche sur une demande de production de code, se
+# tait sur une question. Un rappel hors sujet à chaque tour est la meilleure
+# façon de le faire ignorer.
+BRIEF="../../../hooks/green-claude-brief.sh"
+if [ -x "$BRIEF" ]; then
+    OUT="$(printf '{"prompt":"écris-moi une fonction qui parse le CSV"}' | bash "$BRIEF")"
+    printf '%s' "$OUT" | grep -q 'ECO-ARCH-07' || fail "cadrage : pas de rappel sur une demande de code"
+    OUT="$(printf '{"prompt":"quelle est la différence entre gzip et brotli ?"}' | bash "$BRIEF")"
+    [ -z "$OUT" ] || fail "cadrage : rappel déclenché sur une simple question"
+fi
+true
+
+# 42. Coût de l'audit. La boucle lançait douze `jq` par règle, soit plus de 750
+# processus pour un fichier, et le coût grimpait à chaque règle ajoutée : un
+# outil de sobriété qui devient cher perd son argument. Le seuil est large
+# exprès — il attrape une régression d'ordre de grandeur, pas une variation de
+# machine.
+cat > "$TMP/perf.js" <<'EOF'
+const a = [1, 2, 3];
+EOF
+START=$(date +%s)
+bash eco-audit.sh "$TMP/perf.js" >/dev/null 2>&1 || true
+ELAPSED=$(( $(date +%s) - START ))
+[ "$ELAPSED" -le 3 ] || fail "coût de l'audit : ${ELAPSED}s sur un fichier d'une ligne (seuil 3s, régression probable du batching jq)"
+true
+
+# 43. Frameworks partageant une extension : react.json et solid.json sont
+# chargés tous deux sur un .jsx. Les règles qui portent sur du JSX générique
+# doivent se borner au bon framework, sinon chaque projet React reçoit des
+# conseils Solid.
+cat > "$TMP/langs/r.jsx" <<'EOF'
+import React from "react"
+export const L = ({items}) => <ul>{items.map(i => <li key={i.id}>{i.n}</li>)}</ul>
+EOF
+cat > "$TMP/langs/s.jsx" <<'EOF'
+import { createSignal } from "solid-js"
+const V = () => <ul>{items.map(i => <li>{i.n}</li>)}</ul>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/langs/r.jsx")"
+echo "$OUT" | grep -q 'ECO-SOLID-' && fail "frameworks : une règle Solid se déclenche sur un fichier React"
+OUT="$(bash eco-audit.sh "$TMP/langs/s.jsx")"
+echo "$OUT" | grep -q 'ECO-SOLID-02' || fail "frameworks : la règle Solid ne se déclenche pas sur un fichier Solid"
+echo "$OUT" | grep -q 'ECO-REACT-' && fail "frameworks : une règle React se déclenche sur un fichier Solid"
+true
+
+# 44. Fichiers hors périmètre : un catalogue d'exemples fautifs n'est pas du
+# code fautif. C'est le faux positif qui a coûté le plus de bruit à ce dépôt.
+mkdir -p "$TMP/ign/.green-claude"
+cat > "$TMP/ign/fixtures.sql" <<'EOF'
+SELECT * FROM t;
+EOF
+OUT="$(GREEN_CLAUDE_IGNORE=/dev/null bash eco-audit.sh "$TMP/ign/fixtures.sql")"
+echo "$OUT" | grep -q 'ECO-SQL-01' || fail "exclusion : le cas de base ne se déclenche plus"
+printf 'fixtures\n' > "$TMP/ign/.green-claude/ignore"
+OUT="$(GREEN_CLAUDE_IGNORE="$TMP/ign/.green-claude/ignore" bash eco-audit.sh "$TMP/ign/fixtures.sql")"
+echo "$OUT" | grep -q 'ECO-SQL-01' && fail "exclusion : un fichier listé est encore audité"
+true
 
 echo "OK - suite complete"

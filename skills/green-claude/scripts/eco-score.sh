@@ -53,9 +53,9 @@ nb_files=$(printf '%s\n' "$FILES" | wc -l | tr -d ' ')
 nb_lines=$(printf '%s\n' "$FILES" | tr '\n' '\0' | xargs -0 cat 2>/dev/null | wc -l | tr -d ' ')
 
 REPORT="$(printf '%s\n' "$FILES" | tr '\n' '\0' | xargs -0 bash "$AUDIT" 2>/dev/null || true)"
-eleve=$(printf '%s\n' "$REPORT" | grep -c '^\[Élevé\]' || true)
-moyen=$(printf '%s\n' "$REPORT" | grep -c '^\[Moyen\]' || true)
-faible=$(printf '%s\n' "$REPORT" | grep -c '^\[Faible\]' || true)
+eleve=$(printf '%s\n' "$REPORT" | grep -c '^\[High\]' || true)
+moyen=$(printf '%s\n' "$REPORT" | grep -c '^\[Medium\]' || true)
+faible=$(printf '%s\n' "$REPORT" | grep -c '^\[Low\]' || true)
 
 # Pondération : un défaut à impact élevé pèse trois fois un défaut faible. Les
 # poids sont arbitraires et assumés comme tels ; ce qui compte est de garder
@@ -73,13 +73,13 @@ if [ "$FORMAT" = "json" ]; then
     exit 0
 fi
 
-echo "Score d'éco-conception"
-echo "  Fichiers audités : $nb_files ($nb_lines lignes)"
-echo "  Impact Élevé     : $eleve"
-echo "  Impact Moyen     : $moyen"
-echo "  Impact Faible    : $faible"
-echo "  Poids total      : $poids (Élevé×3 + Moyen×2 + Faible×1)"
-echo "  Densité          : $densite pour 1000 lignes"
+echo "Ecodesign score"
+echo "  Files audited    : $nb_files ($nb_lines lines)"
+echo "  High impact      : $eleve"
+echo "  Medium impact    : $moyen"
+echo "  Low impact       : $faible"
+echo "  Weighted total   : $poids (High x3 + Medium x2 + Low x1)"
+echo "  Density          : $densite per 1000 lines"
 echo ""
 echo "Comparez cette densité à celle d'hier, pas à zéro : c'est la tendance qui"
 echo "renseigne. Et confrontez-la à une mesure d'exécution réelle (requêtes,"

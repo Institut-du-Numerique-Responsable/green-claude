@@ -1,0 +1,286 @@
+{
+  "metadata": {
+    "name": "Responsible use practices for Claude Code",
+    "description": "15 editorial recommendations from the project to limit unnecessary computation, transfers and rework when using Claude Code, without presenting token counts as a direct measure of energy.",
+    "version": "3.0.0",
+    "editorial_status": "Recommendations of the Green Claude project, not attributed to any individual.",
+    "source_policy": "Any attribution to a named person requires a verifiable primary source. Commands and features mentioned here must be checked against the official documentation for the version in use.",
+    "count": 15,
+    "type": "practices",
+    "type_note": "These rules describe USAGE PRACTICES, not code patterns: they carry no grep-able 'patterns'. The --eco-check audit ignores them; use --list-rules to consult them as a checklist."
+  },
+  "categories": {
+    "contexte": {
+      "name": "Manage the context",
+      "description": "The context you transmit contributes to input volume, in proportion that depends on the client, the cache and the execution mode. Keep only what remains useful.",
+      "rules": [
+        {
+          "id": "USAGE-CTX-01",
+          "title": "Context minimalism",
+          "principle": "Supply the context that is useful and let the agent fetch the remaining details on demand.",
+          "description": "Do not preload huge system prompts or exhaustive tool listings. State the goal and a way to reach the context (files, search), then let the agent work.",
+          "why_green": "Needlessly large context increases the data processed, the latency and potentially the cost; the real effect depends on the cache and the client in use.",
+          "how": "Write a short brief with the goal and the constraints. Do not paste whole files when the model can read them itself if needed.",
+          "impact": "High",
+          "source_ref": "Project recommendation; measure input tokens, latency and cost in the environment you actually use.",
+          "patterns": [],
+          "tags": [
+            "context",
+            "tokens",
+            "prompt"
+          ]
+        },
+        {
+          "id": "USAGE-CTX-02",
+          "title": "Rewind rather than patch",
+          "principle": "When the client supports it, restarting from an earlier point can avoid carrying a thread that has become useless.",
+          "description": "When a thread turns out to be a dead end, avoid stacking corrections if the client can return to a point before it. Check how /rewind (double Esc) behaves in the version you are running.",
+          "why_green": "Keeping a long dead-end thread can increase the input volume of every later exchange; check what the client and its cache actually do.",
+          "how": "Double-tap Esc or /rewind to return before the mistake, then restate the request with what you learned.",
+          "impact": "High",
+          "source_ref": "Client-dependent feature; check the official documentation for the version in use.",
+          "patterns": [],
+          "tags": [
+            "context",
+            "correction",
+            "rewind"
+          ]
+        },
+        {
+          "id": "USAGE-CTX-03",
+          "title": "/clear for a new task, /compact for a related one",
+          "principle": "An unrelated task deserves a fresh context; a related one keeps only the context still needed.",
+          "description": "/clear starts from nothing, so the context is exactly what you decide it is. /compact has the model summarise the conversation, which is convenient but lossy. Steer the summary: \"/compact keep the auth refactor, drop the test debugging\".",
+          "why_green": "Continuing a long conversation for an unrelated task can transmit and process history that serves no purpose.",
+          "how": "Before each new task, ask whether you need that history. No: /clear. Partly: /compact <instruction>.",
+          "impact": "High",
+          "source_ref": "Client-dependent features; check the official documentation for the version in use.",
+          "patterns": [],
+          "tags": [
+            "context",
+            "compact",
+            "clear"
+          ]
+        },
+        {
+          "id": "USAGE-CTX-04",
+          "title": "Shrink the context once it stops helping",
+          "principle": "Reduce or summarise the context when its size visibly hurts relevance, latency or cost.",
+          "description": "There is no universal threshold at which quality degrades. Watch the output quality and whatever metrics you have before compacting or starting a new session.",
+          "why_green": "Targeted context reduction can avoid useless input and rework, but compaction itself consumes resources and can lose information.",
+          "how": "At a stable point, keep the goal, the decisions and the verified state; drop only the threads that no longer serve.",
+          "impact": "Medium",
+          "source_ref": "Project recommendation; no universal numeric threshold is claimed.",
+          "patterns": [],
+          "tags": [
+            "context",
+            "compaction",
+            "long-sessions"
+          ]
+        },
+        {
+          "id": "USAGE-CTX-05",
+          "title": "Map the code instead of re-reading it",
+          "principle": "A maintained index can spare the agent from rediscovering the stable structure of a large repository.",
+          "description": "Keep an index of the code (key files, their role, main exports) so Claude can orient itself without walking the tree or re-reading whole files every time.",
+          "why_green": "Exploring unfamiliar code through repeated searches and full reads costs tokens in every session. An index, or a knowledge graph of the repository, turns that into a single read reused afterwards.",
+          "how": "Generate an index file (for example CODEMAP.md) or a repository knowledge graph with a dedicated tool, such as the open-source graphify skill (MIT, github.com/Graphify-Labs/graphify) which turns a code folder into a queryable graph. Read it first rather than exploring blind.",
+          "impact": "Medium",
+          "source_ref": "Project recommendation; graphify is an illustrative third-party example, not audited by this project.",
+          "patterns": [],
+          "tags": [
+            "context",
+            "mapping",
+            "tokens",
+            "tools"
+          ]
+        },
+        {
+          "id": "USAGE-CTX-06",
+          "title": "Dense answers, no padding",
+          "principle": "Match the length of the answer to what the user actually needs.",
+          "description": "Keep answers to what is useful: no restating the question, no summary of what was just done when the diff or the result already says it.",
+          "why_green": "Needlessly long output immediately increases the tokens produced, and can also inflate the context of later exchanges.",
+          "how": "Go straight to the result. Tools such as the open-source caveman skill (MIT, github.com/juliusbrussee/caveman) illustrate the idea by pushing style compression to its limit; the point to keep is the density, not necessarily the tool.",
+          "impact": "Medium",
+          "source_ref": "Project recommendation; caveman is an illustrative third-party example, not audited by this project.",
+          "patterns": [],
+          "tags": [
+            "context",
+            "verbosity",
+            "tokens",
+            "tools"
+          ]
+        }
+      ]
+    },
+    "brief": {
+      "name": "Prepare the task",
+      "description": "A precise brief can cut avoidable round trips, cascading corrections and re-explanations.",
+      "rules": [
+        {
+          "id": "USAGE-BRIEF-01",
+          "title": "Full context in the first message",
+          "principle": "A useful brief states the goal, the constraints and the acceptance criteria.",
+          "description": "A good brief carries three things: the goal in plain language, the constraints (what must not be touched, which contracts to honour), and the acceptance criteria (how to tell it is finished).",
+          "why_green": "An incomplete brief can trigger clarifications and rework that increase both the computation and the duration of the task.",
+          "how": "For example: \"Goal: rate limiting on /api/login. Constraints: no DB schema change, use Redis. Acceptance: 5 req/min per IP returns 429, existing tests still green.\"",
+          "impact": "High",
+          "source_ref": "Editorial recommendation of the Green Claude project.",
+          "patterns": [],
+          "tags": [
+            "brief",
+            "specification",
+            "delegation"
+          ]
+        },
+        {
+          "id": "USAGE-BRIEF-02",
+          "title": "Delegate instead of micromanaging",
+          "principle": "For a well-bounded task, a complete brief can avoid micromanagement that costs several round trips.",
+          "description": "The old reflex, describing one step, watching the output, correcting, describing the next step, multiplies interruptions and turns. Write a clear brief, start it, come back when it is done.",
+          "why_green": "Needless interventions add turns and content; their real cost depends on the context transmitted, the cache and the client.",
+          "how": "Write the full brief (see USAGE-BRIEF-01), then step in when a decision, an authorisation or a correction is genuinely required.",
+          "impact": "Medium",
+          "source_ref": "Editorial recommendation of the Green Claude project.",
+          "patterns": [],
+          "tags": [
+            "delegation",
+            "autonomy",
+            "workflow"
+          ]
+        },
+        {
+          "id": "USAGE-BRIEF-03",
+          "title": "Ask before you build",
+          "principle": "When a request admits two readings that lead to different work, ask. When it admits one, build.",
+          "description": "An assistant that guesses on an ambiguous brief produces something plausible and wrong, and the cost lands twice: once to generate it, once to undo it. The cost of a question is one short exchange. The asymmetry is large enough that a single clarifying question is almost always the cheaper move, and it is cheapest at the start, before anything has been written on top of the wrong assumption.",
+          "why_green": "Rework is the most avoidable computation in an assisted session: the tokens are spent, the context grows with a thread that led nowhere, and the correction cycle spends more than the original generation. A question costs one exchange.",
+          "how": "Before a task of any size, name the assumption that would change the shape of the work if it were wrong. If it is genuinely ambiguous, ask that one question and wait. If it is not, state the assumption in one line and proceed. Do not stack questions: one blocking question beats four that could have been answered by reading the repository.",
+          "impact": "High",
+          "patterns": [],
+          "source_ref": "Editorial recommendation of the Green Claude project.",
+          "tags": [
+            "brief",
+            "clarification",
+            "rework"
+          ]
+        }
+      ]
+    },
+    "memoire": {
+      "name": "Capture durable conventions",
+      "description": "Documenting a durable convention can spare you from re-explaining it, as long as the cost of maintaining and loading it stays justified.",
+      "rules": [
+        {
+          "id": "USAGE-MEM-01",
+          "title": "Write the rule instead of correcting again",
+          "principle": "Turn a recurring correction into a project rule that is reviewed and maintained.",
+          "description": "A correction made in conversation only fixes the run in progress. A rule read from CLAUDE.md can prevent the same mistake in every session that loads the file.",
+          "why_green": "A concise convention can cut repeated corrections; drop it or tighten it when loading it every time costs more than it saves.",
+          "how": "When a correction reveals a durable convention, propose a concise rule in CLAUDE.md and have it reviewed before adopting it.",
+          "impact": "High",
+          "source_ref": "Editorial recommendation of the Green Claude project.",
+          "patterns": [],
+          "tags": [
+            "claude-md",
+            "memory",
+            "conventions"
+          ]
+        },
+        {
+          "id": "USAGE-MEM-02",
+          "title": "A skill for whatever repeats",
+          "principle": "Formalise the workflows you genuinely repeat, when reuse outweighs the cost of maintaining and loading them.",
+          "description": "Repeated workflows can be captured in a versioned command or skill. Their content is loaded whenever they are used, so keep them concise and check that the reuse justifies that cost.",
+          "why_green": "A reusable procedure can spare re-explanation, but a skill that is too broad, or loaded when it is not needed, inflates the context in its turn.",
+          "how": "Create commands in .claude/commands/ and skills shared through git for the whole team.",
+          "impact": "Medium",
+          "source_ref": "Project recommendation; check the real loading cost against how often it is reused.",
+          "patterns": [],
+          "tags": [
+            "skills",
+            "commands",
+            "reuse"
+          ]
+        }
+      ]
+    },
+    "verification": {
+      "name": "Verify so you don't redo",
+      "description": "A proportionate verification loop reduces rework and separates observed results from assumptions.",
+      "rules": [
+        {
+          "id": "USAGE-VERIF-01",
+          "title": "Give Claude a way to check its own work",
+          "principle": "Give the agent a proportionate way to verify the expected result.",
+          "description": "Tests, a bash command, a browser, a simulator: the means matter less than the fact that Claude can see for itself whether it works. Without a verification loop, the user is the one who discovers the defects and starts another correction cycle.",
+          "why_green": "A fitting verification can catch a defect earlier and avoid further rounds of diagnosis and correction.",
+          "how": "Put the test command, the URL to check or the measurable criterion in the brief. Require the verification before anything is called done.",
+          "impact": "High",
+          "source_ref": "Engineering recommendation of the project; no universal quality multiplier is claimed.",
+          "patterns": [],
+          "tags": [
+            "verification",
+            "tests",
+            "quality"
+          ]
+        }
+      ]
+    },
+    "compute": {
+      "name": "Size the compute to the task",
+      "description": "Size the compute to the task, and confirm the trade-off with measurements of quality, latency and consumption.",
+      "rules": [
+        {
+          "id": "USAGE-CPU-01",
+          "title": "Match the effort level to the task",
+          "principle": "Match the model and the effort level to what the task is observed to need.",
+          "description": "The available commands, levels and models vary by client and version. Pick the cheapest level that meets your quality bar, then measure before generalising.",
+          "why_green": "Higher effort can increase computation, while insufficient effort can cause rework. The right setting depends on measured results for the task at hand.",
+          "how": "Start from the setting recommended for your client, raise the effort when your evaluations demand it, and check which controls exist in the official documentation.",
+          "impact": "High",
+          "source_ref": "Client-dependent feature; check the official documentation and measure quality, latency and consumption.",
+          "patterns": [],
+          "tags": [
+            "effort",
+            "models",
+            "proportionality"
+          ]
+        },
+        {
+          "id": "USAGE-CPU-02",
+          "title": "No panel of agents for a small task",
+          "principle": "Reserve multi-agent parallelism for tasks whose expected benefit justifies the extra computation.",
+          "description": "Multi-agent workflows add calls and context, but they can also cut elapsed time or improve quality. Keep them for tasks where that benefit is expected and measurable.",
+          "why_green": "Parallelism can increase total consumption; weigh that overhead against the gain in quality, elapsed time or avoided rework.",
+          "how": "Before launching subagents, define the expected result, bound the scope, and compare whatever metrics you have against a simpler run.",
+          "impact": "High",
+          "source_ref": "Project recommendation; compare the cost of parallelism against the gain in quality or elapsed time.",
+          "patterns": [],
+          "tags": [
+            "subagents",
+            "workflows",
+            "token-budget"
+          ]
+        },
+        {
+          "id": "USAGE-CPU-03",
+          "title": "Minimal mode for scripts that tolerate it",
+          "principle": "For isolated automation, avoid loading the customisations and contexts it does not need.",
+          "description": "Depending on the Claude Code version, --bare disables auto-discovery of several customisations. It only fits a task that does not depend on them.",
+          "why_green": "Every scripted invocation that loads project context it does not need pays those tokens for nothing, multiplied by every run of the script.",
+          "how": "In scripts and cron jobs: claude -p --bare \"...\", naming explicitly the only context that is required.",
+          "impact": "Medium",
+          "source_ref": "Official Claude Code CLI documentation: https://code.claude.com/docs/en/cli-usage",
+          "patterns": [],
+          "tags": [
+            "scripts",
+            "automation",
+            "startup"
+          ]
+        }
+      ]
+    }
+  }
+}

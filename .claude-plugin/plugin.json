@@ -1,6 +1,6 @@
 {
   "name": "green-claude",
-  "description": "Éco-conception de services numériques (RGESN 2024 / GR491 / Green Software Foundation) appliquée pendant que Claude Code écrit ou revoit du code, avec un audit déterministe et des pratiques d'usage sobre inspirées de Boris Cherny. Présentation : https://institut-du-numerique-responsable.github.io/green-claude/",
+  "description": "Éco-conception de services numériques (RGESN 2024 / GR491 / Green Software Foundation) appliquée pendant que Claude Code écrit ou revoit du code, avec un audit déterministe et des pratiques d'usage responsable maintenues par le projet. Présentation : https://institut-du-numerique-responsable.github.io/green-claude/",
   "version": "1.4.0",
   "author": {
     "name": "Institut du Numérique Responsable"

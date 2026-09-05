@@ -1,0 +1,79 @@
+{
+  "metadata": {
+    "name": "Ecodesign for Solid",
+    "description": "Ecodesign rules for Solid: fine-grained signals, narrow effects, lazy routes.",
+    "version": "1.0.0",
+    "globs": "**/*.{jsx,tsx}",
+    "extensions": [
+      "jsx",
+      "tsx"
+    ],
+    "sources": [
+      "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
+      "https://gr491.isit-europe.org/"
+    ],
+    "count": 2,
+    "type": "code_audit"
+  },
+  "categories": {
+    "reactivite": {
+      "name": "Solid — reactivity",
+      "description": "Solid updates the exact node that changed, as long as the dependencies stay narrow (RGESN Frontend).",
+      "rules": [
+        {
+          "id": "ECO-SOLID-01",
+          "title": "Effect broader than its dependencies",
+          "description": "createEffect tracks everything it reads. Reading a whole store inside one makes the effect re-run for changes that do not concern it, which throws away the fine-grained updating that Solid exists for.",
+          "impact": "Medium",
+          "patterns": [
+            "createEffect\\("
+          ],
+          "exclude_file_patterns": [
+            "createMemo",
+            "on\\(",
+            "untrack\\("
+          ],
+          "recommendation": "Read only the signals the effect needs, and use createMemo for a derived value several effects share. Verify that an update touches only the intended nodes.",
+          "note": "One createMemo, on() or untrack() anywhere in the file silences the rule. A narrow effect reading a single signal is exactly right, so what matters is what this one reads.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-SOLID-003 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "solid",
+            "signals",
+            "effects"
+          ]
+        },
+        {
+          "id": "ECO-SOLID-02",
+          "title": "List rendered with map instead of For",
+          "description": "map recreates every row when the array changes, where the For component keeps the nodes whose item did not move. On a long list that is the difference between updating one row and rebuilding all of them.",
+          "impact": "Medium",
+          "patterns": [
+            "\\{[a-zA-Z_.]*\\.map\\("
+          ],
+          "exclude_file_patterns": [
+            "<For",
+            "<Index",
+            "from[[:space:]]*['\"]react",
+            "from[[:space:]]*['\"]preact",
+            "require\\(['\"]react",
+            "useEffect\\(",
+            "useState\\(",
+            "useMemo\\("
+          ],
+          "recommendation": "Use For for keyed lists and Index when the position is what identifies the row.",
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Front-end",
+          "source_note": "Adapted from the Green Codex rule LANG-SOLID-001 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
+          "tags": [
+            "solid",
+            "lists",
+            "dom"
+          ],
+          "note": "This rule shares an extension with another framework's rule set, so it also stays silent in a file that imports the other framework: the pattern alone cannot tell which one is in play."
+        }
+      ]
+    }
+  }
+}
