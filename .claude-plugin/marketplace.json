@@ -4,12 +4,12 @@
     "name": "Institut du Numérique Responsable",
     "url": "https://institutnr.org/"
   },
-  "description": "Éco-conception de services numériques avec Claude Code (RGESN 2024 / GR491 / Green Software Foundation).",
+  "description": "Eco-design skill for Claude Code: 106 rules for digital sobriety (RGESN 2024 / GR491). Automatically applies eco-conception best practices during coding. Covers AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, and algorithms. Open source, MIT licensed.",
   "plugins": [
     {
       "name": "green-claude",
       "source": "./",
-      "description": "Applique les règles d'éco-conception RGESN/GR491 pendant que Claude Code écrit du code, avec audit et checklist. Présentation : https://institut-du-numerique-responsable.github.io/green-claude/"
+      "description": "Applies RGESN/GR491 eco-design rules while Claude Code writes or reviews code, with deterministic audit and responsible usage practices. 106 rules for AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, algorithms. Open source, MIT licensed."
     }
   ]
 }
