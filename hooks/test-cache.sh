@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-export HOME="$TMP"          # isole ~/.cache/green-claude
+export GREEN_CLAUDE_CACHE_DIR="$TMP/cache"
 
 TRANSCRIPT="$TMP/t.jsonl"
 cat > "$TRANSCRIPT" <<'EOF'
@@ -19,14 +19,21 @@ EOF
 
 prompt_payload() {  # session, cwd, prompt
     jq -nc --arg s "$1" --arg t "$TRANSCRIPT" --arg c "$2" --arg p "$3" \
-      '{session_id:$s, transcript_path:$t, cwd:$c, hook_event_name:"UserPromptSubmit", prompt:$p}'
+      '{session_id:$s, transcript_path:$t, cwd:$c, hook_event_name:"UserPromptSubmit", prompt:("[cache] " + $p)}'
 }
 stop_payload() {    # session, cwd
     jq -nc --arg s "$1" --arg t "$TRANSCRIPT" --arg c "$2" \
       '{session_id:$s, transcript_path:$t, cwd:$c, hook_event_name:"Stop", stop_hook_active:false}'
 }
 fail() { echo "ECHEC: $1"; exit 1; }
-CACHE="$HOME/.cache/green-claude"
+CACHE="$GREEN_CLAUDE_CACHE_DIR"
+
+# A normal request must never be cached, including after an edit or a new turn.
+for pass in one two; do
+    OUT="$(jq -nc --arg t "$TRANSCRIPT" '{session_id:"ordinary",cwd:"/proj/a",prompt:"Audite query.sql",transcript_path:$t}' | bash green-claude-cache.sh 2>/dev/null)"
+    [ -z "$OUT" ] || fail "ordinary prompt was blocked"
+    [ ! -f "$CACHE/pending/ordinary" ] || fail "ordinary prompt was queued for caching"
+done
 
 # 1. Premier passage : rien en cache, aucun blocage, clé déposée pour Stop.
 OUT="$(prompt_payload sess1 /proj/a "capitale de la France" | bash green-claude-cache.sh 2>/dev/null)"
@@ -84,4 +91,4 @@ gitc commit -q --allow-empty -m deux
 OUT="$(prompt_payload sess7 "$REPO" "etat du depot" | bash green-claude-cache.sh 2>/dev/null)"
 [ -z "$OUT" ] || fail "apres commit: la reponse perimee a ete resservie"
 
-echo "OK - 7 verifications passees"
+echo "OK - cache explicite, isolation, TTL et invalidation vérifiés"

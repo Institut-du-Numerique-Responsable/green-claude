@@ -275,7 +275,10 @@ nothing.
 
 The "zero token" response cache cannot be handled by a skill: it has to be wired
 through `UserPromptSubmit`/`Stop` hooks, which intercept the request *before* it
-reaches the model (see `hooks/` at the repository root). The model choice
+reaches the model (see `hooks/` at the repository root). Caching is explicitly
+opt-in per request with `[cache] `, for self-contained factual questions only.
+Ordinary prompts always reach Claude. Cached replies are displayed to the user
+but are not added to Claude's conversation context. The model choice
 (Haiku/Sonnet/Opus) can be changed mid-session with `/model`: this skill won't do
 it for you, but nothing stops you from suggesting a lighter model when a task is
 plainly out of proportion with it.

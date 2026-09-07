@@ -34,6 +34,8 @@ jobs:
         run: bash skills/green-claude/scripts/test-eco-audit.sh
       - name: Lancer les tests du cache
         run: bash hooks/test-cache.sh
+      - name: Vérifier les hooks et le score
+        run: bash hooks/test-audit-entrypoints.sh
       - name: Construire les archives
         run: bash skills/green-claude/scripts/package-skill.sh
       - name: Vérifier les archives

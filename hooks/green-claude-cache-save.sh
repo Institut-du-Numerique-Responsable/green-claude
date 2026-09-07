@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-CACHE_DIR="$HOME/.cache/green-claude"
+CACHE_DIR="${GREEN_CLAUDE_CACHE_DIR:-$HOME/.cache/green-claude}"
 INPUT="$(cat)"
 
 SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // empty')"

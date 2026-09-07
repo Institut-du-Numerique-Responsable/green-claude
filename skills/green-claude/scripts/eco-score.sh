@@ -19,40 +19,46 @@ AUDIT="$SCRIPT_DIR/eco-audit.sh"
 FORMAT="texte"
 if [ "${1:-}" = "--json" ]; then FORMAT="json"; shift; fi
 
-# Extensions auditables : celles que les règles savent lire. Inutile de compter
-# les Markdown et les JSON dans le volume, aucune règle ne s'y applique.
-EXTS='\.(py|js|jsx|ts|tsx|mjs|cjs|sql|pks|pkb|prc|fnc|trg|java|cs|php|rb|rs|c|h|cpp|cc|cxx|hpp|hh|go|kt|swift|scala|html|htm|css|scss|sass|vue|svelte)$'
+source "$SCRIPT_DIR/audit-common.sh"
+load_audit_extensions
 
 collect_files() {
     if [ $# -eq 0 ]; then
-        # Dans un dépôt git : les fichiers suivis, donc ni node_modules ni
-        # artefacts de build, sans avoir à maintenir une liste d'exclusions.
         if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-            git ls-files | grep -iE "$EXTS" || true
+            git ls-files -z
         else
-            find . -type f | grep -iE "$EXTS" || true
+            find . -type f -print0
         fi
     else
         for path in "$@"; do
             if [ -d "$path" ]; then
-                find "$path" -type f | grep -iE "$EXTS" || true
+                find "$path" -type f -print0
             elif [ -f "$path" ]; then
-                printf '%s\n' "$path" | grep -iE "$EXTS" || true
+                printf '%s\0' "$path"
             fi
         done
     fi
 }
 
-FILES="$(collect_files "$@")"
-if [ -z "$FILES" ]; then
+FILES=()
+while IFS= read -r -d '' file; do
+    is_auditable_file "$file" || continue
+    FILES[${#FILES[@]}]="$file"
+done < <(collect_files "$@")
+if [ "${#FILES[@]}" -eq 0 ]; then
     echo "Aucun fichier auditable trouvé." >&2
     exit 1
 fi
 
-nb_files=$(printf '%s\n' "$FILES" | wc -l | tr -d ' ')
-nb_lines=$(printf '%s\n' "$FILES" | tr '\n' '\0' | xargs -0 cat 2>/dev/null | wc -l | tr -d ' ')
+nb_files=${#FILES[@]}
+nb_lines=$(printf '%s\0' "${FILES[@]}" | xargs -0 cat -- | wc -l | tr -d ' ')
 
-REPORT="$(printf '%s\n' "$FILES" | tr '\n' '\0' | xargs -0 bash "$AUDIT" 2>/dev/null || true)"
+# An unavailable audit is not a zero-issue result. Preserve stderr and fail
+# before emitting any score, including when xargs splits a large file list.
+REPORT="$(printf '%s\0' "${FILES[@]}" | xargs -0 bash "$AUDIT")" || {
+    echo "Green Claude: audit failed; no score produced." >&2
+    exit 1
+}
 eleve=$(printf '%s\n' "$REPORT" | grep -c '^\[High\]' || true)
 moyen=$(printf '%s\n' "$REPORT" | grep -c '^\[Medium\]' || true)
 faible=$(printf '%s\n' "$REPORT" | grep -c '^\[Low\]' || true)
