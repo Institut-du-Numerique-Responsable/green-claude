@@ -115,6 +115,37 @@ Si vous touchez à `eco-audit.sh`, `detect-nested-loops.awk` ou aux règles avec
 bash skills/green-claude/scripts/test-eco-audit.sh
 ```
 
+Pour les hooks, le routage des extensions ou le score, lancez aussi les tests d'intégration :
+
+```bash
+bash hooks/test-cache.sh
+bash hooks/test-audit-entrypoints.sh
+```
+
+`audit-common.sh` partage la sélection des extensions à partir des métadonnées des règles. Lors de l'audit d'une copie temporaire, `GREEN_CLAUDE_SOURCE_FILE` conserve le chemin original pour le rapport, les exclusions et les décisions ; il exige un seul fichier en entrée. `GREEN_CLAUDE_BASE_DIR` sert à résoudre les ressources relatives.
+
+## Maintenir la découverte du projet
+
+Après une modification de version, des règles ou des pages publiques :
+
+```bash
+python3 scripts/sync-discovery.py
+python3 scripts/sync-discovery.py --check
+python3 scripts/test-discovery.py
+```
+
+Le générateur synchronise le sitemap, les métadonnées du dépôt (`.well-known/ai.json`), leur copie publique (`docs/ai.json`) et le JSON-LD de l'accueil. La CI refuse les fichiers générés périmés. `llms.txt` est un index documentaire destiné aux outils qui le lisent ; il ne garantit ni indexation ni classement.
+
+GitHub Pages publie la branche `main`, dossier `/docs`, sous `/green-claude/`. Le chemin source `docs/languages/python.md` devient donc `/green-claude/languages/python.html`, et `docs/languages/README.md` devient `/green-claude/languages/`.
+
+Après publication, vérifier les URL du sitemap puis soumettre `https://institut-du-numerique-responsable.github.io/green-claude/sitemap.xml` dans Google Search Console (et Bing Webmaster Tools si utilisé). La balise de vérification Google existante est conservée. L'accès à ces consoles dépend du compte propriétaire.
+
+Le fichier `docs/robots.txt` est un modèle : sous `/green-claude/robots.txt`, il ne contrôle pas les robots. Pour qu'il soit pris en compte, l'organisation doit publier les directives à `https://institut-du-numerique-responsable.github.io/robots.txt`, depuis son site racine. L'absence de ce fichier n'interdit pas l'exploration.
+
+`.github/search.yml` est un inventaire éditorial, pas une configuration reconnue par GitHub. La description, la page d'accueil et les topics du dépôt se règlent dans GitHub ou via son API.
+
+Références : [sitemaps Google](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [emplacement de robots.txt](https://developers.google.com/crawling/docs/robots-txt/create-robots-txt), [qualité des données structurées](https://developers.google.com/search/docs/appearance/structured-data/sd-policies).
+
 ## Ouvrir la Pull Request
 
 Décrivez la source de la règle (lien vers le référentiel), l'impact attendu, et un exemple de code qui déclenche (ou corrige) le motif. Une PR par sujet plutôt qu'un gros lot de changements non liés.
@@ -137,6 +168,7 @@ bash scripts/check-release-version.sh vX.Y.Z
 bash scripts/test-release-version.sh
 bash skills/green-claude/scripts/test-eco-audit.sh
 bash hooks/test-cache.sh
+bash hooks/test-audit-entrypoints.sh
 ```
 
 Une fois le commit validé présent sur `main`, créez et poussez un tag annoté :

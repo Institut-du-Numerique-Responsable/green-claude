@@ -98,4 +98,4 @@ Store less, and plan the end of life from the moment you create it (RGESN 7.3, G
 
 ---
 
-[Back to all languages](../README.md) | [Main documentation](../../README.md)
+[Back to all languages](./README.md) | [Main documentation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md)

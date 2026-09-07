@@ -26,6 +26,11 @@ jobs:
           jq --version
       - name: Vérifier la version du tag
         run: bash scripts/check-release-version.sh "$GITHUB_REF_NAME"
+      - name: Vérifier les fichiers de découverte
+        run: |
+          python3 scripts/test-discovery.py
+          python3 scripts/sync-discovery.py --check
+
       - name: Valider le JSON des règles
         run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
       - name: Lancer les tests de version

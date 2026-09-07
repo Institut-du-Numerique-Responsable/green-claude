@@ -121,7 +121,7 @@ def generate_markdown_content(lang_data, lang_name):
     # Footer
     content.append("---")
     content.append("")
-    content.append(f"[Back to all languages](../README.md) | [Main documentation](../../README.md)")
+    content.append(f"[Back to all languages](./README.md) | [Main documentation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md)")
     
     return "\n".join(content)
 

@@ -1,5 +1,6 @@
-# GitHub Search Configuration for Green Claude
-# This file helps GitHub understand and index the repository content
+# Editorial discovery inventory for maintainers.
+# GitHub does not read this file as search configuration. Set the repository
+# description, homepage and topics through GitHub Settings or its API.
 
 # Repository name for search indexing
 name: green-claude
@@ -9,7 +10,7 @@ description: "Eco-design skill for Claude Code: digital sobriety, RGESN/GR491 co
 
 # Keywords for search indexing (comma-separated, max 255 characters)
 keywords: >
-  ai,eco-design,digital sobriety,sustainable software,green it,rg491,rgesn,claude code,eco-conception,frugal ai
+  ai,eco-design,digital sobriety,sustainable software,green it,gr491,rgesn,claude code,eco-conception,frugal ai
 
 # Topics for GitHub discovery (max 50)
 topics: [
@@ -54,7 +55,7 @@ homepage: https://institut-du-numerique-responsable.github.io/green-claude/
 # Repository URL (canonical)
 repository: https://github.com/Institut-du-Numerique-Responsable/green-claude
 
-# Maintainers for search ranking
+# Maintainer references
 maintainers:
   - name: Guillaume Gallon
     github: gridboy
@@ -93,10 +94,10 @@ standards:
 
 # Features for feature-based search
 features:
-  - eco-design rules: 225
+  - eco-design rules: 107
   - ai specific rules: 23
   - language rules: 127
-  - supported languages: 25
+  - supported languages and frameworks: 24
   - automatic detection: true
   - claude code integration: true
   - security scanning: true

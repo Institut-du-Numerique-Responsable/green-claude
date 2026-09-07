@@ -1,18 +1,26 @@
-# green-claude — Skill de sobriete numerique pour Claude Code
+# Green Claude
 
-> Skill open source pour Claude Code : fait ecrire du code eco-concu selon le RGESN 2024, le GR491 et d'autres referentiels reconnus, avec un audit deterministe (eco-audit.sh) et des pratiques de sobriete d'usage de l'assistant lui-meme.
+> Skill open source de l'Institut du Numérique Responsable pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe de code et pratiques de sobriété d'usage.
 
-## Docs
+Les résultats du script sont des candidats à vérifier en contexte, pas une certification RGESN ni une mesure d'énergie. Les hooks sont optionnels ; le cache exige une demande autonome préfixée `[cache]`.
 
-- [Site du projet](https://institut-du-numerique-responsable.github.io/green-claude/)
-- [Code source et README](https://github.com/Institut-du-Numerique-Responsable/green-claude)
-- [Projet frere, 11 assistants](https://github.com/Institut-du-Numerique-Responsable/skill-nr)
+## Installation et utilisation
 
-## Qui publie
+- [README français](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md): installation, audit, hooks et limites.
+- [English README](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md): installation and usage.
+- [Instructions du skill](https://raw.githubusercontent.com/Institut-du-Numerique-Responsable/green-claude/main/skills/green-claude/SKILL.md): modes, sélection des règles et interprétation des alertes.
 
-Publie par l'**Institut du Numerique Responsable** (INR), association loi 1901
-creee en 2018 : https://institutnr.org — voir aussi ISIT Belgique
-(https://isit-be.org) et ISIT Suisse (https://isit-ch.org).
+## Règles et documentation
 
-Citation : voir CITATION.cff a la racine du depot.
-Contributeurs : voir la page "Contributors" du depot GitHub.
+- [Index des langages et frameworks](https://institut-du-numerique-responsable.github.io/green-claude/languages/): accès aux règles spécifiques à chaque environnement.
+- [Règles transverses](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/skills/green-claude/rules/ecoconception.json): recommandations, motifs et références.
+- [Pratiques d'usage](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/skills/green-claude/rules/usage.json): contexte, vérification et sobriété de la session.
+- [Eau et électricité](https://institut-du-numerique-responsable.github.io/green-claude/water-electricity-detection.html): portée des règles de sobriété IA.
+- [Métadonnées](https://institut-du-numerique-responsable.github.io/green-claude/ai.json): version et périmètre générés depuis les sources du projet.
+
+## Contribution et provenance
+
+- [Contribuer](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CONTRIBUTING.md): schéma des règles et commandes de validation.
+- [Changelog](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CHANGELOG.md): changements publiés et en préparation.
+- [Citation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CITATION.cff): auteurs et attribution.
+- [Institut du Numérique Responsable](https://institutnr.org): organisation éditrice.

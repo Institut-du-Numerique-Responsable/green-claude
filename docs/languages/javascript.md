@@ -95,4 +95,4 @@ Stream, paginate, cache with an explicit policy, avoid leaks (RGESN Backend/Host
 
 ---
 
-[Back to all languages](../README.md) | [Main documentation](../../README.md)
+[Back to all languages](./README.md) | [Main documentation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md)

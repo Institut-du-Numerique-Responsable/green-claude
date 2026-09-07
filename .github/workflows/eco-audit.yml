@@ -33,6 +33,11 @@ jobs:
           command -v jq >/dev/null || { echo "jq absent de l'image du runner"; exit 1; }
           jq --version
 
+      - name: Vérifier les fichiers de découverte
+        run: |
+          python3 scripts/test-discovery.py
+          python3 scripts/sync-discovery.py --check
+
       - name: Valider le JSON des règles
         run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
 

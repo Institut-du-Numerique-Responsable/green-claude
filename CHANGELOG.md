@@ -30,6 +30,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Corrigé
 
+- Indexation : sitemap aligné sur les URL GitHub Pages, liens vers les pages de documentation, index `llms.txt` enrichi et métadonnées générées depuis la version et les règles ; suppression des notes d'avis non sourcées. Contrôles de synchronisation ajoutés à la CI.
+
 - Cache local réservé aux questions autonomes explicitement préfixées `[cache]` : les demandes ordinaires ne sont plus bloquées par une ancienne réponse.
 - Hook pre-commit : audit du contenu indexé, même si le fichier de travail diffère, avec prise en charge des renommages et des noms contenant des espaces.
 - Hook Claude : conservation du chemin original pour les décisions acceptées et les exclusions lors de l'audit d'un extrait temporaire.
