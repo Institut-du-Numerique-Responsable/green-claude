@@ -1,24 +1,39 @@
 #!/bin/bash
 # Hook UserPromptSubmit — ce qu'un skill ne peut pas faire car il s'exécute
 # APRÈS que la requête ait déjà atteint le modèle :
-#   1. Cache local : une question déjà posée est resservie sans appeler l'API.
+#   1. Cache local explicite : seules les questions préfixées [cache] sont reprises.
 #   2. Heures de pointe : avertit avant d'envoyer une requête lourde en journée.
 #
 # Câblé automatiquement par install.sh dans ~/.claude/settings.json.
 
 set -euo pipefail
 
-CACHE_DIR="$HOME/.cache/green-claude"
+CACHE_DIR="${GREEN_CLAUDE_CACHE_DIR:-$HOME/.cache/green-claude}"
 OFFPEAK_START=22   # 22h UTC
 OFFPEAK_END=6       # 6h UTC
 TTL_MIN=60
-mkdir -p "$CACHE_DIR/pending"
 
 # Hasher le prompt seul, pas l'enveloppe : session_id & co. varieraient la clé
 # à chaque session et cache-save.sh n'en retrouverait aucune.
 INPUT="$(cat)"
 PROMPT="$(printf '%s' "$INPUT" | jq -r '.prompt // empty')"
 [ -n "$PROMPT" ] || exit 0
+
+# Une demande ordinaire dépend du code et de la conversation, même si son
+# texte est identique. Le préfixe déclare explicitement une question autonome.
+SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // empty')"
+case "$SESSION" in *[!a-zA-Z0-9_-]*) exit 0 ;; esac
+[ -z "$SESSION" ] || rm -f "$CACHE_DIR/pending/$SESSION"
+
+current_hour=$((10#$(date -u +%H)))
+if [ "$current_hour" -lt "$OFFPEAK_START" ] && [ "$current_hour" -ge "$OFFPEAK_END" ]; then
+    echo "[Green Claude] Heures creuses configurées : 22h-6h UTC." >&2
+fi
+case "$PROMPT" in
+    '[cache] '?*) ;;
+    *) exit 0 ;;
+esac
+mkdir -p "$CACHE_DIR/pending"
 
 # Le cwd entre dans la clé : le même prompt posé dans deux projets différents
 # n'attend pas la même réponse. Le HEAD git aussi : sans lui, une réponse
@@ -47,15 +62,8 @@ fi
 # Le payload du hook Stop ne porte ni le prompt ni la réponse : on lui laisse
 # la clé ici, plutôt que de la lui faire recalculer depuis le transcript (tout
 # écart de texte la ferait diverger et le cache ne se remplirait jamais).
-SESSION="$(printf '%s' "$INPUT" | jq -r '.session_id // empty')"
 if [ -n "$SESSION" ]; then
     printf '%s' "$KEY" > "$CACHE_DIR/pending/$SESSION"
-fi
-
-# 2. Heures de pointe : simple avertissement, ne bloque jamais
-current_hour=$((10#$(date -u +%H)))
-if [ "$current_hour" -lt "$OFFPEAK_START" ] && [ "$current_hour" -ge "$OFFPEAK_END" ]; then
-    echo "[Green Claude] Heure de pointe (réseau électrique plus carboné). Les heures creuses sont 22h-6h UTC." >&2
 fi
 
 exit 0

@@ -78,4 +78,4 @@ Serialise little, log soberly, do not poll (RGESN Backend/Hosting).
 
 ---
 
-[Back to all languages](../README.md) | [Main documentation](../../README.md)
+[Back to all languages](./README.md) | [Main documentation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md)

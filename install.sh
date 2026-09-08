@@ -71,7 +71,7 @@ fi
 # l'appel au modèle). Proposé, pas imposé.
 # =============================================================================
 print_info ""
-read -p "Installer aussi le hook de cache local / heures creuses ? (o/n) : " -n 1 -r
+read -p "Installer aussi le hook de cache explicite [cache] / heures creuses ? (o/n) : " -n 1 -r
 echo
 if [[ $REPLY =~ ^[OoYy]$ ]]; then
     mkdir -p "$HOOKS_DIR"

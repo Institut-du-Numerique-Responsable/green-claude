@@ -33,6 +33,11 @@ jobs:
           command -v jq >/dev/null || { echo "jq absent de l'image du runner"; exit 1; }
           jq --version
 
+      - name: Vérifier les fichiers de découverte
+        run: |
+          python3 scripts/test-discovery.py
+          python3 scripts/sync-discovery.py --check
+
       - name: Valider le JSON des règles
         run: jq empty skills/green-claude/rules/*.json skills/green-claude/rules/langages/*.json
 
@@ -46,6 +51,11 @@ jobs:
 
       - name: Lancer la suite de tests
         run: bash skills/green-claude/scripts/test-eco-audit.sh
+
+      - name: Vérifier les hooks et le score
+        run: |
+          bash hooks/test-cache.sh
+          bash hooks/test-audit-entrypoints.sh
 
       # Informatif, jamais bloquant : un audit qui fait échouer la CI sur un
       # candidat non confirmé apprend surtout à ignorer la CI. `always()` pour

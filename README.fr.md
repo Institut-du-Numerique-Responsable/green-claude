@@ -153,13 +153,13 @@ Le script d'audit a besoin de `bash` et de `jq`. Là où `jq` manque, les règle
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) couvre les **9 familles** du [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 critères officiels) **et une nouvelle catégorie "Hébergement pour l'IA"**. Chaque règle porte un renvoi RGESN (`rgesn_ref`) et une famille [GR491](https://gr491.isit-europe.org/) (`gr491_famille`).
 
-Précision du renvoi RGESN, en l'état : **38 règles** pointent le critère exact (familles 1 à 4, ex. `4.8`), **67 règles** ne pointent que leur famille (`5.x` à `9.x`) faute d'un mappage encore fait, et une règle relève de la Green Software Foundation plutôt que du RGESN. L'affinage des familles 5 à 9 est un chantier ouvert — le champ dit ce qu'il sait, jamais plus.
+Précision du renvoi RGESN, en l'état : **38 règles** pointent des critères précis (ex. `4.8`), **67 règles** ne pointent que leur famille (`1.x` à `9.x`) faute d'un mappage encore fait, et deux règles relèvent de la Green Software Foundation plutôt que du RGESN. L'affinage de ces renvois à la famille est un chantier ouvert — le champ dit ce qu'il sait, jamais plus.
 
 | Famille RGESN | Règles | Exemples |
 |---|---|---|
 | 1. Stratégie | 9 | Mesurer avant d'optimiser, données raisonnées, formats ouverts, référent sobriété, sensibilisation, transparence utilisateur |
 | 2. Spécifications | 5 | Compatibilité anciens terminaux, bas débit, impact des services tiers |
-| 3. Architecture | 11 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres, code testé et maintenable |
+| 3. Architecture | 12 | Low-tech d'abord, ressources adaptées à la charge, environnements de test sobres, code testé et maintenable |
 | 4. UX/UI | 8 | Pas d'autoplay ni de scroll infini, composants natifs, polices limitées, média le plus sobre, prefers-reduced-motion |
 | 5. Contenus | 3 | Images optimisées, SVG, polices |
 | 6. Frontend | 14 | Pas de bibliothèque lourde, lazy loading, minification, dépendances, pas de code mort, pas de globales implicites, pas de XHR synchrone, DOM sobre, pas d'IDs dupliqués, !important limité, pas de CSS dupliqué, pas de hacks IE legacy, scripts différés |
@@ -211,16 +211,18 @@ skills/green-claude/scripts/eco-score.sh --json   # une ligne par mesure, à his
 
 Ce score compte des motifs connus, pas des joules. Une densité qui baisse dit que le code contient moins de motifs repérables, pas qu'il consomme moins. Comparez-la à celle du mois dernier plutôt qu'à zéro, et confrontez-la à une mesure d'exécution réelle (nombre de requêtes, octets transférés, temps CPU, EcoIndex sur une page) : c'est elle qui tranche.
 
+Si l'audit échoue, la commande retourne une erreur et ne produit aucun score. Les hooks et le score déduisent les extensions prises en charge du catalogue de règles ; la sélection automatique exclut Markdown et JSON.
+
 Deux autres points de contrôle, tous deux optionnels :
 
-- `hooks/green-claude-pre-commit.sh` audite les fichiers mis en index. Là où le hook Claude Code ne voit que ce que Claude écrit, celui-ci voit aussi ce que vous écrivez. Il signale sans bloquer, sauf si vous passez `GREEN_CLAUDE_STRICT=1`.
+- `hooks/green-claude-pre-commit.sh` audite le contenu indexé, même si la copie de travail diffère. Là où le hook Claude Code ne voit que ce que Claude écrit, celui-ci voit aussi ce que vous écrivez. Il signale sans bloquer, sauf si vous passez `GREEN_CLAUDE_STRICT=1`.
 - `.github/workflows/eco-audit.yml` fait tourner la suite de tests des règles sur chaque PR, et publie la densité du dépôt dans le résumé du job.
 
 ## Pratiques d’usage responsable de Claude Code
 
 Coder avec l’IA mobilise des ressources pendant la session. Green Claude maintient donc ses propres recommandations pour limiter les contextes, sorties, reprises et calculs inutiles. Le nombre de tokens reste un indicateur d’activité, pas une mesure directe de l’énergie ou des émissions : toute affirmation environnementale doit être mesurée dans son contexte d’exécution.
 
-[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contient 14 recommandations éditoriales du projet, dont deux illustrées par des outils open source vérifiés :
+[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contient 16 recommandations éditoriales du projet, dont deux illustrées par des outils open source vérifiés :
 
 | Pratique | Le geste |
 |---|---|
@@ -246,7 +248,7 @@ Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/r
 Un skill s'exécute *pendant* une session déjà lancée, et c'est le modèle qui décide de l'appliquer. Il ne choisit donc pas le modèle de démarrage, n'intercepte pas un appel avant qu'il parte, et ne garantit pas qu'une règle soit vérifiée à tous les coups. Quatre leviers restent hors du skill, dans [`hooks/`](hooks/), optionnels et proposés à l'installation :
 
 - **Audit systématique** (`hooks/green-claude-audit.sh`) : câblé en `PostToolUse` sur `Write|Edit|MultiEdit`. Claude Code l'exécute après chaque écriture de fichier de code, sans demander son avis au modèle. Le hook audite ce qui vient d'être ajouté et renvoie les motifs trouvés à Claude, qui corrige avant de continuer.
-- **Cache local** (`hooks/green-claude-cache.sh`) : une question déjà posée est resservie sans réappeler le modèle, zéro token consommé.
+- **Cache local explicite** (`hooks/green-claude-cache.sh`) : préfixer une question factuelle autonome par `[cache] `, par exemple `[cache] Quelle est la capitale de la France ?`. Seules ces demandes peuvent réutiliser une réponse pendant une heure sans appeler le modèle. Les demandes ordinaires atteignent toujours Claude. Ne pas utiliser ce préfixe pour un audit de code, une action ou une question liée aux fichiers ou aux échanges précédents : le cache ne suit pas ces changements. Une réponse en cache est affichée comme message du hook et n'entre pas dans le contexte de conversation de Claude.
 - **Avertissement heures creuses** (même hook) : signale les heures de pointe (hors 22h-6h UTC) sans bloquer.
 - **Cadrage avant écriture** (`hooks/green-claude-brief.sh`) : câblé en `UserPromptSubmit`. Sur une demande de production de code, il rappelle les trois règles qui décident de ce qui sera écrit — le moins de code qui résout le problème, challenger la demande et le modèle, poser la question avant de coder. Sur une question, il se tait. Ces règles vivent aussi dans le skill, mais un skill est lu au chargement de la session : trois tours plus tard il ne pèse plus rien.
 

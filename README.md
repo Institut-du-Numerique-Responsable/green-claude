@@ -151,13 +151,13 @@ The audit script needs `bash` and `jq`. Where `jq` is missing, the rules still a
 
 [`skills/green-claude/rules/ecoconception.json`](skills/green-claude/rules/ecoconception.json) covers all **9 families** of [RGESN 2024](https://www.arcep.fr/mes-demarches-et-services/entreprises/fiches-pratiques/referentiel-general-ecoconception-services-numeriques.html) (78 official criteria) **plus a new "Hosting for AI" category**. Every rule carries an RGESN reference (`rgesn_ref`) and a [GR491](https://gr491.isit-europe.org/) family (`gr491_famille`).
 
-How precise that reference currently is: **38 rules** point at the exact criterion (families 1 to 4, e.g. `4.8`), **67 rules** only point at their family (`5.x` to `9.x`) because that mapping has not been done yet, and one rule follows the Green Software Foundation rather than the RGESN. Refining families 5 to 9 is open work — the field states what it knows, never more.
+How precise that reference currently is: **38 rules** point at specific criteria (e.g. `4.8`), **67 rules** only point at their family (`1.x` to `9.x`) because that mapping has not been done yet, and two rules follow the Green Software Foundation rather than the RGESN. Refining those family-level references is open work — the field states what it knows, never more.
 
 | RGESN family | Rules | Examples |
 |---|---|---|
 | 1. Strategy | 9 | Measure before optimizing, reasoned data collection, open formats, sustainability advocate, awareness training, user transparency |
 | 2. Specifications | 5 | Compatibility with old devices, low bandwidth, third-party services impact |
-| 3. Architecture | 11 | Low-tech first, resources matched to load, sober test environments, tested and maintainable code |
+| 3. Architecture | 12 | Low-tech first, resources matched to load, sober test environments, tested and maintainable code |
 | 4. UX/UI | 8 | No autoplay or infinite scroll, native components, limited fonts, most sober medium, prefers-reduced-motion |
 | 5. Content | 3 | Optimized images, SVG, fonts |
 | 6. Frontend | 14 | No heavy libraries, lazy loading, minification, dependencies, no dead code, no implicit globals, no synchronous XHR, lean DOM, no duplicate IDs, limited `!important`, no duplicate CSS, no legacy IE hacks, deferred scripts |
@@ -209,16 +209,18 @@ skills/green-claude/scripts/eco-score.sh --json   # one line per measurement, to
 
 This score counts known patterns, not joules. A falling density says the code holds fewer recognizable patterns, not that it draws less power. Compare it to last month's rather than to zero, and check it against a real runtime measurement (query count, bytes transferred, CPU time, EcoIndex on a page): that's what settles it.
 
+If the audit fails, the command exits with an error and produces no score. Hooks and the score derive their supported extensions from the rule catalog; automatic selection excludes Markdown and JSON.
+
 Two more checkpoints, both optional:
 
-- `hooks/green-claude-pre-commit.sh` audits staged files. Where the Claude Code hook only sees what Claude writes, this one also sees what you write. It reports without blocking, unless you pass `GREEN_CLAUDE_STRICT=1`.
+- `hooks/green-claude-pre-commit.sh` audits the staged content, even when the working copy differs. Where the Claude Code hook only sees what Claude writes, this one also sees what you write. It reports without blocking, unless you pass `GREEN_CLAUDE_STRICT=1`.
 - `.github/workflows/eco-audit.yml` runs the rule test suite on every PR and publishes the repository's density in the job summary.
 
 ## Responsible-use practices for Claude Code
 
 Coding with AI also uses resources during the session. Green Claude therefore maintains its own recommendations for avoiding unnecessary context, output, retries, and compute. Token counts are an activity indicator, not a direct measurement of energy or emissions; environmental claims require measurements from the actual execution context.
 
-[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contains 14 project-authored recommendations, including two illustrated with verified open-source tools:
+[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contains 16 project-authored recommendations, including two illustrated with verified open-source tools:
 
 | Practice | The move |
 |---|---|
@@ -244,7 +246,7 @@ Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/
 A skill runs *during* a session that's already started, and the model decides whether to apply it. So it can't pick the starting model, can't intercept a call before it leaves, and can't guarantee a rule gets checked every single time. Four levers therefore live outside the skill, in [`hooks/`](hooks/), optional and offered at install time:
 
 - **Systematic audit** (`hooks/green-claude-audit.sh`): wired as `PostToolUse` on `Write|Edit|MultiEdit`. Claude Code runs it after every code file written, without asking the model. It audits what was just added and hands the findings back to Claude, who fixes them before moving on.
-- **Local cache** (`hooks/green-claude-cache.sh`): a question already asked gets served again without calling the model — zero tokens spent.
+- **Explicit local cache** (`hooks/green-claude-cache.sh`): prefix a self-contained factual question with `[cache] `, for example `[cache] What is the capital of France?`. Only these requests can reuse a response for one hour without calling the model. Ordinary requests always reach Claude. Do not use this prefix for code audits, actions, or questions that depend on files or previous messages: the cache does not track those changes. A cache hit is displayed as a hook message and is not added to Claude's conversation context.
 - **Off-peak warning** (same hook): flags peak hours (outside 22:00-06:00 UTC) without ever blocking.
 - **Framing before writing** (`hooks/green-claude-brief.sh`): wired as `UserPromptSubmit`. On a request to produce code, it recalls the three rules that decide what gets written at all — the least code that solves the problem, challenge the request and the model, ask before you build. On a question, it stays quiet. Those rules also live in the skill, but a skill is read when the session loads: three turns later it weighs nothing.
 

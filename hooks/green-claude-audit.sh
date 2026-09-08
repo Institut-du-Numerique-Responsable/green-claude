@@ -25,15 +25,9 @@ INPUT="$(cat)"
 FILE="$(jq -r '.tool_input.file_path // empty' <<<"$INPUT")"
 [ -n "$FILE" ] || exit 0
 
-EXT="$(printf '%s' "${FILE##*.}" | tr '[:upper:]' '[:lower:]')"
-[ "$EXT" != "$(printf '%s' "$FILE" | tr '[:upper:]' '[:lower:]')" ] || exit 0
-
-# Uniquement du code : sur un .md ou un .json, les patterns des règles décrivent
-# le sujet du document, pas un défaut à corriger (« penser à éviter SELECT * »).
-case "$EXT" in
-    py|js|jsx|ts|tsx|mjs|cjs|sql|pks|pkb|prc|fnc|trg|java|cs|php|rb|rs|c|h|cpp|cc|cxx|hpp|hh|go|kt|swift|scala|html|htm|css|scss|sass|vue|svelte|sh|bash) ;;
-    *) exit 0 ;;
-esac
+source "$(dirname "$AUDIT")/audit-common.sh"
+load_audit_extensions || exit 0
+is_auditable_file "$FILE" || exit 0
 
 # Contenu écrit : Write -> .content, Edit -> .new_string, MultiEdit -> tous les
 # .edits[].new_string. Repli sur le fichier complet si rien n'est exploitable.
@@ -43,7 +37,7 @@ ADDED="$(jq -r '
 
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
-TARGET="$TMP_DIR/ajout.$EXT"
+TARGET="$TMP_DIR/${FILE##*/}"
 
 if [ -n "$ADDED" ]; then
     printf '%s\n' "$ADDED" > "$TARGET"
@@ -60,13 +54,11 @@ fi
 # image — signale systématiquement un défaut inexistant, et un faux positif
 # systématique est ce qui apprend à ignorer le hook.
 GREEN_CLAUDE_BASE_DIR="$(dirname "$FILE")"
-export GREEN_CLAUDE_BASE_DIR
+GREEN_CLAUDE_SOURCE_FILE="$FILE"
+export GREEN_CLAUDE_BASE_DIR GREEN_CLAUDE_SOURCE_FILE
 
 REPORT="$("$AUDIT" "$TARGET" 2>/dev/null)" || exit 0
 grep -q '^\[' <<<"$REPORT" || exit 0  # aucune issue : silence
-
-# Le chemin temporaire n'a aucun sens pour Claude : on remet le vrai fichier.
-REPORT="${REPORT//$TARGET/$FILE}"
 
 cat >&2 <<EOF
 [Green Claude] Éco-conception — motifs détectés dans ce que tu viens d'écrire ($FILE) :

@@ -1,34 +1,6 @@
-# robots.txt pour Green Claude - Institut du Numérique Responsable
-# https://institut-du-numerique-responsable.github.io/green-claude/
-
+# Template for the domain root: /robots.txt.
+# At /green-claude/robots.txt this file does not control crawler access.
 User-agent: *
 Allow: /
 
-# Sitemap location
 Sitemap: https://institut-du-numerique-responsable.github.io/green-claude/sitemap.xml
-
-# Crawl-delay pour éviter la surcharge
-Crawl-delay: 2
-
-# Disallow crawl de fichiers spécifiques qui ne sont pas pertinents pour le SEO
-Disallow: /assets/
-Disallow: /llms.txt
-Disallow: /eb88e4a22ebe41dd8c98e6ae20cda3d2.txt
-
-# User-agents spécifiques pour une meilleure indexation
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: FacebookExternalHit
-Allow: /

@@ -12,18 +12,7 @@ RULES_FILE="$SCRIPT_DIR/../rules/ecoconception.json"
 USAGE_FILE="$SCRIPT_DIR/../rules/usage.json"
 LANG_DIR="$SCRIPT_DIR/../rules/langages"
 
-# Extension d'un fichier, en minuscules. Deux pieges : "${f##*.}" travaille sur
-# le chemin complet, donc un fichier sans point renvoie tout le chemin ; et les
-# fichiers de build utiles ici n'ont pas d'extension du tout. On raisonne donc
-# sur le nom seul, et un nom sans point est sa propre extension : Dockerfile ->
-# dockerfile, Makefile -> makefile.
-ext_of() {
-    local base="${1##*/}"
-    case "$base" in
-        *.*) printf '%s' "${base##*.}" | tr '[:upper:]' '[:lower:]' ;;
-        *)   printf '%s' "$base"       | tr '[:upper:]' '[:lower:]' ;;
-    esac
-}
+source "$SCRIPT_DIR/audit-common.sh"
 
 # Le texte rédigé n'est pas du code. Un fichier qui *parle* d'autoplay ou de
 # SELECT * n'en contient pas pour autant, et le signaler use la crédibilité de
@@ -207,6 +196,11 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+# A caller auditing a temporary snapshot can preserve the source identity.
+if [ -n "${GREEN_CLAUDE_SOURCE_FILE:-}" ] && [ "$#" -ne 1 ]; then
+    echo "GREEN_CLAUDE_SOURCE_FILE requires exactly one input file." >&2
+    exit 1
+fi
 issues_found=0
 suppressed=0
 
@@ -356,6 +350,9 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
         cleaned="${CLEANED_NAMES[file_index]}"
         file_index=$((file_index + 1))
         [ -f "$file" ] || continue
+        source_file="${GREEN_CLAUDE_SOURCE_FILE:-$file}"
+        filter_file="${source_file#"$PWD"/}"
+        filter_file="${filter_file#./}"
         # Règle propre à un langage : ne s'applique qu'aux fichiers de ce langage.
         if [ -n "$exts" ]; then
             file_ext="$(ext_of "$file")"
@@ -425,16 +422,16 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
         if [ -n "$matches" ] && [ "$enrich_verdict" = "true" ] && [ -z "$enrich_out" ]; then
             matches=""
         fi
-        if [ -n "$matches" ] && is_ignored "$file"; then
+        if [ -n "$matches" ] && is_ignored "$filter_file"; then
             matches=""
         fi
-        if [ -n "$matches" ] && is_accepted "$id" "$file"; then
+        if [ -n "$matches" ] && is_accepted "$id" "$filter_file"; then
             suppressed=$((suppressed + 1))
             matches=""
         fi
         if [ -n "$matches" ]; then
             echo "[$impact] $id — $title"
-            echo "  File           : $file"
+            echo "  File           : $source_file"
             if [ "$matches" != "match" ]; then
                 echo "$matches" | head -5 | sed 's/^/  Line           : /'
             fi

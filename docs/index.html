@@ -4,14 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Claude : sobriété numérique pour Claude Code</title>
-  <meta name="description" content="Green Claude : skill open source pour Claude Code, code éco-conçu selon le RGESN 2024, le GR491 et d'autres référentiels reconnus. sobriété numérique, IA responsable, éco-conception logicielle.">
-  <meta name="keywords" content="Green Claude, Claude Code, skill, plugin, éco-conception, sobriété numérique, RGESN 2024, GR491, Green Software Foundation, W3C, IA responsable, digital sustainability, carbon footprint, green IT, sustainable software, frugal AI, optimisation CPU, optimisation GPU, consommation eau, tokens, écologie numérique, Institut du Numérique Responsable, INR">
+  <meta name="description" content="Green Claude : skill open source pour Claude Code, règles d'éco-conception RGESN/GR491, audit de code et recommandations de sobriété numérique.">
   <meta name="author" content="Institut du Numérique Responsable - Guillaume Gallon, Robin Trassard, Guillaume Bourgeois (@bourgeoisguillaume01-glitch), Vincent Courboulay">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="google-site-verification" content="jgumEgIuIzTPIIrXW3ot-CFd51RTcmmTdRNcSlqf2MA" />
   <meta name="rating" content="general">
   <meta name="referrer" content="origin-when-cross-origin">
   <link rel="canonical" href="https://institut-du-numerique-responsable.github.io/green-claude/">
+  <link rel="sitemap" type="application/xml" href="sitemap.xml">
+  <link rel="alternate" type="text/plain" href="llms.txt" title="Documentation pour les assistants IA">
+  <link rel="describedby" type="application/ld+json" href="ai.json">
   <meta property="og:title" content="Green Claude : sobriété numérique pour Claude Code">
   <meta property="og:description" content="Skill open source pour Claude Code : code éco-conçu par défaut (RGESN 2024 / GR491 / WSG), plus un hook optionnel de cache local et heures creuses.">
   <meta property="og:type" content="website">
@@ -36,78 +38,43 @@
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Green Claude",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "macOS, Linux, Windows",
-    "softwareVersion": "3.0.0",
-    "datePublished": "2026-07-18",
-    "dateModified": "2026-09-05",
-    "description": "Eco-design skill for Claude Code that promotes digital sobriety, eco-conception (RGESN 2024, GR491, Green Software Foundation, W3C Web Sustainability Guidelines) and AI sobriety practices. Automatically applies eco-design rules during code generation.",
-    "license": "https://opensource.org/licenses/MIT",
-    "url": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
-    "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
-    "documentation": "https://institut-du-numerique-responsable.github.io/green-claude/",
-    "keywords": ["AI", "eco-design", "digital sobriety", "sustainable software", "green IT", "RGESN", "GR491", "Claude Code", "Claude Code plugin", "eco-conception", "frugal AI", "carbon footprint", "green software foundation", "responsible AI", "water usage", "energy efficiency", "CPU optimization", "GPU optimization", "token counting"],
-    "author": {
-      "@type": "Person",
-      "name": "Guillaume Gallon",
-      "url": "https://github.com/gridboy",
-      "affiliation": { "@type": "Organization", "name": "Institut du Numérique Responsable", "url": "https://institutnr.org" }
-    },
-    "creator": { "@type": "Person", "name": "Guillaume Gallon", "url": "https://github.com/gridboy" },
-    "contributor": [
-      {
-        "@type": "Person",
-        "name": "Robin Trassard",
-        "url": "https://github.com/robintra",
-        "affiliation": { "@type": "Organization", "name": "Institut du Numérique Responsable" }
-      },
-      {
-        "@type": "Person",
-        "name": "Guillaume Bourgeois",
-        "url": "https://github.com/bourgeoisguillaume01-glitch",
-        "affiliation": { "@type": "Organization", "name": "Institut du Numérique Responsable" }
-      },
-      {
-        "@type": "Person",
-        "name": "Vincent Courboulay",
-        "url": "https://github.com/vcourbou",
-        "affiliation": { "@type": "Organization", "name": "Institut du Numérique Responsable" }
-      }
-    ],
-    "publisher": {
-      "@type": "Organization",
-      "name": "Institut du Numérique Responsable",
-      "url": "https://institutnr.org",
-      "logo": "https://institut-du-numerique-responsable.github.io/green-claude/assets/logo.jpg"
-    },
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR", "category": "free" },
-    "sameAs": [
-      "https://github.com/Institut-du-Numerique-Responsable/green-claude",
-      "https://institutnr.org"
-    ],
-    "inLanguage": ["fr", "en"],
-    "applicationSubCategory": ["Code Quality", "Sustainability", "AI Assistants", "Developer Tools"],
-    "featureList": [
-      "Automatic eco-design rule application",
-      "RGESN 2024 compliant",
-      "GR491 compliant",
-      "25+ programming languages supported",
-      "AI sobriety rules",
-      "Water and electricity measurement guidance",
-      "CPU and GPU optimization rules",
-      "Secret scanning enabled",
-      "Push protection enabled"
-    ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "5",
-      "reviewCount": "45"
-    }
-  }
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "@id": "https://institut-du-numerique-responsable.github.io/green-claude/#software",
+  "name": "Green Claude",
+  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 250 règles : 107 transverses, 127 pour 24 langages et frameworks, 16 pratiques d'usage.",
+  "version": "1.4.0",
+  "url": "https://institut-du-numerique-responsable.github.io/green-claude/",
+  "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
+  "license": "https://opensource.org/licenses/MIT",
+  "author": {
+    "@type": "Organization",
+    "name": "Institut du Numérique Responsable",
+    "url": "https://institutnr.org"
+  },
+  "runtimePlatform": "Claude Code",
+  "inLanguage": [
+    "fr",
+    "en"
+  ],
+  "keywords": [
+    "eco-design",
+    "sustainable AI",
+    "green coding",
+    "digital sobriety",
+    "low-carbon software",
+    "responsible AI",
+    "RGESN 2024",
+    "GR491",
+    "energy efficiency",
+    "water usage",
+    "CPU optimization",
+    "GPU optimization",
+    "frugal AI",
+    "green IT"
+  ]
+}
   </script>
   <style>
     /* Page éco-conçue : polices système, zéro JavaScript, zéro requête externe,
@@ -212,7 +179,7 @@
   <div class="duo">
     <div class="card">
       <h3>Pendant que Claude code</h3>
-      <p>107 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : renvoi au critère officiel près pour les familles 1 à 4, renvoi à la famille pour les suivantes. Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
+      <p>107 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : 38 règles renvoient à des critères précis, 67 à une famille et 2 à la Green Software Foundation. Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
     </div>
     <div class="card">
       <h3>Sur demande, un audit</h3>
@@ -274,14 +241,25 @@ cd green-claude && ./install.sh</code></pre>
     <li>107 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
     <li>127 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
     <li>16 pratiques d’usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
-    <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des réponses, avertissement aux heures de pointe.</li>
+    <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des questions autonomes préfixées <code>[cache]</code>, avertissement aux heures de pointe.</li>
     <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
   </ul>
 
   <h2>Pourquoi c'est important</h2>
   <p>Le code généré par l'IA va tourner pendant des années chez des utilisateurs qu'on ne verra jamais. C'est là que se joue l'essentiel de l'empreinte du « coder avec l'IA », pas pendant la session de génération. Green Claude s'attaque à ce moment précis, en s'appuyant sur des référentiels publics français et internationaux plutôt que sur des règles maison.</p>
 
-    <h2>Ce que l'équipe décide, l'audit s'en souvient</h2>
+  <nav aria-label="Documentation du projet">
+    <h2>Documentation et règles</h2>
+    <ul>
+      <li><a href="languages/">Règles par langage et framework</a> : Python, JavaScript, SQL, Shell et les autres environnements couverts.</li>
+      <li><a href="water-electricity-detection.html">Sobriété IA : eau, électricité et limites des mesures</a></li>
+      <li><a href="security-audit.html">Documentation de l'audit de sécurité</a></li>
+      <li><a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CONTRIBUTING.md">Contribuer aux règles et aux tests</a></li>
+      <li><a href="llms.txt">Index pour les assistants IA</a> et <a href="ai.json">métadonnées du projet</a></li>
+    </ul>
+  </nav>
+
+  <h2>Ce que l'équipe décide, l'audit s'en souvient</h2>
   <p>Un candidat écarté une fois revient au tour suivant. Écarté six fois, il apprend à toute l'équipe à survoler l'audit, ce qui coûte plus cher que la règle ne rapporte. Deux fichiers versionnés à la racine du dépôt ferment la question : <code>.green-claude/decisions.md</code> pour ce qui a été tranché, où <code>ACCEPTED</code> fait taire une règle sur un fichier précis et <code>TODO</code> garde la dette visible, et <code>.green-claude/ignore</code> pour les fichiers hors périmètre, comme une suite de tests ou un corpus de règles qui contiennent du code fautif sans jamais l'exécuter. L'audit annonce combien de constats il a tus et où, donc rien ne disparaît sans trace.</p>
 
 <h2>Pourquoi un skill, pas une checklist</h2>

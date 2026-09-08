@@ -4,12 +4,12 @@
     "name": "Institut du Numérique Responsable",
     "url": "https://institutnr.org/"
   },
-  "description": "Eco-design skill for Claude Code: 106 rules for digital sobriety (RGESN 2024 / GR491). Automatically applies eco-conception best practices during coding. Covers AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, and algorithms. Open source, MIT licensed.",
+  "description": "Eco-design skill for Claude Code: 107 rules for digital sobriety (RGESN 2024 / GR491). Automatically applies eco-conception best practices during coding. Covers AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, and algorithms. Open source, MIT licensed.",
   "plugins": [
     {
       "name": "green-claude",
       "source": "./",
-      "description": "Applies RGESN/GR491 eco-design rules while Claude Code writes or reviews code, with deterministic audit and responsible usage practices. 106 rules for AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, algorithms. Open source, MIT licensed."
+      "description": "Applies RGESN/GR491 eco-design rules while Claude Code writes or reviews code, with deterministic audit and responsible usage practices. 107 rules for AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, algorithms. Open source, MIT licensed."
     }
   ]
 }

@@ -32,7 +32,7 @@ Both matter; only one of them stops when the conversation does.
 Three rule sets: `rules/ecoconception.json` (107 rules, RGESN 2024 / GR491 /
 Green Software Foundation / W3C WSG) while you write or modify code,
 `rules/langages/*.json` (127 rules across 24 languages and frameworks) for the language you're
-working in, and `rules/usage.json` (15 responsible-use practices) during the
+working in, and `rules/usage.json` (16 responsible-use practices) during the
 conversation itself. Using Claude Code efficiently is also using it soberly.
 
 ## Quick reference
@@ -41,7 +41,7 @@ conversation itself. Using Claude Code efficiently is also using it soberly.
 |---|---|---|
 | Proactive (default) | Always, as soon as you write or modify code | Apply the relevant families from `ecoconception.json`, unprompted |
 | Audit | "eco-design audit", "check the sobriety", `--eco-check` | `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` (see *Finding the scripts*) |
-| Browse | `/green-claude` | Full checklist of the 9 RGESN families + 15 responsible-use practices |
+| Browse | `/green-claude` | Full checklist of the 9 RGESN families + 16 responsible-use practices |
 
 ## Before you write anything
 
@@ -251,7 +251,7 @@ a decision, not a mistake.
 
 ## Browse mode (`/green-claude`)
 
-Checklist of the 9 RGESN families and the 15 responsible-use practices, with each rule's
+Checklist of the 9 RGESN families and the 16 responsible-use practices, with each rule's
 title and recommendation. Useful for a design review before any code is written.
 
 ## Common mistakes
@@ -275,7 +275,10 @@ nothing.
 
 The "zero token" response cache cannot be handled by a skill: it has to be wired
 through `UserPromptSubmit`/`Stop` hooks, which intercept the request *before* it
-reaches the model (see `hooks/` at the repository root). The model choice
+reaches the model (see `hooks/` at the repository root). Caching is explicitly
+opt-in per request with `[cache] `, for self-contained factual questions only.
+Ordinary prompts always reach Claude. Cached replies are displayed to the user
+but are not added to Claude's conversation context. The model choice
 (Haiku/Sonnet/Opus) can be changed mid-session with `/model`: this skill won't do
 it for you, but nothing stops you from suggesting a lighter model when a task is
 plainly out of proportion with it.

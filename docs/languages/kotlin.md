@@ -68,4 +68,4 @@ Do not materialise a collection you only walk once (RGESN Algorithms).
 
 ---
 
-[Back to all languages](../README.md) | [Main documentation](../../README.md)
+[Back to all languages](./README.md) | [Main documentation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md)
