@@ -10,7 +10,7 @@ description: |
   rule checklist.
 author: Institut du Numérique Responsable
 version: 1.4.0
-license: MIT
+license: CC-BY-4.0 (content); Apache-2.0 (scripts); see LICENSE
 user-invocable: true
 ---
 

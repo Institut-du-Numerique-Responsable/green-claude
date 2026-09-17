@@ -1,49 +1,20 @@
 # Green Claude : sobriété numérique pour Claude Code
 
-<!-- SEO: Alternate language links for search engines -->
-<link rel="alternate" hreflang="en" href="README.md" />
-<link rel="alternate" hreflang="fr" href="README.fr.md" />
-<link rel="canonical" href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md" />
-
 🇬🇧 [Read in English](README.md)
 
-[![Licence MIT](https://img.shields.io/badge/licence-MIT-green.svg)](LICENSE)
-[![RGESN 2024](https://img.shields.io/badge/RGESN-2024-1b7a4a.svg)](https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/)
-[![GR491](https://img.shields.io/badge/GR491-r%C3%A9f%C3%A9rentiel-1b7a4a.svg)](https://gr491.isit-europe.org/)
-[![INR](https://img.shields.io/badge/INR-Institut%20du%20Num%C3%A9rique%20Responsable-1b7a4a.svg)](https://institutnr.org)
+[![Licences](https://img.shields.io/badge/licences-Apache--2.0%20%2B%20CC%20BY%204.0-green.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Institut-du-Numerique-Responsable/green-claude)](https://github.com/Institut-du-Numerique-Responsable/green-claude/releases)
 [![Site](https://img.shields.io/badge/site-green--claude-blue)](https://institut-du-numerique-responsable.github.io/green-claude/)
-[![Dernier commit](https://img.shields.io/github/last-commit/Institut-du-Numerique-Responsable/green-claude)](https://github.com/Institut-du-Numerique-Responsable/green-claude/commits/main)
-[![Stars GitHub](https://img.shields.io/github/stars/Institut-du-Numerique-Responsable/green-claude?style=flat)](https://github.com/Institut-du-Numerique-Responsable/green-claude/stargazers)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Green Claude** est un skill pour [Claude Code](https://claude.com/claude-code) qui guide Claude vers un code éco-conçu, de façon automatique, sans commande à retenir.
+**Green Claude** aide [Claude Code](https://claude.com/claude-code) à proposer du code moins gourmand en ressources, grâce à des règles d’éco-conception et à un audit local.
 
-Une production de l'[Institut du Numérique Responsable](https://institutnr.org), 2026, sous licence MIT.
+Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, et 16 pratiques d’usage responsable**.
 
-> Un code éco-conçu = moins de ressources consommées chez chaque utilisateur, à chaque exécution, pendant toute la vie du logiciel.
+Le skill guide le modèle lorsqu’il est chargé ; son application n’est pas garantie à chaque réponse. L’audit détecte des problèmes potentiels à examiner, sans certifier la conformité RGESN ni mesurer une économie d’énergie. Les hooks optionnels permettent de lancer cet audit après les écritures de code prises en charge.
 
-Ce dépôt est spécifique à Claude Code. Une version indépendante des règles,
-portable vers d'autres assistants IA et d'autres langages, est en cours de
-développement ici : [regles-ecoconception-ia](https://github.com/Institut-du-Numerique-Responsable/regles-ecoconception-ia).
+Les règles s’appuient sur le RGESN 2024, le GR491, la Green Software Foundation et les W3C Web Sustainability Guidelines. Une version portable vers d’autres assistants est développée dans [regles-ecoconception-ia](https://github.com/Institut-du-Numerique-Responsable/regles-ecoconception-ia).
 
----
-
-## En une phrase
-
-Tu installes le skill une fois. Ensuite, quand Claude Code écrit ou revoit du code dans tes projets, il applique de lui-même les règles d'éco-conception (**RGESN 2024**, **GR491**, **Green Software Foundation**, **W3C Web Sustainability Guidelines**, plus des seuils repris de **YellowLabTools**), sans que tu aies à le lui demander à chaque fois.
-
-## Pourquoi un skill plutôt qu'une simple liste de règles
-
-Une checklist RGESN en PDF ou en wiki dépend de la mémoire de qui l'a lue une fois. Personne ne la rouvre avant chaque ligne de code, et son application varie d'une personne à l'autre selon qui s'en souvient ce jour-là.
-
-Un skill Claude Code apporte trois différences concrètes :
-
-- **Chargement automatique à chaque session.** Le skill se charge tout seul, sans qu'on ait à le mentionner en tête de conversation.
-- **Sélection contextuelle des règles.** Claude applique les familles pertinentes pour ce qu'il écrit à l'instant : un backend déclenche les règles SQL et pools de connexions, pas les règles UX/UI sur l'autoplay.
-- **Vérification a posteriori intégrée.** Le script d'audit (`eco-audit.sh`) tourne à la demande sur le code déjà écrit, sans coût de raisonnement pour le modèle, pour attraper ce que l'application proactive a raté.
-
-La checklist reste un document qu'on consulte. Le skill s'exécute au moment où le code s'écrit, dans la session de travail elle-même.
+[Installation](#installation) · [Utilisation](#utilisation) · [Langages et frameworks](docs/languages/README.md) · [Limites et hooks](#limites-et-hooks) · [Contribuer](CONTRIBUTING.md) · [Licence](#licence)
 
 ## Installation
 
@@ -64,21 +35,36 @@ cd green-claude
 ./install.sh
 ```
 
-Ça installe le skill dans `~/.claude/skills/green-claude`. Rien d'autre à faire : Claude Code le charge automatiquement dans tes sessions suivantes. Cette méthode reste utile pour câbler en plus les hooks de cache (voir plus bas), que le gestionnaire de plugins ne pose pas automatiquement.
+Le script installe le skill dans `~/.claude/skills/green-claude` et propose séparément les hooks d’audit, de cache et de cadrage. Le gestionnaire de plugins ne configure pas ces hooks.
 
 Prérequis : `jq`, pour le script d'audit et les hooks (`brew install jq` / `sudo apt install jq`).
 
+### Claude.ai et API Claude
+
+Depuis un clone local, génère les archives :
+
+```bash
+bash skills/green-claude/scripts/package-skill.sh    # écrit dans dist/
+```
+
+| Canal | Archive | Installation |
+|---|---|---|
+| Claude.ai | `dist/green-claude-claude-ai.zip` | Réglages → Fonctionnalités → Skills → Téléverser (l'exécution de code doit être activée) |
+| API Claude | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-claude"))` |
+
+Les archives contiennent le même skill, avec une description adaptée à chaque canal. L’audit nécessite `bash` et `jq` dans l’environnement d’exécution.
+
 ## Utilisation
 
-Rien à taper. Trois façons de s'en servir :
+Trois façons de s’en servir :
 
 | Tu veux... | Ce que tu fais |
 |---|---|
-| Que Claude code sobrement par défaut | Rien : c'est automatique dès que le skill est installé |
+| Que Claude code sobrement par défaut | Installer le skill ; demander explicitement son application si nécessaire |
 | Auditer un fichier existant | Demande simplement : *« audit éco-conception de ce fichier »* |
 | Voir la checklist complète | Tape `/green-claude` |
 
-L'audit (`skills/green-claude/scripts/eco-audit.sh`) est un script déterministe (grep sur les règles) : il ne coûte pas de raisonnement au modèle, juste la lecture du résultat.
+L’audit utilise des motifs et des détecteurs locaux, sans appel à un modèle pour la détection. L’interprétation de ses résultats par Claude consomme des tokens.
 
 ## Exemple concret
 
@@ -94,7 +80,7 @@ app.get('/api/users', (req, res) => {
 });
 ```
 
-`eco-audit.sh api.js` (sortie réelle, non retouchée ; les règles sont en anglais) :
+`bash skills/green-claude/scripts/eco-audit.sh api.js` (extrait de sortie ; les règles sont en anglais) :
 
 ```
 [High] ECO-FRONT-01 — No heavy library for a minor need
@@ -118,34 +104,7 @@ app.get('/api/users', (req, res) => {
 3 ecodesign issue(s) found.
 ```
 
-En pratique, tu n'as pas besoin de lancer l'audit toi-même sur ce genre de code : en mode proactif, Claude évite `lodash` pour une seule fonction et `SELECT *` dès l'écriture, avant même qu'un audit ait lieu.
-
----
-
-## Installer nativement dans Claude
-
-Trois canaux, trois formats. Claude Code n'a besoin de rien d'autre que le dépôt :
-
-```bash
-/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
-/plugin install green-claude
-```
-
-Les deux autres attendent une archive zip, que `package-skill.sh` fabrique :
-
-```bash
-bash skills/green-claude/scripts/package-skill.sh    # écrit dans dist/
-```
-
-| Canal | Archive | Installation |
-|---|---|---|
-| Claude Code | aucune | la commande ci-dessus, ou `npx skills add Institut-du-Numerique-Responsable/green-claude` |
-| Claude.ai | `dist/green-claude-claude-ai.zip` | Réglages → Fonctionnalités → Skills → Téléverser (l'exécution de code doit être activée) |
-| API Claude | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-claude"))` |
-
-Les deux archives contiennent le même skill et ne diffèrent que par la description : Claude.ai la plafonne à 200 caractères là où l'API en autorise 1024. Le dépôt garde la longue, celle qui fait charger le skill au bon moment dans Claude Code ; le script d'empaquetage lui substitue une version courte plutôt que de tronquer en plein milieu, une phrase coupée se déclenchant mal.
-
-Le script d'audit a besoin de `bash` et de `jq`. Là où `jq` manque, les règles continuent de s'appliquer pendant que Claude écrit du code : seul `eco-audit.sh` cesse de fonctionner.
+Le skill peut aider Claude à éviter ces problèmes lors de l’écriture ; l’audit permet ensuite de contrôler le résultat.
 
 ---
 
@@ -178,6 +137,8 @@ Les 107 règles ci-dessus valent quel que soit le langage. Elles fixent l'object
 
 [`skills/green-claude/rules/langages/`](skills/green-claude/rules/langages/) descend d'un cran, avec un fichier par langage appliqué **uniquement aux fichiers de ce langage** :
 
+Exemples parmi les **24 langages et frameworks**. Voir la [liste complète et les règles détaillées](docs/languages/README.md).
+
 | Fichier | Fichiers concernés | Règles | Ce qu'il attrape en propre |
 |---|---|---|---|
 | `python.json` | `**/*.py` | 11 | N+1 Django/SQLAlchemy, `iterrows()`, `lru_cache()` non borné, `requests.get` sans session |
@@ -194,8 +155,8 @@ Les 107 règles ci-dessus valent quel que soit le langage. Elles fixent l'object
 Sans ce filtrage par extension, les motifs d'un langage se déclenchent à tort sur les autres : `.all()`, `save()` et `+=` existent partout et n'y désignent pas le même problème. L'audit ne charge que le fichier des langages réellement présents parmi ses arguments.
 
 ```bash
-eco-audit.sh --list-langs           # langages couverts et globs associés
-eco-audit.sh --list-rules python    # checklist complète d'un langage
+bash skills/green-claude/scripts/eco-audit.sh --list-langs           # langages couverts et globs associés
+bash skills/green-claude/scripts/eco-audit.sh --list-rules python    # checklist complète d'un langage
 ```
 
 ---
@@ -243,14 +204,14 @@ Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/r
 
 ---
 
-## Ce qu'un skill ne peut pas faire (et comment on le couvre quand même)
+## Limites et hooks
 
 Un skill s'exécute *pendant* une session déjà lancée, et c'est le modèle qui décide de l'appliquer. Il ne choisit donc pas le modèle de démarrage, n'intercepte pas un appel avant qu'il parte, et ne garantit pas qu'une règle soit vérifiée à tous les coups. Quatre leviers restent hors du skill, dans [`hooks/`](hooks/), optionnels et proposés à l'installation :
 
-- **Audit systématique** (`hooks/green-claude-audit.sh`) : câblé en `PostToolUse` sur `Write|Edit|MultiEdit`. Claude Code l'exécute après chaque écriture de fichier de code, sans demander son avis au modèle. Le hook audite ce qui vient d'être ajouté et renvoie les motifs trouvés à Claude, qui corrige avant de continuer.
+- **Audit systématique** (`hooks/green-claude-audit.sh`) : câblé en `PostToolUse` sur `Write|Edit|MultiEdit`. Claude Code l'exécute après chaque écriture de fichier de code, sans demander son avis au modèle. Le hook audite ce qui vient d'être ajouté et renvoie les motifs trouvés à Claude pour examen et correction éventuelle.
 - **Cache local explicite** (`hooks/green-claude-cache.sh`) : préfixer une question factuelle autonome par `[cache] `, par exemple `[cache] Quelle est la capitale de la France ?`. Seules ces demandes peuvent réutiliser une réponse pendant une heure sans appeler le modèle. Les demandes ordinaires atteignent toujours Claude. Ne pas utiliser ce préfixe pour un audit de code, une action ou une question liée aux fichiers ou aux échanges précédents : le cache ne suit pas ces changements. Une réponse en cache est affichée comme message du hook et n'entre pas dans le contexte de conversation de Claude.
 - **Avertissement heures creuses** (même hook) : signale les heures de pointe (hors 22h-6h UTC) sans bloquer.
-- **Cadrage avant écriture** (`hooks/green-claude-brief.sh`) : câblé en `UserPromptSubmit`. Sur une demande de production de code, il rappelle les trois règles qui décident de ce qui sera écrit — le moins de code qui résout le problème, challenger la demande et le modèle, poser la question avant de coder. Sur une question, il se tait. Ces règles vivent aussi dans le skill, mais un skill est lu au chargement de la session : trois tours plus tard il ne pèse plus rien.
+- **Cadrage avant écriture** (`hooks/green-claude-brief.sh`) : câblé en `UserPromptSubmit`. Sur une demande de production de code, il rappelle les trois règles qui décident de ce qui sera écrit — le moins de code qui résout le problème, challenger la demande et le modèle, poser la question avant de coder. Sur une question, il se tait. Ces règles figurent aussi dans le skill ; le hook les rappelle au moment de la demande.
 
 ## Deux fichiers pour faire taire ce qui n'a pas à parler
 
@@ -282,25 +243,7 @@ Ces hooks se câblent dans `~/.claude/settings.json`. Si on répond « o », `in
 
 ## Écrire ses propres règles
 
-Ajoute un fichier JSON dans `skills/green-claude/rules/`, structuré comme `ecoconception.json` (catégories → règles) :
-
-```json
-{
-  "id": "CUSTOM-001",
-  "title": "Ma règle",
-  "impact": "High",
-  "patterns": ["mon_motif_regex"],
-  "recommendation": "Quoi faire à la place."
-}
-```
-
-- `patterns` : expressions régulières `grep -E` détectant le problème. **Liste vide = pratique** (checklist, ignorée par l'audit).
-- `impact` : `High`, `Medium` ou `Low`.
-- `rgesn_ref` / `gr491_famille` (optionnels) : renvoi vers les référentiels officiels.
-- `detector` / `enrich` (optionnels) : pour les cas qu'un pattern seul ne peut pas voir (imbrication multi-lignes, comptage, poids réel d'un fichier référencé...), un script dédié dans `scripts/`. Détail complet dans [CONTRIBUTING.md](CONTRIBUTING.md).
-- `note` (optionnel) : mise en garde affichée dans le résultat de l'audit (faux positif connu, seuil, portée limitée) — l'endroit où documenter les pièges d'interprétation d'une règle, pas dans le skill lui-même.
-
-Relance ensuite `./install.sh` pour republier le skill mis à jour.
+Le [guide de contribution](CONTRIBUTING.md) décrit le format JSON, les sources à citer, les détecteurs et les tests à lancer. Après une modification locale, relance `./install.sh` pour mettre à jour la copie installée.
 
 ---
 
@@ -345,6 +288,8 @@ vérification de sa version, des tests et des archives produites.
 
 - [Guillaume Gallon](https://github.com/gridboy) ([LinkedIn](https://www.linkedin.com/in/ggallon/)) — [Institut du Numérique Responsable](https://institutnr.org)
 
-## 📄 Licence
+## Licence
 
-[MIT](LICENSE), © 2026 Institut du Numérique Responsable
+Code : **Apache-2.0**. Règles et documentation : **CC BY 4.0**. Réutilisation, adaptation et usage commercial autorisés selon ces licences, avec conservation des mentions requises et attribution.
+
+© 2026 Institut du Numérique Responsable. Auteur principal : Guillaume Gallon ; autres contributions : historique Git. Voir le [périmètre des licences](LICENSE) et les [crédits](skills/green-claude/NOTICE). Les sources tierces conservent leurs propres conditions.

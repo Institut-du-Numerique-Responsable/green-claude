@@ -7,7 +7,10 @@
   "version": "1.4.0",
   "url": "https://institut-du-numerique-responsable.github.io/green-claude/",
   "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
-  "license": "https://opensource.org/licenses/MIT",
+  "license": [
+    "https://www.apache.org/licenses/LICENSE-2.0",
+    "https://creativecommons.org/licenses/by/4.0/"
+  ],
   "author": {
     "@type": "Organization",
     "name": "Institut du Numérique Responsable",
