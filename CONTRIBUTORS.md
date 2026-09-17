@@ -58,7 +58,7 @@ Thank you for your interest in contributing! Please see [CONTRIBUTING.md](CONTRI
 
 ## 📄 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
+Code is licensed under Apache-2.0; rules and documentation under CC BY 4.0. See [LICENSE](LICENSE) for the scope. Historical MIT contributions keep their terms (see [NOTICE](skills/green-claude/NOTICE)).
 
 ---
 
@@ -70,7 +70,7 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 project:
   name: Green Claude
   description: Eco-design skill for Claude Code focusing on digital sobriety, eco-conception (RGESN, GR491, Green Software Foundation) and AI sobriety practices
-  license: MIT
+  license: Apache-2.0 AND CC-BY-4.0
   organization: Institut du Numérique Responsable (INR)
   website: https://institutnr.org
   repository: https://github.com/Institut-du-Numerique-Responsable/green-claude

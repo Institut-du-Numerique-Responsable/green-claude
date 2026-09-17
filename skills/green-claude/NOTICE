@@ -1,0 +1,29 @@
+Green Claude
+Copyright (c) 2026 Institut du Numérique Responsable
+Principal author: Guillaume Gallon
+Contributors include RobinT; see the Git history of the source repository.
+Source: https://github.com/Institut-du-Numerique-Responsable/green-claude
+
+Code: Apache License 2.0. Rules and documentation: CC BY 4.0.
+See LICENSE for the content boundaries and LICENSES/ for the full terms.
+
+Suggested attribution for rules and documentation:
+“Green Claude — Institut du Numérique Responsable, Guillaume Gallon and
+contributors — CC BY 4.0 — https://github.com/Institut-du-Numerique-Responsable/green-claude”.
+Include a license link (https://creativecommons.org/licenses/by/4.0/)
+and indicate your modifications when sharing adapted material.
+
+Preserve rule-level source_note and attribution_note fields. Rules adapted
+from Green Codex credit Institut du Numérique Responsable under CC BY 4.0;
+their identifiers and adaptations are recorded in those fields.
+References to RGESN, GR491, Green Software Foundation, W3C and YellowLabTools
+do not relicense those sources or imply their endorsement.
+Graphify and Caveman are independent MIT-licensed tools cited as examples.
+
+Apache-2.0 redistribution requires preservation of applicable legal notices;
+it does not require a credit on every user interface. This NOTICE provides
+attribution information and adds no conditions to either license.
+
+Historical MIT contributions by RobinT include commits 7dd7ab4 and d9d6921
+(cache hooks and regression tests). Preserve their original MIT terms and
+the notice in LICENSES/MIT-legacy.txt when redistributing those portions.

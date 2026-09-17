@@ -14,11 +14,11 @@ This is a division by content type, not a choice of license for every file.
 Repository metadata describing the combined distribution uses the SPDX
 expression Apache-2.0 AND CC-BY-4.0.
 
-Full license texts are included in skills/green-claude/LICENSES/Apache-2.0.txt and
-skills/green-claude/LICENSES/CC-BY-4.0.txt in this repository. See skills/green-claude/NOTICE for attribution.
+Full license texts are included in LICENSES/Apache-2.0.txt and
+LICENSES/CC-BY-4.0.txt beside this file. See NOTICE for attribution.
 
 Historical third-party contributions retain their MIT terms. The original
-MIT notice is preserved in skills/green-claude/LICENSES/MIT-legacy.txt; it is not the
+MIT notice is preserved in LICENSES/MIT-legacy.txt; it is not the
 default license for new project work.
 
 Third-party material and explicitly marked source attributions retain their

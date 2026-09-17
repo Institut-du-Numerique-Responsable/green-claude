@@ -33,7 +33,9 @@ publisher:
   alias: "INR"
   website: "https://institutnr.org"
 url: "https://institut-du-numerique-responsable.github.io/green-claude/"
-license: MIT
+license:
+  - Apache-2.0
+  - CC-BY-4.0
 date-released: 2026-07-18
 keywords:
   - "ai"

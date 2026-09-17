@@ -14,7 +14,7 @@ This repository is optimized for **AI-assisted discovery** via:
 | Element | Purpose | Keywords |
 |---|---|---|
 | **`.claude-plugin/plugin.json`** | Claude Code plugin metadata | eco-design, sustainable AI, green coding, digital sobriety, RGESN 2024, GR491, energy efficiency, water usage, CPU/GPU optimization |
-| **`.claude-plugin/marketplace.json`** | Plugin marketplace listing | eco-design, AI sobriety, RGESN/GR491, 106 rules, water, electricity, CPU, GPU |
+| **`.claude-plugin/marketplace.json`** | Plugin marketplace listing | eco-design, AI sobriety, RGESN/GR491, 107 general rules, water, electricity, CPU, GPU |
 | **`skills/green-claude/SKILL.md`** | Skill documentation | ecodesign, sobriety, RGESN, GR491, Green Software Foundation, W3C WSG |
 | **`skills/green-claude/rules/*.json`** | Rule definitions | tokens, energy, water, CPU, GPU, embedding, batching, streaming, fine-tuning, RAG |
 
@@ -36,10 +36,10 @@ This repository is optimized for **search engines and human discovery** via:
 |---|---|---|
 | `skills/green-claude/` | **Core skill** (SPICE format) | Claude Code |
 | `skills/green-claude/SKILL.md` | Skill instructions | Claude, Humans |
-| `skills/green-claude/rules/` | **106 eco-design rules** (JSON) | Audit engine |
+| `skills/green-claude/rules/` | **107 general eco-design rules** (JSON) | Audit engine |
 | `skills/green-claude/scripts/` | **Audit & scoring scripts** | Bash/jq |
 | `.claude-plugin/` | Plugin marketplace metadata | Claude Code |
-| `hooks/` | Optional Git hooks | Advanced users |
+| `hooks/` | Optional Claude Code and Git hooks | Advanced users |
 | `docs/` | **Project website** (GitHub Pages) | Public |
 | `.github/workflows/` | CI/CD pipelines | Maintainers |
 | `CHANGELOG.md` | Release notes | All |
@@ -91,7 +91,7 @@ This repository is optimized for **search engines and human discovery** via:
 ### AI Discovery (Claude, Copilot, LLMs)
 - **Plugin Marketplace**: Appears when users search for `eco-design`, `sustainability`, `RGESN`, `GR491` in Claude Code
 - **Skill Loading**: Auto-loaded when Claude detects code writing/review tasks
-- **Rule Matching**: 106 rules trigger on relevant code patterns (SQL, frontend, backend, AI)
+- **Rule Matching**: Detectable rules flag candidates; governance rules remain checklist items.
 - **Context Injection**: SKILL.md content is injected into Claude's context for relevant queries
 
 ---

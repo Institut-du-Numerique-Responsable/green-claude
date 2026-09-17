@@ -4,7 +4,7 @@
   "version": "3.0.0",
   "type": "skill",
   "platform": "Claude Code",
-  "license": "MIT",
+  "license": "Apache-2.0 AND CC-BY-4.0",
   "organization": {
     "name": "Institut du Numérique Responsable",
     "alias": "INR",

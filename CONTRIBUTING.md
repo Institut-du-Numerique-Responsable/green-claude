@@ -180,3 +180,9 @@ git push origin vX.Y.Z
 
 Le workflow `.github/workflows/release.yml` revalide le tag, exécute les suites
 de tests, construit les archives Claude.ai/API et publie la release GitHub.
+
+## Licences des contributions
+
+Le code relève d’Apache-2.0 ; les règles et la documentation de CC BY 4.0, selon le [périmètre des licences](LICENSE). Ne proposez que des contributions pour lesquelles vous disposez des droits nécessaires et acceptez la licence applicable. Conservez les crédits et conditions des sources tierces ; signalez toute incompatibilité avant intégration. Les contributions ne transfèrent pas automatiquement leur copyright à l’INR.
+
+Lors d’une redistribution, conservez les textes de licence et le [NOTICE](skills/green-claude/NOTICE). Pour les contenus CC BY, indiquez également les modifications apportées et conservez les attributions propres aux règles.
