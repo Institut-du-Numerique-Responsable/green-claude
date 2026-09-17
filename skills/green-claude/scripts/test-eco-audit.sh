@@ -1192,4 +1192,33 @@ jq -e '[.categories[].rules[].id | select(startswith("ECO-HOST-"))] | length == 
     || fail "ECO-HOST ne recommence pas à 01 : ses numéros chevauchent ceux d'ECO-HEB"
 true
 
+# Faux positifs PHP relevés en usage réel : un in_array sur un tableau littéral de
+# deux valeurs, un json_decode(file_get_contents()) de configuration, un foreach
+# sur le résultat d'un appel de méthode. Aucun ne relève de la règle visée.
+cat > "$TMP/faux-positifs.php" <<'EOF'
+<?php
+$bloque = in_array((string) $org->statut, array('0', '1'), true);
+$court = in_array($pays, ['France', 'Belgique']);
+$config = json_decode(file_get_contents($chemin), true);
+$corps = file_get_contents('php://input');
+foreach ($wpdb->get_results($sql) as $ligne) { echo $ligne->id; }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/faux-positifs.php")"
+for id in ECO-PHP-02 ECO-PHP-04 ECO-PHP-05; do
+    echo "$OUT" | grep -q "$id" && fail "faux positif $id sur du PHP sans le défaut visé"
+done
+true
+
+# Les vrais cas restent signalés.
+cat > "$TMP/vrais-cas.php" <<'EOF'
+<?php
+if (in_array($id, $tous_les_ids)) { $n++; }
+$csv = file_get_contents($export);
+foreach ($client->commandes as $commande) { echo $commande->produit->nom; }
+EOF
+OUT="$(bash eco-audit.sh "$TMP/vrais-cas.php")"
+for id in ECO-PHP-02 ECO-PHP-04 ECO-PHP-05; do
+    echo "$OUT" | grep -q "$id" || fail "$id n'est plus détecté sur un cas réel"
+done
+
 echo "OK - suite complete"

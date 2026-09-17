@@ -47,7 +47,7 @@
           "description": "Reading an association inside a foreach fires one query per element.",
           "impact": "High",
           "patterns": [
-            "foreach[[:space:]]*\\([[:space:]]*\\$\\w+->"
+            "foreach[[:space:]]*\\([[:space:]]*\\$[[:alnum:]_]+->[[:alnum:]_]+[[:space:]]+as[[:space:]]"
           ],
           "recommendation": "Eager loading: with() (Eloquent) or a fetch join / DQL join (Doctrine); project the useful columns rather than full entities.",
           "example": {
@@ -99,7 +99,12 @@
             "php",
             "streams",
             "memory"
-          ]
+          ],
+          "exclude_patterns": [
+            "json_decode\\([[:space:]]*file_get_contents\\(",
+            "file_get_contents\\([[:space:]]*['\"]php://input"
+          ],
+          "detector_note": "A JSON document has to be decoded whole, and php://input is bounded by the request size: both are excluded."
         },
         {
           "id": "ECO-PHP-05",
@@ -116,7 +121,11 @@
           "tags": [
             "php",
             "algorithms"
-          ]
+          ],
+          "exclude_patterns": [
+            "(in_array|array_search)\\([^,]+,[[:space:]]*(array[[:space:]]*\\(|\\[)"
+          ],
+          "detector_note": "A search in an array literal written on the same line is short by construction and is not reported."
         }
       ]
     },
