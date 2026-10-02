@@ -33,6 +33,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Corrigé
 
+- `ECO-FRONT-06` ne signale plus les modules ES : une instruction `import` ou `export` statique, ou un `<script type="module">`, prouve que les déclarations de premier niveau ne sont pas globales. Tout fichier JS/TS moderne produisait jusque-là un candidat. Dans une page, chaque bloc `<script>` est jugé séparément et le script classique reste signalé.
+
 - Indexation : sitemap aligné sur les URL GitHub Pages, liens vers les pages de documentation, index `llms.txt` enrichi et métadonnées générées depuis la version et les règles ; suppression des notes d'avis non sourcées. Contrôles de synchronisation ajoutés à la CI.
 
 - Règles PHP moins bruyantes : `ECO-PHP-05` ignore un `in_array` sur un tableau littéral, `ECO-PHP-04` ignore `json_decode(file_get_contents())` et `php://input`, `ECO-PHP-02` ne vise plus qu'une relation lue comme propriété (`foreach ($client->commandes as …)`), plus les appels de méthode.
