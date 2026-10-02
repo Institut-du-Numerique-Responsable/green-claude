@@ -4,6 +4,8 @@
 #
 # Usage : eco-audit.sh <fichier> [fichier...]
 #         eco-audit.sh --list-rules          (checklist des règles sans pattern grep-able)
+#         eco-audit.sh --rules               (familles et langages disponibles)
+#         eco-audit.sh --rules <nom>...      (vue compacte : famille, langage, fichier, usage, all)
 
 set -euo pipefail
 
@@ -151,6 +153,66 @@ if [ "${1:-}" = "--list-langs" ]; then
     exit 0
 fi
 
+# Vue compacte : une ligne par règle (impact, identifiant, titre,
+# recommandation). C'est ce dont le modèle a besoin pour écrire du code ; les
+# motifs, exemples et notes servent à l'audit et restent dans les JSON. Lire un
+# fichier de règles brut coûte environ cinq fois plus de contexte que sa vue
+# compacte, pour la même information utile.
+if [ "${1:-}" = "--rules" ]; then
+    shift
+    COMPACT='.categories[] | "## \(.name)", (.rules[] | "[\(.impact)] \(.id) \(.title) — \(.recommendation // .how)")'
+    if [ $# -eq 0 ]; then
+        echo "Families : $(jq -r '[.categories[].name | sub("^[0-9]+\\. "; "") | ascii_downcase] | join(", ")' "$RULES_FILE")"
+        echo "Languages: $(for lang_json in "$LANG_DIR"/*.json; do basename "$lang_json" .json; done | paste -sd' ' -)"
+        echo "Also     : usage (responsible-use practices), all (every family and usage),"
+        echo "           or a file name (src/App.tsx) for the rules of its language."
+        exit 0
+    fi
+    for name in "$@"; do
+        key="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
+        base="${name##*/}"
+        # Un nom vide est un préfixe de toutes les familles : le refuser, sinon
+        # il chargerait tout le référentiel sans que rien ne l'ait demandé.
+        [ -n "$key" ] || { echo "Empty family or language name (see eco-audit.sh --rules)." >&2; exit 1; }
+        if [ "$key" = "usage" ]; then
+            jq -r "$COMPACT" "$USAGE_FILE"
+        elif [ "$key" = "all" ]; then
+            jq -r "$COMPACT" "$RULES_FILE" "$USAGE_FILE"
+        elif [ "$base" = "$name" ] && [ -f "$LANG_DIR/$key.json" ]; then
+            jq -r "$COMPACT" "$LANG_DIR/$key.json"
+        elif [ "$base" != "${base%.*}" ]; then
+            # Un nom de fichier : son langage est résolu par l'extension, avec
+            # la même table que l'audit.
+            found=0
+            while IFS= read -r lang_json; do
+                [ -n "$lang_json" ] || continue
+                jq -r "$COMPACT" "$lang_json"
+                found=1
+            done <<EOF
+$(lang_file_for_ext "$(ext_of "$name")")
+EOF
+            [ "$found" -eq 1 ] || echo "No language rules for $name: the cross-cutting families still apply."
+        else
+            # Famille transverse, par préfixe : « ux » pour « 4. UX/UI ».
+            out="$(jq -r --arg f "$key" '
+                .categories[]
+                | select(.name | sub("^[0-9]+\\. "; "") | ascii_downcase | startswith($f))
+                | "## \(.name)", (.rules[] | "[\(.impact)] \(.id) \(.title) — \(.recommendation)")' "$RULES_FILE")"
+            if [ -n "$out" ]; then
+                printf '%s\n' "$out"
+            elif [ "$base" != "$name" ] || { load_audit_extensions && is_auditable_file "$name"; }; then
+                # Un chemin sans extension (build/Makefile), ou un fichier que
+                # l'audit route par son nom (Dockerfile) : aucun jeu de langage.
+                echo "No language rules for $name: the cross-cutting families still apply."
+            else
+                echo "Unknown family or language: $name (see eco-audit.sh --rules)." >&2
+                exit 1
+            fi
+        fi
+    done
+    exit 0
+fi
+
 if [ "${1:-}" = "--list-rules" ] && [ -n "${2:-}" ]; then
     # Checklist d'un seul langage : toutes ses règles, pattern ou non.
     lang_json="$LANG_DIR/$2.json"
@@ -193,6 +255,7 @@ if [ $# -eq 0 ]; then
     echo "Usage: eco-audit.sh <file> [file...]" >&2
     echo "        eco-audit.sh --list-rules [language]" >&2
     echo "        eco-audit.sh --list-langs" >&2
+    echo "        eco-audit.sh --rules [family|language|file|usage|all]..." >&2
     exit 1
 fi
 

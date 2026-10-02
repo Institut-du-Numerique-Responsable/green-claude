@@ -1009,7 +1009,7 @@
           "impact": "Low",
           "patterns": [],
           "detector": "implicit_globals",
-          "detector_note": "scripts/detect-implicit-globals.awk flags any var/let/const declaration or bare assignment at the root level (brace depth 0) of a file; nothing inside a function or an IIFE. Known limit: a <script type=\"module\"> does not have that top-level global scoping, but the detector only receives the script's content, not its type attribute. A hit stays a candidate to check, not proof (a global imposed by a third-party script such as Matomo is a legitimate candidate, not a mistake).",
+          "detector_note": "scripts/detect-implicit-globals.awk flags any var/let/const declaration or bare assignment at the root level (brace depth 0) of a file; nothing inside a function or an IIFE. An ES module has no such top-level global scoping, so a block is skipped when it holds a static import or export statement, or sits in a <script type=\"module\">. Known limit: a module that neither imports nor exports, loaded by a tag in another file, cannot be told apart from a classic script. A hit stays a candidate to check, not proof (a global imposed by a third-party script such as Matomo is a legitimate candidate, not a mistake).",
           "recommendation": "Wrap the code in an IIFE or a module, or scope the variable to the function that uses it. When the global is required (a third-party script), assign it explicitly as a property of an existing global object rather than as a bare variable.",
           "rgesn_ref": "6.x",
           "gr491_famille": "Front-end",

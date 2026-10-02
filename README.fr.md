@@ -157,6 +157,7 @@ Sans ce filtrage par extension, les motifs d'un langage se déclenchent à tort 
 ```bash
 bash skills/green-claude/scripts/eco-audit.sh --list-langs           # langages couverts et globs associés
 bash skills/green-claude/scripts/eco-audit.sh --list-rules python    # checklist complète d'un langage
+bash skills/green-claude/scripts/eco-audit.sh --rules src/App.tsx    # règles compactes pour un fichier, une famille ou un langage
 ```
 
 ---

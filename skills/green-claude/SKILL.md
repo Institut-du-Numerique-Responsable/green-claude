@@ -35,13 +35,18 @@ Green Software Foundation / W3C WSG) while you write or modify code,
 working in, and `rules/usage.json` (16 responsible-use practices) during the
 conversation itself. Using Claude Code efficiently is also using it soberly.
 
+Do not read these JSON files whole. They carry the regexes, examples and notes
+the audit script needs, which is several times the context of the rules
+themselves. `eco-audit.sh --rules` prints what you need, one line per rule (see
+*Language-specific rules*).
+
 ## Quick reference
 
 | Mode | Trigger | Action |
 |---|---|---|
-| Proactive (default) | Always, as soon as you write or modify code | Apply the relevant families from `ecoconception.json`, unprompted |
+| Proactive (default) | Always, as soon as you write or modify code | Apply the relevant families from `ecoconception.json`, unprompted; load them with `eco-audit.sh --rules <family>` |
 | Audit | "eco-design audit", "check the sobriety", `--eco-check` | `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` (see *Finding the scripts*) |
-| Browse | `/green-claude` | Full checklist of the 9 RGESN families + 16 responsible-use practices |
+| Browse | `/green-claude` | Full checklist of the 9 RGESN families + 16 responsible-use practices: `eco-audit.sh --rules all` |
 
 ## Before you write anything
 
@@ -75,8 +80,8 @@ the order matters: raise it once, take the answer, deliver.
 ## Proactive mode
 
 Keep the 9 families of `ecoconception.json` in mind (strategy, specifications,
-architecture, UX, content, frontend, backend, hosting, algorithms), and read the
-rules file for the language you are about to write (see *Language-specific
+architecture, UX, content, frontend, backend, hosting, algorithms), and load the
+rules for the language you are about to write (see *Language-specific
 rules*). Concretely, without being asked:
 
 - Prefer open, lightweight formats (JSON/CSV/Markdown over docx/xlsx).
@@ -147,48 +152,27 @@ cannot name, such as ORM N+1 queries, cursor-based pagination,
 `parallelStream()` or a convenience `clone()`. A generic "avoid redundant
 queries" never tells you to use `select_related`; the Python file does.
 
-**Read the file for the language you are about to write, before writing it.**
-Map the extension, then read that one file:
-
-| Extension | File to read |
-|---|---|
-| `.py` | `rules/langages/python.json` |
-| `.js` `.jsx` `.ts` `.tsx` `.mjs` `.cjs` | `rules/langages/javascript.json` |
-| `.sql` `.pks` `.pkb` `.prc` `.fnc` `.trg` | `rules/langages/sql.json` |
-| `.java` | `rules/langages/java.json` |
-| `.cs` | `rules/langages/csharp.json` |
-| `.php` | `rules/langages/php.json` |
-| `.rb` | `rules/langages/ruby.json` |
-| `.rs` | `rules/langages/rust.json` |
-| `.c` `.h` | `rules/langages/c.json` |
-| `.cpp` `.cc` `.cxx` `.hpp` `.hh` | `rules/langages/cpp.json` |
-| `.go` | `rules/langages/go.json` |
-| `.kt` `.kts` | `rules/langages/kotlin.json` |
-| `.swift` | `rules/langages/swift.json` |
-| `.sh` `.bash` `.zsh` | `rules/langages/shell.json` |
-| `.scala` `.sc` | `rules/langages/scala.json` |
-| `.jl` | `rules/langages/julia.json` |
-| `.nim` | `rules/langages/nim.json` |
-| `.zig` | `rules/langages/zig.json` |
-| `.jsx` `.tsx` | `javascript.json` + `react.json` + `solid.json` |
-| `.ts` | `javascript.json` + `angular.json` |
-| `.vue` | `javascript.json` + `vue.json` |
-| `.svelte` | `javascript.json` + `svelte.json` |
-| `.astro` | `javascript.json` + `astro.json` |
+**Load the rules for the language you are about to write, before writing it.**
+Give the script the file you are working on, and it resolves the language from
+the extension, with the same table the audit uses:
 
 ```bash
-cat "$SKILL_DIR/rules/langages/python.json"     # or the Read tool, same file
+bash "$SKILL_DIR/scripts/eco-audit.sh" --rules src/App.tsx    # or by name: --rules python
 ```
 
-Read the file or files for the language actually in play, once per session.
-Reading all 24 costs context for the ones you are not writing, and a Python
-pattern says nothing useful about Java. Some extensions map to more than one
-file, because a `.tsx` is TypeScript and React at once. An extension absent from the table has no
-language file: the cross-cutting rules still apply. A `Dockerfile` has no
+Load them once per session, for the language actually in play. Loading all 24
+costs context for the ones you are not writing, and a Python pattern says
+nothing useful about Java. Some extensions map to more than one set, because a
+`.tsx` is TypeScript and React at once. A file with no language rules is
+reported as such: the cross-cutting rules still apply. A `Dockerfile` has no
 extension at all and is routed by its name.
 
-`eco-audit.sh --list-langs` lists the covered languages, `--list-rules <language>`
-prints the full checklist for one of them.
+The same command loads a cross-cutting family before a structural decision
+(`--rules backend hosting`), and `--rules` alone lists the families and
+languages. If the script cannot run (`jq` missing), read the one file you need
+in `rules/langages/` rather than all of them.
+
+`eco-audit.sh --list-langs` lists the covered languages and their globs.
 
 ## Reporting what you find
 
@@ -253,6 +237,8 @@ a decision, not a mistake.
 
 Checklist of the 9 RGESN families and the 16 responsible-use practices, with each rule's
 title and recommendation. Useful for a design review before any code is written.
+Print it with `bash "$SKILL_DIR/scripts/eco-audit.sh" --rules all` rather than
+reading the JSON files.
 
 ## Common mistakes
 

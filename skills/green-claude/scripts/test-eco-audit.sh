@@ -263,6 +263,91 @@ echo "$OUT" | grep -q 'var scoped' && fail "globales : faux positif sur une var 
 echo "$OUT" | grep -q 'localVar' && fail "globales : faux positif sur une var dans une fonction"
 echo "$OUT" | grep -q 'obj.prop' && fail "globales : faux positif sur une affectation de propriété (obj.prop)"
 
+# 10 bis. Un module ES n'a pas de portée globale au premier niveau : ses
+# déclarations restent dans le module. La règle vise le script classique, et la
+# présence d'un import ou d'un export statique prouve qu'on n'en est pas un.
+# Sans cette distinction, tout fichier JS/TS moderne produisait un candidat.
+cat > "$TMP/module.ts" <<'EOF'
+import { z } from 'zod';
+const schema = z.object({ id: z.string() });
+let cache;
+cache = new Map();
+export const MAX = 10;
+export function parse(input: unknown) {
+  return schema.parse(input);
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/module.ts")"
+echo "$OUT" | grep -q 'ECO-FRONT-06' && fail "globales : faux positif sur un module ES (import/export)"
+cat > "$TMP/export-seul.js" <<'EOF'
+const TAUX = 0.2;
+export { TAUX };
+EOF
+OUT="$(bash eco-audit.sh "$TMP/export-seul.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-06' && fail "globales : faux positif sur un module ES sans import (export seul)"
+# Une balise citée dans une chaîne ne découpe pas un fichier de script en blocs.
+cat > "$TMP/module-gabarit.js" <<'EOF'
+import { rendu } from './rendu.js';
+const gabarit = '<script src="a.js"></script>';
+const suite = rendu(gabarit);
+EOF
+OUT="$(bash eco-audit.sh "$TMP/module-gabarit.js")"
+echo "$OUT" | grep -q 'ECO-FRONT-06' && fail "globales : module ES redécoupé par une balise <script> citée dans une chaîne"
+
+# Ce qui ne prouve PAS un module ne doit pas faire taire la règle : un import()
+# dynamique est permis dans un script classique, un commentaire n'est pas du
+# code, un texte cité dans une fonction n'est pas au premier niveau, et des noms
+# commençant par « import » ou « export » sont des variables ordinaires.
+cat > "$TMP/classique.js" <<'EOF'
+// import foo from 'bar';
+var leaked = 1;
+import('./lazy.js').then(function (m) { m.run(); });
+imports = [];
+exported = 2;
+function aide() {
+  return `
+import x from 'y';
+`;
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/classique.js")"
+echo "$OUT" | grep -q 'var leaked' || fail "globales : script classique tu à tort (commentaire ou import() dynamique)"
+echo "$OUT" | grep -q 'imports = \[\]' || fail "globales : variable « imports » prise pour une instruction import"
+echo "$OUT" | grep -q 'exported = 2' || fail "globales : variable « exported » prise pour une instruction export"
+
+# Dans une page, chaque bloc <script> est jugé séparément : un bloc
+# type="module" se tait, le script classique voisin reste signalé.
+cat > "$TMP/mixte.html" <<'EOF'
+<html><body>
+<script>
+var compteur = 0;
+</script>
+<script type="module">
+import { init } from './app.js';
+const etat = init();
+</script>
+<script>
+var second = 1;
+</script>
+</body></html>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/mixte.html")"
+echo "$OUT" | grep -q 'var compteur' || fail "globales : script classique non signalé avant un bloc module"
+echo "$OUT" | grep -q 'var second' || fail "globales : script classique non signalé après un bloc module"
+echo "$OUT" | grep -q 'const etat' && fail "globales : faux positif dans un <script type=\"module\">"
+cat > "$TMP/module-sans-import.html" <<'EOF'
+<script type=module>
+const seul = 1;
+</script>
+<script data-type="module">
+var pasUnModule = 1;
+</script>
+EOF
+OUT="$(bash eco-audit.sh "$TMP/module-sans-import.html")"
+echo "$OUT" | grep -q 'const seul' && fail "globales : faux positif dans un <script type=module> sans import"
+echo "$OUT" | grep -q 'var pasUnModule' || fail "globales : un attribut data-type pris pour type=\"module\""
+true
+
 # 11. ECO-FRONT-07 (XHR synchrone) : détecte le 3e argument false, pas true.
 cat > "$TMP/sync.js" <<'EOF'
 xhr.open('GET', '/api', false);
@@ -1220,5 +1305,77 @@ OUT="$(bash eco-audit.sh "$TMP/vrais-cas.php")"
 for id in ECO-PHP-02 ECO-PHP-04 ECO-PHP-05; do
     echo "$OUT" | grep -q "$id" || fail "$id n'est plus détecté sur un cas réel"
 done
+
+# --rules : vue compacte, une ligne par règle (impact, identifiant, titre,
+# recommandation), par famille, par langage ou par nom de fichier. C'est ce que
+# SKILL.md fait charger à la place des JSON bruts, qui portent en plus les
+# motifs, les exemples et les notes destinés à l'audit : un fichier de langage
+# pèse environ cinq fois sa vue compacte.
+OUT="$(bash eco-audit.sh --rules backend)"
+echo "$OUT" | grep -q '^\[High\] ECO-BACK-01 ' || fail "--rules backend omet ECO-BACK-01"
+echo "$OUT" | grep -q 'ECO-FRONT-' && fail "--rules backend déborde sur une autre famille"
+N=$(echo "$OUT" | grep -c '^\[')
+EXPECTED=$(jq '[.categories[] | select(.name == "7. Backend") | .rules[]] | length' ../rules/ecoconception.json)
+[ "$N" -eq "$EXPECTED" ] || fail "--rules backend : $EXPECTED règles attendues, $N affichées"
+
+# Le préfixe suffit, sans tenir compte de la casse : « ux » pour « 4. UX/UI ».
+OUT="$(bash eco-audit.sh --rules UX)"
+echo "$OUT" | grep -q 'ECO-UX-01' || fail "--rules UX ne trouve pas la famille UX/UI"
+
+# Plusieurs noms à la fois, familles et langages mélangés.
+OUT="$(bash eco-audit.sh --rules content python)"
+echo "$OUT" | grep -q 'ECO-CONT-01' || fail "--rules content python omet la famille"
+echo "$OUT" | grep -q 'ECO-PY-01' || fail "--rules content python omet le langage"
+
+# Un nom de fichier est résolu par son extension, avec la même table que
+# l'audit : un .tsx charge JavaScript et React.
+OUT="$(bash eco-audit.sh --rules src/App.tsx)"
+echo "$OUT" | grep -q 'ECO-JS-01' || fail "--rules <fichier.tsx> ne résout pas JavaScript"
+echo "$OUT" | grep -q 'ECO-REACT-01' || fail "--rules <fichier.tsx> ne résout pas React"
+echo "$OUT" | grep -q 'ECO-PY-' && fail "--rules <fichier.tsx> charge un langage sans rapport"
+OUT="$(bash eco-audit.sh --rules notes.xyz)"
+echo "$OUT" | grep -q 'No language rules for notes.xyz' || fail "--rules : extension sans langage non signalée"
+# Un fichier sans extension n'est pas une famille mal orthographiée : Dockerfile
+# est routé par son nom dans l'audit, build/Makefile est visiblement un chemin.
+for f in Dockerfile build/Makefile; do
+    OUT="$(bash eco-audit.sh --rules "$f")" || fail "--rules $f échoue au lieu de signaler l'absence de règles de langage"
+    echo "$OUT" | grep -q "No language rules for $f" || fail "--rules $f : absence de règles de langage non signalée"
+done
+# « ux/ui » est le nom affiché de la famille, pas un chemin.
+OUT="$(bash eco-audit.sh --rules ux/ui)"
+echo "$OUT" | grep -q 'ECO-UX-01' || fail "--rules ux/ui pris pour un chemin de fichier"
+
+OUT="$(bash eco-audit.sh --rules usage)"
+echo "$OUT" | grep -q 'USAGE-BRIEF-03' || fail "--rules usage omet les pratiques d'usage"
+
+# all : toutes les règles transverses et les pratiques d'usage, chacune une
+# seule fois, sans champ vide ni motif d'audit.
+OUT="$(bash eco-audit.sh --rules all)"
+N=$(echo "$OUT" | grep -c '^\[')
+EXPECTED=$(( $(jq '[.categories[].rules[]] | length' ../rules/ecoconception.json) + $(jq '[.categories[].rules[]] | length' ../rules/usage.json) ))
+[ "$N" -eq "$EXPECTED" ] || fail "--rules all : $EXPECTED règles attendues, $N affichées"
+DUP=$(echo "$OUT" | grep '^\[' | awk '{print $2}' | sort | uniq -d | head -1)
+[ -z "$DUP" ] || fail "--rules all affiche deux fois $DUP"
+echo "$OUT" | grep -q 'null' && fail "--rules all affiche un champ vide (null)"
+echo "$OUT" | grep -qF 'SELECT\s' && fail "--rules expose un motif d'audit"
+RAW=$(cat ../rules/ecoconception.json ../rules/usage.json | wc -c)
+[ $(( ${#OUT} * 4 )) -lt "$RAW" ] || fail "--rules all n'est plus au moins quatre fois plus léger que les JSON"
+
+OUT="$(bash eco-audit.sh --rules)"
+echo "$OUT" | grep -q 'frontend' || fail "--rules sans argument ne liste pas les familles"
+echo "$OUT" | grep -q 'python' || fail "--rules sans argument ne liste pas les langages"
+status=0
+bash eco-audit.sh --rules inconnue >/dev/null 2>&1 || status=$?
+[ "$status" -eq 1 ] || fail "--rules : nom inconnu, code 1 attendu, reçu $status"
+# Un nom vide ne doit pas servir de préfixe universel.
+status=0
+OUT="$(bash eco-audit.sh --rules "" 2>/dev/null)" || status=$?
+[ "$status" -eq 1 ] || fail "--rules \"\" : code 1 attendu, reçu $status"
+[ -z "$OUT" ] || fail "--rules \"\" affiche des règles"
+
+# SKILL.md doit renvoyer vers la vue compacte, pas vers les JSON bruts.
+grep -q 'eco-audit.sh" --rules' ../SKILL.md || fail "SKILL.md ne renvoie pas vers --rules"
+grep -qE 'cat "?\$SKILL_DIR/rules' ../SKILL.md && fail "SKILL.md demande de lire un JSON de règles en entier"
+true
 
 echo "OK - suite complete"
