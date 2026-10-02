@@ -1221,4 +1221,76 @@ for id in ECO-PHP-02 ECO-PHP-04 ECO-PHP-05; do
     echo "$OUT" | grep -q "$id" || fail "$id n'est plus détecté sur un cas réel"
 done
 
+# --rules : vue compacte, une ligne par règle (impact, identifiant, titre,
+# recommandation), par famille, par langage ou par nom de fichier. C'est ce que
+# SKILL.md fait charger à la place des JSON bruts, qui portent en plus les
+# motifs, les exemples et les notes destinés à l'audit : un fichier de langage
+# pèse environ cinq fois sa vue compacte.
+OUT="$(bash eco-audit.sh --rules backend)"
+echo "$OUT" | grep -q '^\[High\] ECO-BACK-01 ' || fail "--rules backend omet ECO-BACK-01"
+echo "$OUT" | grep -q 'ECO-FRONT-' && fail "--rules backend déborde sur une autre famille"
+N=$(echo "$OUT" | grep -c '^\[')
+EXPECTED=$(jq '[.categories[] | select(.name == "7. Backend") | .rules[]] | length' ../rules/ecoconception.json)
+[ "$N" -eq "$EXPECTED" ] || fail "--rules backend : $EXPECTED règles attendues, $N affichées"
+
+# Le préfixe suffit, sans tenir compte de la casse : « ux » pour « 4. UX/UI ».
+OUT="$(bash eco-audit.sh --rules UX)"
+echo "$OUT" | grep -q 'ECO-UX-01' || fail "--rules UX ne trouve pas la famille UX/UI"
+
+# Plusieurs noms à la fois, familles et langages mélangés.
+OUT="$(bash eco-audit.sh --rules content python)"
+echo "$OUT" | grep -q 'ECO-CONT-01' || fail "--rules content python omet la famille"
+echo "$OUT" | grep -q 'ECO-PY-01' || fail "--rules content python omet le langage"
+
+# Un nom de fichier est résolu par son extension, avec la même table que
+# l'audit : un .tsx charge JavaScript et React.
+OUT="$(bash eco-audit.sh --rules src/App.tsx)"
+echo "$OUT" | grep -q 'ECO-JS-01' || fail "--rules <fichier.tsx> ne résout pas JavaScript"
+echo "$OUT" | grep -q 'ECO-REACT-01' || fail "--rules <fichier.tsx> ne résout pas React"
+echo "$OUT" | grep -q 'ECO-PY-' && fail "--rules <fichier.tsx> charge un langage sans rapport"
+OUT="$(bash eco-audit.sh --rules notes.xyz)"
+echo "$OUT" | grep -q 'No language rules for notes.xyz' || fail "--rules : extension sans langage non signalée"
+# Un fichier sans extension n'est pas une famille mal orthographiée : Dockerfile
+# est routé par son nom dans l'audit, build/Makefile est visiblement un chemin.
+for f in Dockerfile build/Makefile; do
+    OUT="$(bash eco-audit.sh --rules "$f")" || fail "--rules $f échoue au lieu de signaler l'absence de règles de langage"
+    echo "$OUT" | grep -q "No language rules for $f" || fail "--rules $f : absence de règles de langage non signalée"
+done
+# « ux/ui » est le nom affiché de la famille, pas un chemin.
+OUT="$(bash eco-audit.sh --rules ux/ui)"
+echo "$OUT" | grep -q 'ECO-UX-01' || fail "--rules ux/ui pris pour un chemin de fichier"
+
+OUT="$(bash eco-audit.sh --rules usage)"
+echo "$OUT" | grep -q 'USAGE-BRIEF-03' || fail "--rules usage omet les pratiques d'usage"
+
+# all : toutes les règles transverses et les pratiques d'usage, chacune une
+# seule fois, sans champ vide ni motif d'audit.
+OUT="$(bash eco-audit.sh --rules all)"
+N=$(echo "$OUT" | grep -c '^\[')
+EXPECTED=$(( $(jq '[.categories[].rules[]] | length' ../rules/ecoconception.json) + $(jq '[.categories[].rules[]] | length' ../rules/usage.json) ))
+[ "$N" -eq "$EXPECTED" ] || fail "--rules all : $EXPECTED règles attendues, $N affichées"
+DUP=$(echo "$OUT" | grep '^\[' | awk '{print $2}' | sort | uniq -d | head -1)
+[ -z "$DUP" ] || fail "--rules all affiche deux fois $DUP"
+echo "$OUT" | grep -q 'null' && fail "--rules all affiche un champ vide (null)"
+echo "$OUT" | grep -qF 'SELECT\s' && fail "--rules expose un motif d'audit"
+RAW=$(cat ../rules/ecoconception.json ../rules/usage.json | wc -c)
+[ $(( ${#OUT} * 4 )) -lt "$RAW" ] || fail "--rules all n'est plus au moins quatre fois plus léger que les JSON"
+
+OUT="$(bash eco-audit.sh --rules)"
+echo "$OUT" | grep -q 'frontend' || fail "--rules sans argument ne liste pas les familles"
+echo "$OUT" | grep -q 'python' || fail "--rules sans argument ne liste pas les langages"
+status=0
+bash eco-audit.sh --rules inconnue >/dev/null 2>&1 || status=$?
+[ "$status" -eq 1 ] || fail "--rules : nom inconnu, code 1 attendu, reçu $status"
+# Un nom vide ne doit pas servir de préfixe universel.
+status=0
+OUT="$(bash eco-audit.sh --rules "" 2>/dev/null)" || status=$?
+[ "$status" -eq 1 ] || fail "--rules \"\" : code 1 attendu, reçu $status"
+[ -z "$OUT" ] || fail "--rules \"\" affiche des règles"
+
+# SKILL.md doit renvoyer vers la vue compacte, pas vers les JSON bruts.
+grep -q 'eco-audit.sh" --rules' ../SKILL.md || fail "SKILL.md ne renvoie pas vers --rules"
+grep -qE 'cat "?\$SKILL_DIR/rules' ../SKILL.md && fail "SKILL.md demande de lire un JSON de règles en entier"
+true
+
 echo "OK - suite complete"

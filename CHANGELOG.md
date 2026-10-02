@@ -17,8 +17,11 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 - Registre de décisions `.green-claude/decisions.md` : ce que l’équipe a tranché n’est plus resignalé, et l’audit annonce ce qu’il a tu.
 - Fichier d’exclusion `.green-claude/ignore` pour les fixtures et catalogues d’exemples, qui contiennent du code fautif sans jamais l’exécuter.
 - Hook `UserPromptSubmit` de cadrage (`hooks/green-claude-brief.sh`), qui rappelle les trois règles amont sur une demande de production de code et se tait sur une question.
+- Option `eco-audit.sh --rules <famille|langage|fichier|usage|all>` : vue compacte des règles, une ligne par règle (impact, identifiant, titre, recommandation), sans les motifs, exemples et notes destinés à l’audit. Un nom de fichier est résolu par son extension, avec la même table que l’audit.
 
 ### Modifié
+
+- `SKILL.md` renvoie vers `eco-audit.sh --rules` au lieu de faire lire les fichiers de règles bruts : 1,7 Ko au lieu de 8,8 Ko pour Python, 3 Ko au lieu de 22 Ko pour un `.tsx`, 27 Ko au lieu de 150 Ko pour la checklist complète. Le tableau des extensions disparaît de `SKILL.md`, le script le portant déjà.
 
 - Objectif du skill énoncé en tête de `SKILL.md` et dans les métadonnées des règles : livrer du code qui consomme le moins possible de tokens pendant la session, de temps CPU et de mémoire à l'exécution, d'octets sur le réseau, de stockage, et donc d'énergie.
 - Lien tokens/énergie assumé dans sa direction et refusé dans son rapport : moins de tokens traités, c'est moins de calcul, et moins de calcul, c'est moins d'énergie ; convertir un nombre de tokens en watts ou en grammes de CO2 reste interdit sans mesure, le cache de prompt, la taille du modèle, le batching, le matériel et le mix électrique pesant chacun davantage. `USAGE-CTX-01` et `USAGE-CTX-03` portent désormais cette raison, et trois tests vérifient qu'elle ne disparaît pas.

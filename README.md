@@ -157,6 +157,7 @@ Without this filtering by extension, one language's patterns fire on the others:
 ```bash
 bash skills/green-claude/scripts/eco-audit.sh --list-langs           # covered languages and their globs
 bash skills/green-claude/scripts/eco-audit.sh --list-rules python    # full checklist for one language
+bash skills/green-claude/scripts/eco-audit.sh --rules src/App.tsx    # compact rules for a file, a family or a language
 ```
 
 ---
