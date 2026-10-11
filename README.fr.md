@@ -8,7 +8,7 @@
 
 **Green Claude** aide [Claude Code](https://claude.com/claude-code) à proposer du code moins gourmand en ressources, grâce à des règles d’éco-conception et à un audit local.
 
-Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, et 16 pratiques d’usage responsable**.
+Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, et 16 pratiques d’usage responsable**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 Le skill guide le modèle lorsqu’il est chargé ; son application n’est pas garantie à chaque réponse. L’audit détecte des problèmes potentiels à examiner, sans certifier la conformité RGESN ni mesurer une économie d’énergie. Les hooks optionnels permettent de lancer cet audit après les écritures de code prises en charge.
 

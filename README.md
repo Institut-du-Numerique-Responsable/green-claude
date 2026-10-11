@@ -8,7 +8,7 @@
 
 **Green Claude** helps [Claude Code](https://claude.com/claude-code) write code that uses fewer resources, with eco-design rules and a local audit tool.
 
-A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, and 16 responsible-use practices**.
+A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, and 16 responsible-use practices**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 The skill guides the model when loaded; its application is not guaranteed on every response. The audit flags candidates for review, without certifying RGESN compliance or measuring energy savings. Optional hooks run the audit after supported code-writing operations.
 
