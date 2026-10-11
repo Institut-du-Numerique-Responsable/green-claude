@@ -24,3 +24,4 @@ Les résultats du script sont des candidats à vérifier en contexte, pas une ce
 - [Changelog](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CHANGELOG.md): changements publiés et en préparation.
 - [Citation](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CITATION.cff): auteurs et attribution.
 - [Institut du Numérique Responsable](https://institutnr.org): organisation éditrice.
+- [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code): présentation de la démarche sur le site de l'INR.
