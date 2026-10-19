@@ -1378,4 +1378,56 @@ grep -q 'eco-audit.sh" --rules' ../SKILL.md || fail "SKILL.md ne renvoie pas ver
 grep -qE 'cat "?\$SKILL_DIR/rules' ../SKILL.md && fail "SKILL.md demande de lire un JSON de règles en entier"
 true
 
+# Faux positifs relevés sur un thème WordPress.
+# ECO-FRONT-05 : un return dont l'expression s'étend sur plusieurs lignes n'est
+# pas suivi de code mort ; seul ce qui suit la fin de l'instruction peut l'être.
+cat > "$TMP/return_multiligne.php" <<'EOF'
+<?php
+function liste($id)
+{
+    return $wpdb->get_results($wpdb->prepare(
+        "SELECT id, nom FROM t WHERE id = %d",
+        $id
+    ));
+}
+function resultat()
+{
+    return array(
+        'success' => true,
+        'message' => 'ok',
+    );
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_multiligne.php")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : return multi-lignes pris pour du code mort"
+cat > "$TMP/return_multiligne_mort.php" <<'EOF'
+<?php
+function f($id)
+{
+    return array(
+        'id' => $id,
+    );
+    echo "jamais";
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_multiligne_mort.php")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort après un return multi-lignes non détecté"
+
+# ECO-BACK-10 : concaténer un nom de table (préfixe WordPress, constante) n'est
+# pas concaténer une valeur ; la valeur, elle, reste signalée.
+cat > "$TMP/table_concat.php" <<'EOF'
+<?php
+$rows = $wpdb->get_results($wpdb->prepare("SELECT id FROM " . $GLOBALS['table_organisation'] . " WHERE id = %d", $id));
+$n = $wpdb->get_var("SELECT COUNT(id) FROM " . $wpdb->prefix . "organisation");
+EOF
+OUT="$(bash eco-audit.sh "$TMP/table_concat.php")"
+echo "$OUT" | grep -q 'ECO-BACK-10' && fail "faux positif : nom de table concaténé signalé comme valeur"
+cat > "$TMP/valeur_concat.php" <<'EOF'
+<?php
+$rows = $wpdb->get_results("SELECT id FROM t WHERE nom = " . $nom);
+EOF
+OUT="$(bash eco-audit.sh "$TMP/valeur_concat.php")"
+echo "$OUT" | grep -q 'ECO-BACK-10' || fail "valeur concaténée dans une requête PHP non détectée"
+true
+
 echo "OK - suite complete"

@@ -78,6 +78,19 @@ function blank_strings(s,   out, i, n, c, q, esc) {
         }
     }
 
+    # Instruction return/throw encore ouverte (parenthèses ou crochets non
+    # refermés) : ses lignes de suite sont l'expression retournée, pas du code
+    # mort. La zone surveillée ne commence qu'une fois l'instruction refermée.
+    if (pending > 0) {
+        pending += count_char(line, "(") + count_char(line, "[") - count_char(line, ")") - count_char(line, "]")
+        if (pending <= 0) {
+            pending = 0
+            dead_depth = depth
+            flagged_this_zone = 0
+        }
+        next
+    }
+
     if (dead_depth >= 0) {
         if (close_pos > 0) {
             before = substr(line, 1, close_pos - 1)
@@ -110,12 +123,20 @@ function blank_strings(s,   out, i, n, c, q, esc) {
     # refermer, et l'objet littéral est l'une des formes de retour les plus
     # courantes en JS. Seul un excédent de fermantes referme vraiment le bloc.
     closed_here = 0
+    ouvertes = 0
     if (match(line, /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/)) {
-        apres = substr(line, RSTART + RLENGTH)
+        # RLENGTH inclut le séparateur : une parenthèse collée au mot-clé fait
+        # partie de l'expression, on la recompte.
+        apres = substr(line, RSTART + RLENGTH - 1)
         if (count_char(apres, "}") > count_char(apres, "{")) closed_here = 1
+        ouvertes = count_char(apres, "(") + count_char(apres, "[") - count_char(apres, ")") - count_char(apres, "]")
     }
     if (dead_depth < 0 && !guarded && !closed_here && trimmed ~ /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/) {
-        dead_depth = depth
-        flagged_this_zone = 0
+        if (ouvertes > 0) {
+            pending = ouvertes  # expression sur plusieurs lignes
+        } else {
+            dead_depth = depth
+            flagged_this_zone = 0
+        }
     }
 }
