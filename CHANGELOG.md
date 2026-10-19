@@ -33,6 +33,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Corrigé
 
+- `ECO-FRONT-05` ne prend plus pour du code mort les lignes d’un `return` dont l’expression s’étend sur plusieurs lignes (`return $wpdb->get_results(` … `);`, `return array(` … `);`). La zone surveillée commence une fois l’instruction refermée ; le code placé après reste signalé.
+- `ECO-BACK-10` ne signale plus la concaténation d’un nom de table (`"… FROM " . $wpdb->prefix . "t"`) : seule une concaténation qui suit un opérateur (`= "` + valeur, `IN ("` + liste) est une valeur injectée dans la requête.
 - `ECO-FRONT-06` ne signale plus les modules ES : une instruction `import` ou `export` statique, ou un `<script type="module">`, prouve que les déclarations de premier niveau ne sont pas globales. Tout fichier JS/TS moderne produisait jusque-là un candidat. Dans une page, chaque bloc `<script>` est jugé séparément et le script classique reste signalé.
 
 - Indexation : sitemap aligné sur les URL GitHub Pages, liens vers les pages de documentation, index `llms.txt` enrichi et métadonnées générées depuis la version et les règles ; suppression des notes d'avis non sourcées. Contrôles de synchronisation ajoutés à la CI.

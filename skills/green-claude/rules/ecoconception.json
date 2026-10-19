@@ -1579,7 +1579,7 @@
           "description": "A query assembled by concatenating strings forces the database to parse and plan it again on every call, since no two are identical. It is also the classic injection hole, so the sober version and the safe version are the same code.",
           "impact": "High",
           "patterns": [
-            "(SELECT|INSERT|UPDATE|DELETE)[^\"']*[\"'][[:space:]]*(\\+|\\.[[:space:]]*[a-zA-Z$])",
+            "(SELECT|INSERT|UPDATE|DELETE)[^\"']*[^[:alnum:][:space:]_\"'][[:space:]]*[\"'][[:space:]]*(\\+|\\.[[:space:]]*[a-zA-Z$])",
             "f[\"'](SELECT|INSERT|UPDATE|DELETE)",
             "\\$\\{[a-zA-Z_]+\\}[^\"']*(FROM|WHERE|VALUES)"
           ],
