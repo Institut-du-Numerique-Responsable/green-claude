@@ -192,7 +192,7 @@ Coder avec l’IA mobilise des ressources pendant la session. Green Claude maint
 | Rembobiner plutôt que corriger | `/rewind` (double Échap) au lieu d'empiler des corrections dans le contexte |
 | `/clear` vs `/compact` | Nouvelle tâche → `/clear`. Tâche liée → `/compact <consigne>` |
 | Cartographier le code | Un index du dépôt (CODEMAP.md, ou un outil comme [graphify](https://github.com/Graphify-Labs/graphify)) évite de relire les mêmes fichiers en entier à chaque session |
-| Réponses denses | Aller droit au résultat plutôt que reformuler (l'esprit derrière des outils comme [caveman](https://github.com/juliusbrussee/caveman)) |
+| Réponses denses | Aller droit au résultat plutôt que reformuler (l'esprit derrière des outils comme [caveman](https://github.com/juliusbrussee/caveman)) ; style simple, sans tics d'écriture IA, vérifié avec [stop-slop](https://github.com/hardikpandya/stop-slop) quand il est installé |
 | Écrire la règle, pas re-corriger | « Ajoute ça à CLAUDE.md » répare une fois pour toutes |
 | Une skill pour ce qui se répète | Un workflow quotidien devient une slash command |
 | Donner un moyen de vérifier | Tests, commande, navigateur : moins de cycles de correction |
@@ -201,7 +201,9 @@ Coder avec l’IA mobilise des ressources pendant la session. Green Claude maint
 
 Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
 
-> Les outils tiers cités (graphify, caveman) sont des exemples illustratifs vérifiés (open source, licence MIT). Le projet ne les audite pas et n'en dépend pas.
+Le skill applique ces consignes à ses propres réponses : pas de tiret quadratin, pas de formule qui annonce une idée au lieu de la livrer, pas de phrase pseudo-clivée, de présentatif emphatique ni de fausse subordonnée détachée, pas d'épanorthose, d'anaphore verbale ni d'antithèse binaire, pas d'annonce dénombrée ni d'énumération annoncée. Elles valent dans toutes les langues (section « Writing your replies » de [`SKILL.md`](skills/green-claude/SKILL.md)).
+
+> Les outils tiers cités (graphify, caveman, stop-slop) sont des exemples illustratifs vérifiés (open source, licence MIT). Le projet ne les audite pas et n'en dépend pas.
 
 ---
 
