@@ -8,7 +8,7 @@
 
 **Green Claude** aide [Claude Code](https://claude.com/claude-code) à proposer du code moins gourmand en ressources, grâce à des règles d’éco-conception et à un audit local.
 
-Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, 16 pratiques d’usage responsable et 30 règles de sobriété des tokens**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
+Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, 13 pratiques d’usage responsable et 30 règles de sobriété des tokens**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 Le skill guide le modèle lorsqu’il est chargé ; son application n’est pas garantie à chaque réponse. L’audit détecte des problèmes potentiels à examiner, sans certifier la conformité RGESN ni mesurer une économie d’énergie. Les hooks optionnels permettent de lancer cet audit après les écritures de code prises en charge.
 
@@ -184,7 +184,7 @@ Deux autres points de contrôle, tous deux optionnels :
 
 Coder avec l’IA mobilise des ressources pendant la session. Green Claude maintient donc ses propres recommandations pour limiter les contextes, sorties, reprises et calculs inutiles. Le nombre de tokens reste un indicateur d’activité, pas une mesure directe de l’énergie ou des émissions : toute affirmation environnementale doit être mesurée dans son contexte d’exécution.
 
-[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contient 16 recommandations éditoriales du projet, dont deux illustrées par des outils open source vérifiés :
+[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contient 13 recommandations éditoriales du projet. Le tableau y ajoute deux pratiques reprises par les règles de sobriété des tokens (NR-TOK, section suivante) :
 
 | Pratique | Le geste |
 |---|---|
@@ -192,11 +192,11 @@ Coder avec l’IA mobilise des ressources pendant la session. Green Claude maint
 | Rembobiner plutôt que corriger | `/rewind` (double Échap) au lieu d'empiler des corrections dans le contexte |
 | `/clear` vs `/compact` | Nouvelle tâche → `/clear`. Tâche liée → `/compact <consigne>` |
 | Cartographier le code | Un index du dépôt (CODEMAP.md, ou un outil comme [graphify](https://github.com/Graphify-Labs/graphify)) évite de relire les mêmes fichiers en entier à chaque session |
-| Réponses denses | Aller droit au résultat plutôt que reformuler (l'esprit derrière des outils comme [caveman](https://github.com/juliusbrussee/caveman)) ; style simple, sans tics d'écriture IA, vérifié avec [stop-slop](https://github.com/hardikpandya/stop-slop) quand il est installé |
+| Réponses denses | Aller droit au résultat plutôt que reformuler (l'esprit derrière des outils comme [caveman](https://github.com/juliusbrussee/caveman)) ; style simple, sans tics d'écriture IA, vérifié avec [stop-slop](https://github.com/hardikpandya/stop-slop) quand il est installé (NR-TOK-001 à 005) |
 | Écrire la règle, pas re-corriger | « Ajoute ça à CLAUDE.md » répare une fois pour toutes |
 | Une skill pour ce qui se répète | Un workflow quotidien devient une slash command |
 | Donner un moyen de vérifier | Tests, commande, navigateur : moins de cycles de correction |
-| Adapter le niveau d'effort | Utiliser les réglages disponibles et vérifier leur effet par des évaluations |
+| Adapter le niveau d'effort | Utiliser les réglages disponibles et vérifier leur effet par des évaluations (NR-TOK-023, NR-TOK-024 pour les sous-agents) |
 | Mode minimal pour les scripts | Éviter les personnalisations inutiles lorsque le client le permet |
 
 Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
@@ -217,7 +217,7 @@ Le skill applique ces consignes à ses propres réponses : pas de tiret quadrati
 | D. Optimisation des modèles | NR-TOK-023 à 026 | modèle proportionné, traitements déterministes en local, cache |
 | E. Qualité et mesure | NR-TOK-027 à 030 | aucune économie au prix de la qualité, mesurer, bilan de session |
 
-Sept règles sont obligatoires : NR-TOK-007, 011, 015, 016, 022, 027 et 030. NR-TOK-023 à 026 et NR-TOK-028 dépendent de ce que permet l’environnement. Les autres s’appliquent par défaut. Plusieurs recoupent les pratiques d’usage : le champ `related` de chaque règle les nomme.
+Sept règles sont obligatoires : NR-TOK-007, 011, 015, 016, 022, 027 et 030. NR-TOK-023 à 026 et NR-TOK-028 dépendent de ce que permet l’environnement. Les autres s’appliquent par défaut. Elles reprennent les anciennes pratiques USAGE-CTX-06, USAGE-CPU-01 et USAGE-CPU-02, et le champ `related` nomme les pratiques d’usage qu’elles recoupent encore.
 
 `eco-audit.sh --rules tokens` les affiche en vue compacte, suivies du format du bilan de session exigé par NR-TOK-030. Ce bilan clôt toute tâche qui a lancé des outils ou modifié des fichiers, jamais une simple question. Il liste les règles appliquées, les optimisations, les mesures disponibles, les tests et les limites. Il n’invente aucune métrique et ne donne un pourcentage d’économie que face à une référence comparable. Réduire les tokens, les coûts et l’impact environnemental restent trois objectifs distincts.
 

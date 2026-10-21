@@ -8,7 +8,7 @@
 
 **Green Claude** helps [Claude Code](https://claude.com/claude-code) write code that uses fewer resources, with eco-design rules and a local audit tool.
 
-A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, 16 responsible-use practices and 30 token sobriety rules**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
+A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, 13 responsible-use practices and 30 token sobriety rules**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 The skill guides the model when loaded; its application is not guaranteed on every response. The audit flags candidates for review, without certifying RGESN compliance or measuring energy savings. Optional hooks run the audit after supported code-writing operations.
 
@@ -184,7 +184,7 @@ Two more checkpoints, both optional:
 
 Coding with AI also uses resources during the session. Green Claude therefore maintains its own recommendations for avoiding unnecessary context, output, retries, and compute. Token counts are an activity indicator, not a direct measurement of energy or emissions; environmental claims require measurements from the actual execution context.
 
-[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contains 16 project-authored recommendations, including two illustrated with verified open-source tools:
+[`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json) contains 13 project-authored recommendations. The table adds two practices now carried by the token sobriety rules (NR-TOK, next section):
 
 | Practice | The move |
 |---|---|
@@ -192,11 +192,11 @@ Coding with AI also uses resources during the session. Green Claude therefore ma
 | Rewind instead of correcting | `/rewind` (double Esc) instead of stacking corrections into the context |
 | `/clear` vs `/compact` | New task → `/clear`. Related task → `/compact <instruction>` |
 | Map the codebase | A repo index (CODEMAP.md, or a tool like [graphify](https://github.com/Graphify-Labs/graphify)) avoids re-reading the same files whole every session |
-| Dense answers | Get straight to the result instead of rephrasing (the spirit behind tools like [caveman](https://github.com/juliusbrussee/caveman)); plain style without AI writing tics, checked with [stop-slop](https://github.com/hardikpandya/stop-slop) when installed |
+| Dense answers | Get straight to the result instead of rephrasing (the spirit behind tools like [caveman](https://github.com/juliusbrussee/caveman)); plain style without AI writing tics, checked with [stop-slop](https://github.com/hardikpandya/stop-slop) when installed (NR-TOK-001 to 005) |
 | Write the rule, don't re-correct | "Add this to CLAUDE.md" fixes it once and for all |
 | A skill for anything repeated | A daily workflow becomes a slash command |
 | Give it a way to verify | Tests, a command, a browser: fewer correction cycles |
-| Match effort to the task | Use the controls available in the client and verify their effect through evaluations |
+| Match effort to the task | Use the controls available in the client and verify their effect through evaluations (NR-TOK-023, NR-TOK-024 for subagents) |
 | Minimal mode for scripts | Avoid loading customizations an automation does not need |
 
 Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
@@ -217,7 +217,7 @@ The skill applies these rules to its own replies: no em dash, no phrase that ann
 | D. Model optimization | NR-TOK-023 to 026 | proportionate model, deterministic local processing, cache |
 | E. Quality and measurement | NR-TOK-027 to 030 | no saving at the cost of quality, measure, session report |
 
-Seven rules are mandatory: NR-TOK-007, 011, 015, 016, 022, 027 and 030. NR-TOK-023 to 026 and NR-TOK-028 depend on what the environment allows. The others apply by default. Several overlap with the responsible-use practices: each rule's `related` field names them.
+Seven rules are mandatory: NR-TOK-007, 011, 015, 016, 022, 027 and 030. NR-TOK-023 to 026 and NR-TOK-028 depend on what the environment allows. The others apply by default. They absorb the former USAGE-CTX-06, USAGE-CPU-01 and USAGE-CPU-02 practices, and each rule's `related` field names the responsible-use practices they still overlap.
 
 `eco-audit.sh --rules tokens` prints them in compact form, followed by the session report format required by NR-TOK-030. The report closes any task that ran tools or changed files, never a plain question. It lists the rules applied, the optimizations, the available measurements, the tests and the limits. It invents no metric and gives a saving percentage only against a comparable baseline. Cutting tokens, cutting costs and cutting environmental impact remain three separate goals.
 
