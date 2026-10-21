@@ -21,6 +21,7 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Modifié
 
+- `SKILL.md` encadre la rédaction des réponses : pas de tiret quadratin, pas d’annonce, de pseudo-clivée, de présentatif emphatique, d’épanorthose, d’anaphore, d’antithèse binaire ni d’énumération annoncée, et passage par le skill `stop-slop` quand il est installé.
 - `SKILL.md` renvoie vers `eco-audit.sh --rules` au lieu de faire lire les fichiers de règles bruts : 1,7 Ko au lieu de 8,8 Ko pour Python, 3 Ko au lieu de 22 Ko pour un `.tsx`, 27 Ko au lieu de 150 Ko pour la checklist complète. Le tableau des extensions disparaît de `SKILL.md`, le script le portant déjà.
 
 - Objectif du skill énoncé en tête de `SKILL.md` et dans les métadonnées des règles : livrer du code qui consomme le moins possible de tokens pendant la session, de temps CPU et de mémoire à l'exécution, d'octets sur le réseau, de stockage, et donc d'énergie.

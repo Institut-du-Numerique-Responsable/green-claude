@@ -192,7 +192,7 @@ Coding with AI also uses resources during the session. Green Claude therefore ma
 | Rewind instead of correcting | `/rewind` (double Esc) instead of stacking corrections into the context |
 | `/clear` vs `/compact` | New task → `/clear`. Related task → `/compact <instruction>` |
 | Map the codebase | A repo index (CODEMAP.md, or a tool like [graphify](https://github.com/Graphify-Labs/graphify)) avoids re-reading the same files whole every session |
-| Dense answers | Get straight to the result instead of rephrasing (the spirit behind tools like [caveman](https://github.com/juliusbrussee/caveman)) |
+| Dense answers | Get straight to the result instead of rephrasing (the spirit behind tools like [caveman](https://github.com/juliusbrussee/caveman)); plain style without AI writing tics, checked with [stop-slop](https://github.com/hardikpandya/stop-slop) when installed |
 | Write the rule, don't re-correct | "Add this to CLAUDE.md" fixes it once and for all |
 | A skill for anything repeated | A daily workflow becomes a slash command |
 | Give it a way to verify | Tests, a command, a browser: fewer correction cycles |
@@ -201,7 +201,9 @@ Coding with AI also uses resources during the session. Green Claude therefore ma
 
 Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
 
-> The third-party tools cited (graphify, caveman) are verified illustrative examples (open source, MIT license). The project doesn't audit them and doesn't depend on them.
+The skill applies these rules to its own replies: no em dash, no phrase that announces an idea instead of delivering it, no pseudo-cleft sentence, no emphatic presentative or detached fake subordinate clause, no epanorthosis, verbal anaphora or binary antithesis, no counted announcement or announced list. They hold in every language ("Writing your replies" section of [`SKILL.md`](skills/green-claude/SKILL.md)).
+
+> The third-party tools cited (graphify, caveman, stop-slop) are verified illustrative examples (open source, MIT license). The project doesn't audit them and doesn't depend on them.
 
 ---
 
