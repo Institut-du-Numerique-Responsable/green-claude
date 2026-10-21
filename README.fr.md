@@ -311,9 +311,9 @@ vérification de sa version, des tests et des archives produites.
 
 ### Caveman
 
-Ce projet réutilise et adapte certains éléments du projet open source [Caveman](https://github.com/JuliusBrussee/caveman), développé par Julius Brussee (Copyright 2026 Julius Brussee). Ces éléments sont sous [licence Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) ; voir aussi [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
+Les règles NR-TOK de sobriété des tokens ([`rules/tokens.json`](skills/green-claude/rules/tokens.json)) s’inspirent des règles du projet open source [Caveman](https://github.com/JuliusBrussee/caveman), développé par Julius Brussee (Copyright 2026 Julius Brussee), et les adaptent. Les règles de Caveman sont sous [licence Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) ; voir aussi [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
 
-Les éléments réutilisés ont été adaptés aux objectifs, aux référentiels et aux exigences du Numérique Responsable portés par l’INR. Les modifications et extensions propres à ce projet ne doivent pas être attribuées à l’auteur de Caveman. Les mentions de droits d’auteur et de licence de ces éléments sont conservées dans [`NOTICE`](skills/green-claude/NOTICE), conformément à la licence Apache 2.0.
+Les règles reprises ont été adaptées aux objectifs, aux référentiels et aux exigences du Numérique Responsable portés par l’INR. Les modifications et extensions propres à ce projet ne doivent pas être attribuées à l’auteur de Caveman. Les mentions de droits d’auteur et de licence de ces règles sont conservées dans [`NOTICE`](skills/green-claude/NOTICE), conformément à la licence Apache 2.0.
 
 Ce projet est indépendant de Caveman et de Julius Brussee. La référence à Caveman n’implique aucune approbation, affiliation ou participation de son auteur.
 

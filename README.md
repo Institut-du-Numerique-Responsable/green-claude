@@ -311,9 +311,9 @@ have been verified.
 
 ### Caveman
 
-This project reuses and adapts some elements of the open source project [Caveman](https://github.com/JuliusBrussee/caveman), developed by Julius Brussee (Copyright 2026 Julius Brussee). These elements are under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); see also [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
+The NR-TOK token sobriety rules ([`rules/tokens.json`](skills/green-claude/rules/tokens.json)) are inspired by and adapt the rules of the open source project [Caveman](https://github.com/JuliusBrussee/caveman), developed by Julius Brussee (Copyright 2026 Julius Brussee). Caveman's rules are under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); see also [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
 
-The reused elements have been adapted to the goals, reference frameworks and responsible digital requirements of the INR. Modifications and extensions specific to this project must not be attributed to the author of Caveman. The copyright and license notices of these elements are kept in [`NOTICE`](skills/green-claude/NOTICE), as the Apache License 2.0 requires.
+The rules taken up have been adapted to the goals, reference frameworks and responsible digital requirements of the INR. Modifications and extensions specific to this project must not be attributed to the author of Caveman. The copyright and license notices of those rules are kept in [`NOTICE`](skills/green-claude/NOTICE), as the Apache License 2.0 requires.
 
 This project is independent of Caveman and Julius Brussee. Referring to Caveman implies no endorsement, affiliation or participation of its author.
 

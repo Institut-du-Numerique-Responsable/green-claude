@@ -8,7 +8,7 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajouté
 
-- Attribution de Caveman (Julius Brussee, Apache 2.0) dans `NOTICE` et les README, pour les éléments réutilisés et adaptés ; sa licence était indiquée à tort comme MIT.
+- Attribution de Caveman (Julius Brussee, Apache 2.0) dans `LICENSE`, `NOTICE` et les README : les règles NR-TOK s’inspirent de ses règles et les adaptent ; sa licence était indiquée à tort comme MIT.
 - Référentiel `rules/tokens.json` : 30 règles NR-TOK de sobriété des tokens pour les agents IA (réponses, contexte, opérations, modèles, qualité et mesure), avec leur priorité (7 obligatoires, 5 conditionnelles) et le format du bilan de session. Affiché par `eco-audit.sh --rules tokens` et inclus dans `--rules all` et `--list-rules`.
 - Passage du corpus de 146 à 225 règles : 83 transverses, 127 de langage sur 24 fichiers, 15 pratiques d’usage.
 - Quatorze langages et frameworks supplémentaires : Go, Kotlin, Swift, Shell, Scala, Julia, Nim, Zig, React (Preact compris), Vue, Angular, Svelte, Astro, Solid.
