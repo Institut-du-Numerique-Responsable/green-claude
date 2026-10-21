@@ -23,6 +23,7 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Modifié
 
+- Doublons fusionnés : USAGE-CTX-06 (réponses denses), USAGE-CPU-01 (niveau d’effort) et USAGE-CPU-02 (panels d’agents) disparaissent au profit de NR-TOK-001 à 005, 023 et 024, qui reprennent leurs nuances (effort recommandé par le client, comparaison avec une exécution plus simple avant de lancer des sous-agents, contexte gonflé par une réponse délayée). 13 pratiques d’usage, 277 règles.
 - `SKILL.md` encadre la rédaction des réponses : pas de tiret quadratin, pas d’annonce, de pseudo-clivée, de présentatif emphatique, d’épanorthose, d’anaphore, d’antithèse binaire ni d’énumération annoncée, et passage par le skill `stop-slop` quand il est installé.
 - `SKILL.md` renvoie vers `eco-audit.sh --rules` au lieu de faire lire les fichiers de règles bruts : 1,7 Ko au lieu de 8,8 Ko pour Python, 3 Ko au lieu de 22 Ko pour un `.tsx`, 27 Ko au lieu de 150 Ko pour la checklist complète. Le tableau des extensions disparaît de `SKILL.md`, le script le portant déjà.
 

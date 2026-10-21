@@ -1367,6 +1367,12 @@ CONDITIONAL=$(jq -r '[.categories[].rules[] | select(.priority == "Conditional")
 UNKNOWN=$(jq -r --slurpfile u ../rules/usage.json '([$u[0].categories[].rules[].id]) as $known
     | [.categories[].rules[].related[]? | select(. as $r | $known | index($r) | not)] | join(", ")' ../rules/tokens.json)
 [ -z "$UNKNOWN" ] || fail "tokens.json : related cite des pratiques inexistantes : $UNKNOWN"
+# Les pratiques fusionnées dans NR-TOK ne doivent pas revenir en doublon.
+for id in USAGE-CTX-06 USAGE-CPU-01 USAGE-CPU-02; do
+    jq -e --arg id "$id" '[.categories[].rules[].id] | index($id)' ../rules/usage.json >/dev/null \
+        && fail "$id est revenue dans usage.json alors que NR-TOK la couvre"
+done
+true
 OUT="$(bash eco-audit.sh --rules tokens)"
 echo "$OUT" | grep -q '^\[Mandatory\] NR-TOK-030 ' || fail "--rules tokens omet NR-TOK-030 ou sa priorité"
 echo "$OUT" | grep -q 'Never invent a metric' || fail "--rules tokens : l'interdiction d'inventer des métriques a disparu"

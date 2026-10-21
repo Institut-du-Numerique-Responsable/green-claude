@@ -1,14 +1,15 @@
 {
   "metadata": {
     "name": "Responsible use practices for Claude Code",
-    "description": "15 editorial recommendations from the project to limit unnecessary computation, transfers and rework when using Claude Code, without presenting token counts as a direct measure of energy.",
+    "description": "13 editorial recommendations from the project to limit unnecessary computation, transfers and rework when using Claude Code, without presenting token counts as a direct measure of energy.",
     "version": "3.0.0",
     "editorial_status": "Recommendations of the Green Claude project, not attributed to any individual.",
     "source_policy": "Any attribution to a named person requires a verifiable primary source. Commands and features mentioned here must be checked against the official documentation for the version in use.",
-    "count": 16,
+    "count": 13,
     "type": "practices",
     "type_note": "These rules describe USAGE PRACTICES, not code patterns: they carry no grep-able 'patterns'. The --eco-check audit ignores them; use --list-rules to consult them as a checklist.",
-    "energy_claim_policy": "This project states the direction and refuses the ratio. Fewer tokens processed means less computation, and less computation means less energy: that much holds. Converting a token count into watts, joules or grams of CO2 does not, because prompt caching, model size, batching, hardware and the grid mix each move the result more than the token count does. Earlier versions of this file carried such conversions, taken from a secondary source and never measured; they were removed. Keep the qualitative claim, keep the guard: any figure put on this link must come from a measurement of the setup it describes. A test in scripts/test-eco-audit.sh fails if the removed figures return, and this policy is checked alongside them."
+    "energy_claim_policy": "This project states the direction and refuses the ratio. Fewer tokens processed means less computation, and less computation means less energy: that much holds. Converting a token count into watts, joules or grams of CO2 does not, because prompt caching, model size, batching, hardware and the grid mix each move the result more than the token count does. Earlier versions of this file carried such conversions, taken from a secondary source and never measured; they were removed. Keep the qualitative claim, keep the guard: any figure put on this link must come from a measurement of the setup it describes. A test in scripts/test-eco-audit.sh fails if the removed figures return, and this policy is checked alongside them.",
+    "merged_into_tokens": "USAGE-CTX-06 (dense answers) became NR-TOK-001 to 005, USAGE-CPU-01 (effort level) NR-TOK-023 and USAGE-CPU-02 (agent panels) NR-TOK-024 in rules/tokens.json."
   },
   "categories": {
     "contexte": {
@@ -92,23 +93,6 @@
           "tags": [
             "context",
             "mapping",
-            "tokens",
-            "tools"
-          ]
-        },
-        {
-          "id": "USAGE-CTX-06",
-          "title": "Dense answers, no padding",
-          "principle": "Match the length of the answer to what the user actually needs.",
-          "description": "Keep answers to what is useful: no restating the question, no summary of what was just done when the diff or the result already says it.",
-          "why_green": "Needlessly long output immediately increases the tokens produced, and can also inflate the context of later exchanges.",
-          "how": "Go straight to the result. Tools such as the open-source caveman skill (Apache-2.0, github.com/JuliusBrussee/caveman) illustrate the idea by pushing style compression to its limit; the point to keep is the density, not necessarily the tool. Keep the style plain too: no em dash, no announced ideas or lists, no pseudo-cleft, epanorthosis, anaphora or binary antithesis (see the 'Writing your replies' section of SKILL.md). The open-source stop-slop skill (MIT, github.com/hardikpandya/stop-slop) catches further AI writing patterns.",
-          "impact": "Medium",
-          "source_ref": "Project recommendation; caveman and stop-slop are illustrative third-party examples, not audited by this project.",
-          "patterns": [],
-          "tags": [
-            "context",
-            "verbosity",
             "tokens",
             "tools"
           ]
@@ -250,38 +234,6 @@
       "name": "Size the compute to the task",
       "description": "Size the compute to the task, and confirm the trade-off with measurements of quality, latency and consumption.",
       "rules": [
-        {
-          "id": "USAGE-CPU-01",
-          "title": "Match the effort level to the task",
-          "principle": "Match the model and the effort level to what the task is observed to need.",
-          "description": "The available commands, levels and models vary by client and version. Pick the cheapest level that meets your quality bar, then measure before generalising.",
-          "why_green": "Higher effort can increase computation, while insufficient effort can cause rework. The right setting depends on measured results for the task at hand.",
-          "how": "Start from the setting recommended for your client, raise the effort when your evaluations demand it, and check which controls exist in the official documentation.",
-          "impact": "High",
-          "source_ref": "Client-dependent feature; check the official documentation and measure quality, latency and consumption.",
-          "patterns": [],
-          "tags": [
-            "effort",
-            "models",
-            "proportionality"
-          ]
-        },
-        {
-          "id": "USAGE-CPU-02",
-          "title": "No panel of agents for a small task",
-          "principle": "Reserve multi-agent parallelism for tasks whose expected benefit justifies the extra computation.",
-          "description": "Multi-agent workflows add calls and context, but they can also cut elapsed time or improve quality. Keep them for tasks where that benefit is expected and measurable.",
-          "why_green": "Parallelism can increase total consumption; weigh that overhead against the gain in quality, elapsed time or avoided rework.",
-          "how": "Before launching subagents, define the expected result, bound the scope, and compare whatever metrics you have against a simpler run.",
-          "impact": "High",
-          "source_ref": "Project recommendation; compare the cost of parallelism against the gain in quality or elapsed time.",
-          "patterns": [],
-          "tags": [
-            "subagents",
-            "workflows",
-            "token-budget"
-          ]
-        },
         {
           "id": "USAGE-CPU-03",
           "title": "Minimal mode for scripts that tolerate it",
