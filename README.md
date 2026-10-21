@@ -203,7 +203,7 @@ Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/
 
 The skill applies these rules to its own replies: no em dash, no phrase that announces an idea instead of delivering it, no pseudo-cleft sentence, no emphatic presentative or detached fake subordinate clause, no epanorthosis, verbal anaphora or binary antithesis, no counted announcement or announced list. They hold in every language ("Writing your replies" section of [`SKILL.md`](skills/green-claude/SKILL.md)).
 
-> The third-party tools cited (graphify, caveman, stop-slop) are verified illustrative examples (open source, MIT license). The project doesn't audit them and doesn't depend on them.
+> The third-party tools cited are verified open source: graphify and stop-slop under the MIT license, caveman under the Apache License 2.0 (see [Attribution and third-party licenses](#attribution-and-third-party-licenses)). The project doesn't audit them and doesn't depend on them.
 
 ## Token sobriety for AI agents
 
@@ -306,6 +306,16 @@ have been verified.
 ## Maintainers
 
 - [Guillaume Gallon](https://github.com/gridboy) ([LinkedIn](https://www.linkedin.com/in/ggallon/)) — [Institut du Numérique Responsable](https://institutnr.org)
+
+## Attribution and third-party licenses
+
+### Caveman
+
+This project reuses and adapts some elements of the open source project [Caveman](https://github.com/JuliusBrussee/caveman), developed by Julius Brussee (Copyright 2026 Julius Brussee). These elements are under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); see also [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
+
+The reused elements have been adapted to the goals, reference frameworks and responsible digital requirements of the INR. Modifications and extensions specific to this project must not be attributed to the author of Caveman. The copyright and license notices of these elements are kept in [`NOTICE`](skills/green-claude/NOTICE), as the Apache License 2.0 requires.
+
+This project is independent of Caveman and Julius Brussee. Referring to Caveman implies no endorsement, affiliation or participation of its author.
 
 ## License
 

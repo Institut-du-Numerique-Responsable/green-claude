@@ -102,7 +102,7 @@
           "principle": "Match the length of the answer to what the user actually needs.",
           "description": "Keep answers to what is useful: no restating the question, no summary of what was just done when the diff or the result already says it.",
           "why_green": "Needlessly long output immediately increases the tokens produced, and can also inflate the context of later exchanges.",
-          "how": "Go straight to the result. Tools such as the open-source caveman skill (MIT, github.com/juliusbrussee/caveman) illustrate the idea by pushing style compression to its limit; the point to keep is the density, not necessarily the tool. Keep the style plain too: no em dash, no announced ideas or lists, no pseudo-cleft, epanorthosis, anaphora or binary antithesis (see the 'Writing your replies' section of SKILL.md). The open-source stop-slop skill (MIT, github.com/hardikpandya/stop-slop) catches further AI writing patterns.",
+          "how": "Go straight to the result. Tools such as the open-source caveman skill (Apache-2.0, github.com/JuliusBrussee/caveman) illustrate the idea by pushing style compression to its limit; the point to keep is the density, not necessarily the tool. Keep the style plain too: no em dash, no announced ideas or lists, no pseudo-cleft, epanorthosis, anaphora or binary antithesis (see the 'Writing your replies' section of SKILL.md). The open-source stop-slop skill (MIT, github.com/hardikpandya/stop-slop) catches further AI writing patterns.",
           "impact": "Medium",
           "source_ref": "Project recommendation; caveman and stop-slop are illustrative third-party examples, not audited by this project.",
           "patterns": [],

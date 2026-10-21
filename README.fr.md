@@ -203,7 +203,7 @@ Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/r
 
 Le skill applique ces consignes à ses propres réponses : pas de tiret quadratin, pas de formule qui annonce une idée au lieu de la livrer, pas de phrase pseudo-clivée, de présentatif emphatique ni de fausse subordonnée détachée, pas d'épanorthose, d'anaphore verbale ni d'antithèse binaire, pas d'annonce dénombrée ni d'énumération annoncée. Elles valent dans toutes les langues (section « Writing your replies » de [`SKILL.md`](skills/green-claude/SKILL.md)).
 
-> Les outils tiers cités (graphify, caveman, stop-slop) sont des exemples illustratifs vérifiés (open source, licence MIT). Le projet ne les audite pas et n'en dépend pas.
+> Les outils tiers cités sont open source et vérifiés : graphify et stop-slop sous licence MIT, caveman sous licence Apache 2.0 (voir [Attribution et licences tierces](#attribution-et-licences-tierces)). Le projet ne les audite pas et n'en dépend pas.
 
 ## Sobriété des tokens pour les agents IA
 
@@ -306,6 +306,16 @@ vérification de sa version, des tests et des archives produites.
 ## Mainteneurs
 
 - [Guillaume Gallon](https://github.com/gridboy) ([LinkedIn](https://www.linkedin.com/in/ggallon/)) — [Institut du Numérique Responsable](https://institutnr.org)
+
+## Attribution et licences tierces
+
+### Caveman
+
+Ce projet réutilise et adapte certains éléments du projet open source [Caveman](https://github.com/JuliusBrussee/caveman), développé par Julius Brussee (Copyright 2026 Julius Brussee). Ces éléments sont sous [licence Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) ; voir aussi [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
+
+Les éléments réutilisés ont été adaptés aux objectifs, aux référentiels et aux exigences du Numérique Responsable portés par l’INR. Les modifications et extensions propres à ce projet ne doivent pas être attribuées à l’auteur de Caveman. Les mentions de droits d’auteur et de licence de ces éléments sont conservées dans [`NOTICE`](skills/green-claude/NOTICE), conformément à la licence Apache 2.0.
+
+Ce projet est indépendant de Caveman et de Julius Brussee. La référence à Caveman n’implique aucune approbation, affiliation ou participation de son auteur.
 
 ## Licence
 
