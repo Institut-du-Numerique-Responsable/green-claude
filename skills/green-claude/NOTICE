@@ -20,18 +20,12 @@ References to RGESN, GR491, Green Software Foundation, W3C and YellowLabTools
 do not relicense those sources or imply their endorsement.
 Graphify (MIT) and stop-slop (MIT) are independent tools cited as examples.
 
-Caveman
-Copyright 2026 Julius Brussee
-Source: https://github.com/JuliusBrussee/caveman
-License: Apache License 2.0 (LICENSES/Apache-2.0.txt,
-https://www.apache.org/licenses/LICENSE-2.0); see also
-https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md
-The NR-TOK token sobriety rules (rules/tokens.json) are inspired by and
-adapt the rules of Caveman to the goals, reference frameworks and
-requirements of the Institut du Numérique Responsable. Modifications and extensions made in this project must not be
-attributed to the original author. This project is independent of Caveman
-and Julius Brussee: referring to Caveman implies no endorsement, affiliation
-or participation of its author.
+Some ideas of the NR-TOK token sobriety rules (rules/tokens.json) were
+inspired by Caveman (Copyright 2026 Julius Brussee, Apache License 2.0,
+https://github.com/JuliusBrussee/caveman). The Institut du Numérique
+Responsable reworked and rewrote those rules.
+This project is independent of Caveman and its author: referring to it implies
+no endorsement, affiliation or participation.
 
 Apache-2.0 redistribution requires preservation of applicable legal notices;
 it does not require a credit on every user interface. This NOTICE provides

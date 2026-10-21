@@ -311,11 +311,9 @@ vérification de sa version, des tests et des archives produites.
 
 ### Caveman
 
-Les règles NR-TOK de sobriété des tokens ([`rules/tokens.json`](skills/green-claude/rules/tokens.json)) s’inspirent des règles du projet open source [Caveman](https://github.com/JuliusBrussee/caveman), développé par Julius Brussee (Copyright 2026 Julius Brussee), et les adaptent. Les règles de Caveman sont sous [licence Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) ; voir aussi [LICENSING.md](https://github.com/JuliusBrussee/caveman/blob/main/LICENSING.md).
+Quelques idées des règles NR-TOK ([`rules/tokens.json`](skills/green-claude/rules/tokens.json)) viennent du projet open source [Caveman](https://github.com/JuliusBrussee/caveman) (Copyright 2026 Julius Brussee, licence Apache 2.0). L’INR a remanié et réécrit ces règles pour les objectifs et les référentiels du Numérique Responsable.
 
-Les règles reprises ont été adaptées aux objectifs, aux référentiels et aux exigences du Numérique Responsable portés par l’INR. Les modifications et extensions propres à ce projet ne doivent pas être attribuées à l’auteur de Caveman. Les mentions de droits d’auteur et de licence de ces règles sont conservées dans [`NOTICE`](skills/green-claude/NOTICE), conformément à la licence Apache 2.0.
-
-Ce projet est indépendant de Caveman et de Julius Brussee. La référence à Caveman n’implique aucune approbation, affiliation ou participation de son auteur.
+Ce projet est indépendant de Caveman et de son auteur. La référence à Caveman n’implique aucune approbation, affiliation ou participation de sa part.
 
 ## Licence
 

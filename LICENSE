@@ -21,11 +21,6 @@ Historical third-party contributions retain their MIT terms. The original
 MIT notice is preserved in skills/green-claude/LICENSES/MIT-legacy.txt; it is not the
 default license for new project work.
 
-The NR-TOK rules in rules/tokens.json are inspired by and adapt the rules of
-Caveman, Copyright 2026 Julius Brussee, licensed under the Apache License,
-Version 2.0. The adapted portions remain under Apache-2.0, and the Caveman
-notice is preserved in skills/green-claude/NOTICE.
-
 Third-party material and explicitly marked source attributions retain their
 applicable terms. These licenses grant no trademark rights in project names
 or logos. Previously published MIT versions remain available under MIT;
