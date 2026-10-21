@@ -1369,7 +1369,10 @@ UNKNOWN=$(jq -r --slurpfile u ../rules/usage.json '([$u[0].categories[].rules[].
 [ -z "$UNKNOWN" ] || fail "tokens.json : related cite des pratiques inexistantes : $UNKNOWN"
 OUT="$(bash eco-audit.sh --rules tokens)"
 echo "$OUT" | grep -q '^\[Mandatory\] NR-TOK-030 ' || fail "--rules tokens omet NR-TOK-030 ou sa priorité"
-echo "$OUT" | grep -q 'Never invent metrics' || fail "--rules tokens : l'interdiction d'inventer des métriques a disparu"
+echo "$OUT" | grep -q 'Never invent a metric' || fail "--rules tokens : l'interdiction d'inventer des métriques a disparu"
+# NR-TOK-012 s'applique au référentiel lui-même : sa vue compacte reste sous
+# 6 Ko, faute de quoi elle coûte plus qu'elle n'épargne.
+[ "${#OUT}" -lt 6000 ] || fail "--rules tokens dépasse 6 Ko (${#OUT} caractères)"
 echo "$OUT" | grep -q '^### Token sobriety' || fail "--rules tokens n'affiche pas le format du bilan de session"
 
 # all : toutes les règles transverses et les pratiques d'usage et de sobriété des tokens, chacune une

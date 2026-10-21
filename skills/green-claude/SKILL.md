@@ -228,15 +228,17 @@ costs fewer tokens and less reading time.
 Responsable. Print them with `eco-audit.sh --rules tokens` when a session
 starts on real work. Always apply the mandatory ones:
 
-- NR-TOK-007: load only what the task needs.
-- NR-TOK-011: a summary keeps errors, negations, numbers, units, paths and ids.
-- NR-TOK-015: find the probable cause before changing code.
-- NR-TOK-016: change only the lines that need it.
-- NR-TOK-022: stop once the acceptance criteria are met.
+- NR-TOK-007: start from the files the task names, never the whole repository.
+- NR-TOK-011: a summary keeps errors verbatim, and negations, numbers, units,
+  paths, identifiers, commands and code exactly.
+- NR-TOK-015: locate the cause before editing; no chain of trial fixes.
+- NR-TOK-016: edit the lines that change, never the whole file.
+- NR-TOK-022: stop once the acceptance criteria pass.
 - NR-TOK-027: no saving justifies a loss of security, correctness,
-  accessibility, maintainability or understanding.
-- NR-TOK-030: end the session with the short report printed by
-  `--rules tokens`. Never invent a metric: write "unavailable" instead.
+  accessibility, maintainability or clarity.
+- NR-TOK-030: after a task that ran tools or changed files, end with the short
+  report printed by `--rules tokens`. Skip it for a plain question. Never invent
+  a metric: write "unavailable".
 
 NR-TOK-023 to 026 and NR-TOK-028 apply when the environment allows them (model
 choice, cache, metrics). The others apply by default.

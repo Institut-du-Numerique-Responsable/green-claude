@@ -219,7 +219,7 @@ Le skill applique ces consignes à ses propres réponses : pas de tiret quadrati
 
 Sept règles sont obligatoires : NR-TOK-007, 011, 015, 016, 022, 027 et 030. NR-TOK-023 à 026 et NR-TOK-028 dépendent de ce que permet l’environnement. Les autres s’appliquent par défaut. Plusieurs recoupent les pratiques d’usage : le champ `related` de chaque règle les nomme.
 
-`eco-audit.sh --rules tokens` les affiche en vue compacte, suivies du format du bilan de session exigé par NR-TOK-030. Ce bilan liste les règles appliquées, les optimisations, les mesures disponibles, les tests et les limites. Il n’invente aucune métrique et ne donne un pourcentage d’économie que face à une référence comparable. Réduire les tokens, les coûts et l’impact environnemental restent trois objectifs distincts.
+`eco-audit.sh --rules tokens` les affiche en vue compacte, suivies du format du bilan de session exigé par NR-TOK-030. Ce bilan clôt toute tâche qui a lancé des outils ou modifié des fichiers, jamais une simple question. Il liste les règles appliquées, les optimisations, les mesures disponibles, les tests et les limites. Il n’invente aucune métrique et ne donne un pourcentage d’économie que face à une référence comparable. Réduire les tokens, les coûts et l’impact environnemental restent trois objectifs distincts.
 
 ---
 

@@ -219,7 +219,7 @@ The skill applies these rules to its own replies: no em dash, no phrase that ann
 
 Seven rules are mandatory: NR-TOK-007, 011, 015, 016, 022, 027 and 030. NR-TOK-023 to 026 and NR-TOK-028 depend on what the environment allows. The others apply by default. Several overlap with the responsible-use practices: each rule's `related` field names them.
 
-`eco-audit.sh --rules tokens` prints them in compact form, followed by the session report format required by NR-TOK-030. The report lists the rules applied, the optimizations, the available measurements, the tests and the limits. It invents no metric and gives a saving percentage only against a comparable baseline. Cutting tokens, cutting costs and cutting environmental impact remain three separate goals.
+`eco-audit.sh --rules tokens` prints them in compact form, followed by the session report format required by NR-TOK-030. The report closes any task that ran tools or changed files, never a plain question. It lists the rules applied, the optimizations, the available measurements, the tests and the limits. It invents no metric and gives a saving percentage only against a comparable baseline. Cutting tokens, cutting costs and cutting environmental impact remain three separate goals.
 
 ---
 
