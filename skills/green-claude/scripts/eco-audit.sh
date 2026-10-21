@@ -5,13 +5,14 @@
 # Usage : eco-audit.sh <fichier> [fichier...]
 #         eco-audit.sh --list-rules          (checklist des règles sans pattern grep-able)
 #         eco-audit.sh --rules               (familles et langages disponibles)
-#         eco-audit.sh --rules <nom>...      (vue compacte : famille, langage, fichier, usage, all)
+#         eco-audit.sh --rules <nom>...      (vue compacte : famille, langage, fichier, usage, tokens, all)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RULES_FILE="$SCRIPT_DIR/../rules/ecoconception.json"
 USAGE_FILE="$SCRIPT_DIR/../rules/usage.json"
+TOKENS_FILE="$SCRIPT_DIR/../rules/tokens.json"
 LANG_DIR="$SCRIPT_DIR/../rules/langages"
 
 source "$SCRIPT_DIR/audit-common.sh"
@@ -161,10 +162,14 @@ fi
 if [ "${1:-}" = "--rules" ]; then
     shift
     COMPACT='.categories[] | "## \(.name)", (.rules[] | "[\(.impact)] \(.id) \(.title) — \(.recommendation // .how)")'
+    # Les règles de sobriété des tokens portent une priorité, pas un impact,
+    # et le format du bilan de session exigé par NR-TOK-030.
+    TOKENS='(.categories[] | "## \(.name)", (.rules[] | "[\(.priority)] \(.id) \(.title) — \(.recommendation)")), "## Session report (NR-TOK-030)", .metadata.report_format'
     if [ $# -eq 0 ]; then
         echo "Families : $(jq -r '[.categories[].name | sub("^[0-9]+\\. "; "") | ascii_downcase] | join(", ")' "$RULES_FILE")"
         echo "Languages: $(for lang_json in "$LANG_DIR"/*.json; do basename "$lang_json" .json; done | paste -sd' ' -)"
-        echo "Also     : usage (responsible-use practices), all (every family and usage),"
+        echo "Also     : usage (responsible-use practices), tokens (token sobriety),"
+        echo "           all (every family, usage and tokens),"
         echo "           or a file name (src/App.tsx) for the rules of its language."
         exit 0
     fi
@@ -176,8 +181,11 @@ if [ "${1:-}" = "--rules" ]; then
         [ -n "$key" ] || { echo "Empty family or language name (see eco-audit.sh --rules)." >&2; exit 1; }
         if [ "$key" = "usage" ]; then
             jq -r "$COMPACT" "$USAGE_FILE"
+        elif [ "$key" = "tokens" ]; then
+            jq -r "$TOKENS" "$TOKENS_FILE"
         elif [ "$key" = "all" ]; then
             jq -r "$COMPACT" "$RULES_FILE" "$USAGE_FILE"
+            jq -r "$TOKENS" "$TOKENS_FILE"
         elif [ "$base" = "$name" ] && [ -f "$LANG_DIR/$key.json" ]; then
             jq -r "$COMPACT" "$LANG_DIR/$key.json"
         elif [ "$base" != "${base%.*}" ]; then
@@ -247,6 +255,10 @@ if [ "${1:-}" = "--list-rules" ]; then
         [.categories[] as $c | $c.rules[] | . + {category: $c.name}]
         | .[]
         | "[\(.impact)] \(.id) — \(.title)\n  \(.how)\n"' "$USAGE_FILE"
+    echo "=== Token sobriety for AI agents (NR-TOK) ==="
+    jq -r '
+        .categories[].rules[]
+        | "[\(.priority)] \(.id) — \(.title)\n  \(.recommendation)\n"' "$TOKENS_FILE"
     echo "Checklist for one language: eco-audit.sh --list-rules <language> (see --list-langs)."
     exit 0
 fi
@@ -255,7 +267,7 @@ if [ $# -eq 0 ]; then
     echo "Usage: eco-audit.sh <file> [file...]" >&2
     echo "        eco-audit.sh --list-rules [language]" >&2
     echo "        eco-audit.sh --list-langs" >&2
-    echo "        eco-audit.sh --rules [family|language|file|usage|all]..." >&2
+    echo "        eco-audit.sh --rules [family|language|file|usage|tokens|all]..." >&2
     exit 1
 fi
 

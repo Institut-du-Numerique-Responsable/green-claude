@@ -8,6 +8,7 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Référentiel `rules/tokens.json` : 30 règles NR-TOK de sobriété des tokens pour les agents IA (réponses, contexte, opérations, modèles, qualité et mesure), avec leur priorité (7 obligatoires, 5 conditionnelles) et le format du bilan de session. Affiché par `eco-audit.sh --rules tokens` et inclus dans `--rules all` et `--list-rules`.
 - Passage du corpus de 146 à 225 règles : 83 transverses, 127 de langage sur 24 fichiers, 15 pratiques d’usage.
 - Quatorze langages et frameworks supplémentaires : Go, Kotlin, Swift, Shell, Scala, Julia, Nim, Zig, React (Preact compris), Vue, Angular, Svelte, Astro, Solid.
 - Cadre 3U de l’Institut du Numérique Responsable (utile, utilisable, utilisé) porté par un champ `three_u` sur 29 règles, avec accessibilité (`ECO-UX-08`) et fin de vie (`ECO-STRAT-07`) qui comblaient les deux volets les plus faibles.

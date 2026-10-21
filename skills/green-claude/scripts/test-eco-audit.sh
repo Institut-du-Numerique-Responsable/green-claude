@@ -1189,7 +1189,8 @@ RULES_DIR="../rules"
 COUNT_ECO=$(jq '[.categories[].rules[]] | length' "$RULES_DIR/ecoconception.json")
 COUNT_LANG=$(cat "$RULES_DIR"/langages/*.json | jq -s '[.[].categories[].rules[]] | length')
 COUNT_USAGE=$(jq '[.categories[].rules[]] | length' "$RULES_DIR/usage.json")
-COUNT_TOTAL=$(( COUNT_ECO + COUNT_LANG + COUNT_USAGE ))
+COUNT_TOKENS=$(jq '[.categories[].rules[]] | length' "$RULES_DIR/tokens.json")
+COUNT_TOTAL=$(( COUNT_ECO + COUNT_LANG + COUNT_USAGE + COUNT_TOKENS ))
 
 grep -q "($COUNT_ECO rules, RGESN 2024" ../SKILL.md \
     || fail "SKILL.md annonce un nombre de règles transverses qui n'est plus $COUNT_ECO"
@@ -1199,6 +1200,10 @@ grep -q "it carries $COUNT_TOTAL rules," ../SKILL.md \
     || fail "ecoconception.json : metadata.count ne correspond plus au nombre de règles"
 [ "$COUNT_USAGE" = "$(jq -r '.metadata.count' "$RULES_DIR/usage.json")" ] \
     || fail "usage.json : metadata.count ne correspond plus au nombre de règles"
+[ "$COUNT_TOKENS" = "$(jq -r '.metadata.count' "$RULES_DIR/tokens.json")" ] \
+    || fail "tokens.json : metadata.count ne correspond plus au nombre de règles"
+grep -q "($COUNT_TOKENS token sobriety rules)" ../SKILL.md \
+    || fail "SKILL.md annonce un nombre de règles de sobriété des tokens qui n'est plus $COUNT_TOKENS"
 for lang_json in "$RULES_DIR"/langages/*.json; do
     declared=$(jq -r '.metadata.count' "$lang_json")
     actual=$(jq '[.categories[].rules[]] | length' "$lang_json")
@@ -1348,17 +1353,36 @@ echo "$OUT" | grep -q 'ECO-UX-01' || fail "--rules ux/ui pris pour un chemin de 
 OUT="$(bash eco-audit.sh --rules usage)"
 echo "$OUT" | grep -q 'USAGE-BRIEF-03' || fail "--rules usage omet les pratiques d'usage"
 
-# all : toutes les règles transverses et les pratiques d'usage, chacune une
+# Sobriété des tokens : les 30 identifiants NR-TOK dans l'ordre, les priorités
+# du référentiel INR, et le format du bilan que NR-TOK-030 rend obligatoire.
+IDS=$(jq -r '[.categories[].rules[].id] | join(" ")' ../rules/tokens.json)
+[ "$IDS" = "$(printf 'NR-TOK-%03d ' $(seq 1 30) | sed 's/ $//')" ] \
+    || fail "tokens.json : identifiants NR-TOK-001 à 030 attendus dans l'ordre"
+MANDATORY=$(jq -r '[.categories[].rules[] | select(.priority == "Mandatory") | .id[7:]] | join(" ")' ../rules/tokens.json)
+[ "$MANDATORY" = "007 011 015 016 022 027 030" ] \
+    || fail "tokens.json : règles obligatoires inattendues : $MANDATORY"
+CONDITIONAL=$(jq -r '[.categories[].rules[] | select(.priority == "Conditional") | .id[7:]] | join(" ")' ../rules/tokens.json)
+[ "$CONDITIONAL" = "023 024 025 026 028" ] \
+    || fail "tokens.json : règles conditionnelles inattendues : $CONDITIONAL"
+UNKNOWN=$(jq -r --slurpfile u ../rules/usage.json '([$u[0].categories[].rules[].id]) as $known
+    | [.categories[].rules[].related[]? | select(. as $r | $known | index($r) | not)] | join(", ")' ../rules/tokens.json)
+[ -z "$UNKNOWN" ] || fail "tokens.json : related cite des pratiques inexistantes : $UNKNOWN"
+OUT="$(bash eco-audit.sh --rules tokens)"
+echo "$OUT" | grep -q '^\[Mandatory\] NR-TOK-030 ' || fail "--rules tokens omet NR-TOK-030 ou sa priorité"
+echo "$OUT" | grep -q 'Never invent metrics' || fail "--rules tokens : l'interdiction d'inventer des métriques a disparu"
+echo "$OUT" | grep -q '^### Token sobriety' || fail "--rules tokens n'affiche pas le format du bilan de session"
+
+# all : toutes les règles transverses et les pratiques d'usage et de sobriété des tokens, chacune une
 # seule fois, sans champ vide ni motif d'audit.
 OUT="$(bash eco-audit.sh --rules all)"
 N=$(echo "$OUT" | grep -c '^\[')
-EXPECTED=$(( $(jq '[.categories[].rules[]] | length' ../rules/ecoconception.json) + $(jq '[.categories[].rules[]] | length' ../rules/usage.json) ))
+EXPECTED=$(( $(jq '[.categories[].rules[]] | length' ../rules/ecoconception.json) + $(jq '[.categories[].rules[]] | length' ../rules/usage.json) + $(jq '[.categories[].rules[]] | length' ../rules/tokens.json) ))
 [ "$N" -eq "$EXPECTED" ] || fail "--rules all : $EXPECTED règles attendues, $N affichées"
 DUP=$(echo "$OUT" | grep '^\[' | awk '{print $2}' | sort | uniq -d | head -1)
 [ -z "$DUP" ] || fail "--rules all affiche deux fois $DUP"
 echo "$OUT" | grep -q 'null' && fail "--rules all affiche un champ vide (null)"
 echo "$OUT" | grep -qF 'SELECT\s' && fail "--rules expose un motif d'audit"
-RAW=$(cat ../rules/ecoconception.json ../rules/usage.json | wc -c)
+RAW=$(cat ../rules/ecoconception.json ../rules/usage.json ../rules/tokens.json | wc -c)
 [ $(( ${#OUT} * 4 )) -lt "$RAW" ] || fail "--rules all n'est plus au moins quatre fois plus léger que les JSON"
 
 OUT="$(bash eco-audit.sh --rules)"

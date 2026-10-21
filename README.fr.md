@@ -8,7 +8,7 @@
 
 **Green Claude** aide [Claude Code](https://claude.com/claude-code) à proposer du code moins gourmand en ressources, grâce à des règles d’éco-conception et à un audit local.
 
-Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, et 16 pratiques d’usage responsable**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
+Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, 16 pratiques d’usage responsable et 30 règles de sobriété des tokens**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 Le skill guide le modèle lorsqu’il est chargé ; son application n’est pas garantie à chaque réponse. L’audit détecte des problèmes potentiels à examiner, sans certifier la conformité RGESN ni mesurer une économie d’énergie. Les hooks optionnels permettent de lancer cet audit après les écritures de code prises en charge.
 
@@ -204,6 +204,22 @@ Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/r
 Le skill applique ces consignes à ses propres réponses : pas de tiret quadratin, pas de formule qui annonce une idée au lieu de la livrer, pas de phrase pseudo-clivée, de présentatif emphatique ni de fausse subordonnée détachée, pas d'épanorthose, d'anaphore verbale ni d'antithèse binaire, pas d'annonce dénombrée ni d'énumération annoncée. Elles valent dans toutes les langues (section « Writing your replies » de [`SKILL.md`](skills/green-claude/SKILL.md)).
 
 > Les outils tiers cités (graphify, caveman, stop-slop) sont des exemples illustratifs vérifiés (open source, licence MIT). Le projet ne les audite pas et n'en dépend pas.
+
+## Sobriété des tokens pour les agents IA
+
+[`skills/green-claude/rules/tokens.json`](skills/green-claude/rules/tokens.json) porte les 30 règles NR-TOK de l’Institut du Numérique Responsable. Elles réduisent les tokens consommés, les appels aux modèles et les traitements inutiles sans dégrader la qualité, la sécurité, la maintenabilité ni la compréhension du code. Elles visent les agents de développement comme Claude Code, OpenAI Codex et Mistral Vibe.
+
+| Famille | Règles | Exemples |
+|---|---|---|
+| A. Sobriété des réponses | NR-TOK-001 à 006 | répondre directement, pas de conclusion redondante, peu de messages entre les appels d’outils |
+| B. Gestion du contexte | NR-TOK-007 à 014 | charger le nécessaire, recherche ciblée, compresser les logs en gardant erreurs, nombres et chemins |
+| C. Sobriété des opérations | NR-TOK-015 à 022 | investiguer avant de modifier, modifications ciblées, s’arrêter aux critères d’acceptation |
+| D. Optimisation des modèles | NR-TOK-023 à 026 | modèle proportionné, traitements déterministes en local, cache |
+| E. Qualité et mesure | NR-TOK-027 à 030 | aucune économie au prix de la qualité, mesurer, bilan de session |
+
+Sept règles sont obligatoires : NR-TOK-007, 011, 015, 016, 022, 027 et 030. NR-TOK-023 à 026 et NR-TOK-028 dépendent de ce que permet l’environnement. Les autres s’appliquent par défaut. Plusieurs recoupent les pratiques d’usage : le champ `related` de chaque règle les nomme.
+
+`eco-audit.sh --rules tokens` les affiche en vue compacte, suivies du format du bilan de session exigé par NR-TOK-030. Ce bilan liste les règles appliquées, les optimisations, les mesures disponibles, les tests et les limites. Il n’invente aucune métrique et ne donne un pourcentage d’économie que face à une référence comparable. Réduire les tokens, les coûts et l’impact environnemental restent trois objectifs distincts.
 
 ---
 

@@ -15,6 +15,7 @@ Les résultats du script sont des candidats à vérifier en contexte, pas une ce
 - [Index des langages et frameworks](https://institut-du-numerique-responsable.github.io/green-claude/languages/): accès aux règles spécifiques à chaque environnement.
 - [Règles transverses](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/skills/green-claude/rules/ecoconception.json): recommandations, motifs et références.
 - [Pratiques d'usage](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/skills/green-claude/rules/usage.json): contexte, vérification et sobriété de la session.
+- [Sobriété des tokens](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/skills/green-claude/rules/tokens.json): 30 règles NR-TOK pour les agents IA, priorités et format du bilan de session.
 - [Eau et électricité](https://institut-du-numerique-responsable.github.io/green-claude/water-electricity-detection.html): portée des règles de sobriété IA.
 - [Métadonnées](https://institut-du-numerique-responsable.github.io/green-claude/ai.json): version et périmètre générés depuis les sources du projet.
 

@@ -3,7 +3,7 @@
   "@type": "SoftwareSourceCode",
   "@id": "https://institut-du-numerique-responsable.github.io/green-claude/#software",
   "name": "Green Claude",
-  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 250 règles : 107 transverses, 127 pour 24 langages et frameworks, 16 pratiques d'usage.",
+  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 280 règles : 107 transverses, 127 pour 24 langages et frameworks, 16 pratiques d'usage, 30 règles de sobriété des tokens.",
   "version": "1.4.0",
   "url": "https://institut-du-numerique-responsable.github.io/green-claude/",
   "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
