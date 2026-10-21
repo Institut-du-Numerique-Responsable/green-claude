@@ -8,6 +8,7 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- Page de présentation (`docs/index.html`) refaite aux couleurs de l’INR : public élargi aux product owners, métiers, designers et rédacteurs, tutoriel en cinq étapes pour une première demande sans code (Claude.ai ou Claude Code), demandes à copier par profil, encadré sur la sobriété des tokens. Vidéo de démonstration de 2 minutes intégrée (`docs/assets/video/`, 600 Ko, chargée au clic seulement, affiche de 7 Ko).
 - Mention de Caveman (Julius Brussee, Apache 2.0) dans `NOTICE` et les README : quelques idées des règles NR-TOK en viennent, règles remaniées et réécrites par l’INR ; sa licence était indiquée à tort comme MIT.
 - Référentiel `rules/tokens.json` : 30 règles NR-TOK de sobriété des tokens pour les agents IA (réponses, contexte, opérations, modèles, qualité et mesure), avec leur priorité (7 obligatoires, 5 conditionnelles) et le format du bilan de session, exigé après toute tâche qui lance des outils ou modifie des fichiers. Consignes courtes et concrètes, vue compacte sous 6 Ko. Affiché par `eco-audit.sh --rules tokens` et inclus dans `--rules all` et `--list-rules`.
 - Passage du corpus de 146 à 225 règles : 83 transverses, 127 de langage sur 24 fichiers, 15 pratiques d’usage.

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Claude : sobriété numérique pour Claude Code</title>
-  <meta name="description" content="Green Claude : skill open source pour Claude Code, règles d'éco-conception RGESN/GR491, audit de code et recommandations de sobriété numérique.">
+  <meta name="description" content="Green Claude : skill open source pour Claude Code et Claude.ai, règles d'éco-conception RGESN/GR491 pour développeurs, product owners et métiers, audit de code, sobriété des tokens et démonstration vidéo.">
   <meta name="author" content="Institut du Numérique Responsable - Guillaume Gallon, Robin Trassard, Guillaume Bourgeois (@bourgeoisguillaume01-glitch), Vincent Courboulay">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="google-site-verification" content="jgumEgIuIzTPIIrXW3ot-CFd51RTcmmTdRNcSlqf2MA" />
@@ -15,7 +15,7 @@
   <link rel="alternate" type="text/plain" href="llms.txt" title="Documentation pour les assistants IA">
   <link rel="describedby" type="application/ld+json" href="ai.json">
   <meta property="og:title" content="Green Claude : sobriété numérique pour Claude Code">
-  <meta property="og:description" content="Skill open source pour Claude Code : code éco-conçu par défaut (RGESN 2024 / GR491 / WSG), plus un hook optionnel de cache local et heures creuses.">
+  <meta property="og:description" content="Skill open source pour Claude : un assistant IA plus sobre pour toute l'équipe, développeurs, product owners et métiers (RGESN 2024 / GR491). Tuto et démo vidéo.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://institut-du-numerique-responsable.github.io/green-claude/">
   <meta property="og:locale" content="fr_FR">
@@ -80,53 +80,131 @@
 }
   </script>
   <style>
-    /* Page éco-conçue : polices système, zéro JavaScript, zéro requête externe,
-       mode sombre natif. Elle applique les règles qu'elle promeut. */
+    /* Page éco-conçue aux couleurs de l'INR : polices système (Inter si elle
+       est déjà installée, aucune police téléchargée), zéro JavaScript hors
+       mesure d'audience, mode sombre natif. La vidéo ne se charge qu'au clic.
+       Elle applique les règles qu'elle promeut. */
     :root {
-      --bg: #fbfcfe; --fg: #101823; --muted: #56626f;
-      --accent: #0d3280; --card: #eef2f8; --border: #dce3ec;
+      --bg: #ffffff; --fg: #173b4f; --muted: #4f6875;
+      --blue: #195675; --blue-hover: #123f56; --teal: #147d78;
+      --pale: #eef5f7; --line: #d7e4e9; --alt: #f6f9fa;
+      --ink: #173b4f; --on-ink: #ffffff; --ink-line: #54727f;
     }
     @media (prefers-color-scheme: dark) {
-      :root { --bg: #0e1420; --fg: #e6ecf3; --muted: #94a2b3;
-              --accent: #5aa9ea; --card: #182233; --border: #23303f; }
+      :root { --bg: #0f1d26; --fg: #e3edf1; --muted: #a3b8c2;
+              --blue: #7cc4d6; --blue-hover: #a5d8e5; --teal: #5cc7b8;
+              --pale: #16303d; --line: #26434f; --alt: #132833;
+              --ink: #0a161d; --on-ink: #e3edf1; --ink-line: #33505c; }
     }
     * { box-sizing: border-box; margin: 0; }
     body {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
       background: var(--bg); color: var(--fg);
-      line-height: 1.65; padding: 0 1.25rem;
+      font-size: 17px; line-height: 1.75; padding: 0 16px;
     }
-    main { max-width: 46rem; margin: 0 auto; padding: 3rem 0 4rem; }
-    h1 { font-size: 2rem; line-height: 1.2; margin-bottom: .75rem; }
-    h2 { font-size: 1.35rem; margin: 2.5rem 0 .75rem; color: var(--accent); }
-    p  { margin-bottom: 1rem; }
-    a  { color: var(--accent); }
-    .tagline { font-size: 1.15rem; color: var(--muted); margin-bottom: 1.5rem; }
-    .cta {
-      display: inline-block; background: var(--accent); color: var(--bg);
-      padding: .65rem 1.3rem; border-radius: .4rem; text-decoration: none;
-      font-weight: 600; margin: .25rem .5rem .25rem 0;
+    a { color: var(--blue); overflow-wrap: anywhere; }
+    a:focus-visible { outline: 3px solid var(--teal); outline-offset: 4px; }
+    .site { max-width: 70rem; margin: 0 auto; }
+    .topbar { display: flex; justify-content: space-between; align-items: center;
+              gap: 1rem; padding: 1.1rem 0; border-bottom: 1px solid var(--line);
+              font-size: 15px; }
+    .topbar strong { color: var(--fg); font-weight: 700; }
+    .topbar a { font-weight: 600; text-decoration: none; }
+    .topbar a:hover { text-decoration: underline; }
+
+    /* Bandeau d'ouverture, repris des pages de l'INR */
+    .hero { display: grid; grid-template-columns: 1fr; align-items: center;
+            background: var(--pale); border-radius: 8px; margin: 2.5rem 0 3.5rem;
+            overflow: hidden; }
+    .hero-text { padding: 2rem 1.5rem 1rem; }
+    .kicker { font-size: 15px; color: var(--blue); margin-bottom: 1rem; }
+    h1 { font-size: clamp(32px, 4vw, 46px); line-height: 1.14;
+         letter-spacing: -1px; color: var(--blue); margin-bottom: 1.25rem;
+         max-width: 18ch; }
+    .lead { font-size: 20px; line-height: 1.55; max-width: 36ch;
+            margin-bottom: 1.75rem; }
+    .hero-logo { display: block; width: 9rem; height: auto; color: var(--fg);
+                 margin: 0 1.5rem 2rem; }
+    @media (min-width: 48rem) {
+      .hero { grid-template-columns: 3fr 2fr; }
+      .hero-text { padding: 3rem 0 3rem 3rem; }
+      .hero-logo { width: 14rem; margin: 0 auto; }
     }
-    .cta.secondary { background: transparent; color: var(--accent);
-                     border: 1.5px solid var(--accent); }
-    .duo { display: grid; gap: 1rem; grid-template-columns: 1fr;
+    .button { display: inline-block; background: var(--blue); color: var(--bg);
+              padding: 14px 20px; border-radius: 4px; text-decoration: none;
+              font-weight: 700; margin: 0 .75rem .75rem 0; }
+    .button:hover { background: var(--blue-hover); }
+    .button.ghost { background: transparent; color: var(--blue);
+                    box-shadow: inset 0 0 0 2px var(--blue); }
+    .button.ghost:hover { background: var(--bg); }
+
+    /* Colonne de lecture */
+    .read { max-width: 50rem; margin: 0 auto; }
+    section { padding: 1rem 0 2.5rem; }
+    h2 { font-size: clamp(26px, 3vw, 32px); line-height: 1.25;
+         letter-spacing: -.5px; color: var(--blue); margin: 1rem 0 1.25rem; }
+    h3 { font-size: 20px; line-height: 1.4; margin-bottom: .5rem; }
+    p { margin-bottom: 1rem; }
+    ul, ol { padding-left: 1.2rem; margin-bottom: 1rem; }
+    li { margin-bottom: .45rem; }
+    .callout { padding: 1.5rem 1.75rem; background: var(--pale);
+               border-left: 4px solid var(--teal); font-size: 19px;
+               line-height: 1.65; margin-bottom: 2rem; }
+
+    /* Vidéo : 7 Ko d'affiche, la vidéo n'est demandée qu'à la lecture */
+    figure { margin: 0 0 1rem; }
+    video { display: block; width: 100%; height: auto; aspect-ratio: 1080 / 750;
+            background: #1e1e2e; border-radius: 8px; }
+    figcaption { font-size: 15px; color: var(--muted); margin-top: .75rem; }
+
+    /* Profils : liste à puces rondes, comme les pages thématiques de l'INR */
+    .who { list-style: none; padding: 0; margin: 1.5rem 0 0;
+           display: grid; grid-template-columns: 1fr; gap: 0 2.25rem; }
+    @media (min-width: 44rem) { .who { grid-template-columns: 1fr 1fr; } }
+    .who li { position: relative; padding: 1.25rem 0 1.25rem 1.5rem; margin: 0;
+              border-top: 1px solid var(--line); min-width: 0; }
+    .who li::before { content: ""; position: absolute; left: 0; top: 2rem;
+                      width: 7px; height: 7px; border-radius: 50%;
+                      background: var(--teal); }
+    .who h3 { font-size: 18px; margin-bottom: .25rem; }
+    .who p { margin: 0; font-size: 16px; color: var(--muted); }
+
+    /* Tutoriel : de vraies étapes, donc numérotées */
+    .steps { list-style: none; padding: 0; counter-reset: step; margin: 1.5rem 0; }
+    .steps > li { counter-increment: step; position: relative;
+                  padding: 1.5rem 0 1rem 3.5rem; margin: 0;
+                  border-top: 1px solid var(--line); }
+    .steps > li::before { content: counter(step); position: absolute; left: 0;
+                          top: 1.4rem; width: 2.25rem; height: 2.25rem;
+                          border-radius: 50%; background: var(--teal);
+                          color: var(--bg); font-weight: 700; text-align: center;
+                          line-height: 2.25rem; }
+    .prompt { background: var(--pale); border-radius: 4px; padding: .9rem 1.1rem;
+              margin: .5rem 0 1rem; font-size: 16px; }
+    .prompt b { display: block; font-size: 14px; color: var(--teal);
+                margin-bottom: .2rem; }
+
+    /* Encadré sombre, comme le bloc « valeurs » de l'INR */
+    .ink { background: var(--ink); color: var(--on-ink); border-radius: 8px;
+           padding: 2rem 1.5rem; margin: 1rem 0 3rem; }
+    @media (min-width: 48rem) { .ink { padding: 2.75rem; } }
+    .ink h2, .ink a { color: var(--on-ink); }
+    .ink p:last-child { border-top: 1px solid var(--ink-line); padding-top: 1.25rem;
+                        margin-bottom: 0; }
+
+    .duo { display: grid; gap: 0 2.25rem; grid-template-columns: 1fr;
            margin: 1.25rem 0; }
     @media (min-width: 40rem) { .duo { grid-template-columns: 1fr 1fr; } }
-    .card { background: var(--card); border: 1px solid var(--border);
-            border-radius: .6rem; padding: 1.1rem 1.2rem; }
-    .card h3 { font-size: 1.05rem; margin-bottom: .5rem; }
-    .card p { font-size: .95rem; margin-bottom: 0; color: var(--muted); }
-    ul { padding-left: 1.2rem; margin-bottom: 1rem; }
-    li { margin-bottom: .45rem; }
+    .duo > div { border-top: 3px solid var(--teal); padding: 1rem 0 1.25rem; }
+    .duo p { font-size: 16px; color: var(--muted); margin-bottom: 0; }
     pre {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: .5rem; padding: 1rem; overflow-x: auto;
-      font-size: .88rem; margin-bottom: 1rem;
+      background: var(--alt); border: 1px solid var(--line);
+      border-radius: 4px; padding: 1rem; overflow-x: auto;
+      font-size: 14px; line-height: 1.6; margin-bottom: 1rem;
     }
-    code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-    footer { border-top: 1px solid var(--border); margin-top: 3rem;
-             padding-top: 1.25rem; font-size: .88rem; color: var(--muted); }
-    .logo { display: block; margin: 0 auto 1.5rem; width: 12rem; height: auto; }
+    code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .92em; }
+    footer { border-top: 1px solid var(--line); margin-top: 2rem;
+             padding: 1.5rem 0 3rem; font-size: 15px; color: var(--muted); }
   </style>
   <!-- Matomo -->
   <script>
@@ -163,59 +241,155 @@
   <!-- End Matomo Code -->
 </head>
 <body>
-<main>
-  <!-- Le JPEG 1024x529 était servi tel quel pour un affichage 192x99, soit
-       cinq fois la résolution utile, et son fond crème opaque formait un
-       rectangle clair en mode sombre. Le même SVG que le favicon sert ici,
-       recadré comme l'original : 1 064 octets (615 compressés), net à toute
-       taille, et l'encre suit le thème. Le JPEG reste pour og:image — les
-       robots des réseaux sociaux ne lisent pas tous le SVG — et sert de repli
-       aux navigateurs sans SVG, les seuls à le télécharger. -->
-  <picture>
-    <source srcset="assets/logo.svg" type="image/svg+xml">
-    <img class="logo" src="assets/logo.jpg" alt="Green Claude, un prompt de terminal dont le curseur devient une pousse verte" width="192" height="99">
-  </picture>
-  <h1>🌱 Green Claude, un skill IA éco-conçu</h1>
-  <p class="tagline">Un skill pour <strong>Claude Code</strong> qui guide Claude vers un code éco-conçu selon le <strong>RGESN&nbsp;2024</strong> et le <strong>GR491</strong>, installé une fois et appliqué automatiquement.</p>
+<div class="site">
+  <header class="topbar">
+    <strong>Institut du Numérique Responsable</strong>
+    <a href="https://github.com/Institut-du-Numerique-Responsable/green-claude">GitHub</a>
+  </header>
 
-  <p>Coder avec un agent IA a un coût énergétique, pendant la session et dans le code qu'il produit. Le RGESN 2024 en fait une famille à part entière (« Algorithmie, dont IA ») : justifier le recours à l'IA, dimensionner le modèle à la tâche, mesurer son impact. Green Claude relie cette exigence de sobriété numérique à l'usage quotidien d'un assistant de code IA générative, plutôt que de traiter les deux sujets séparément.</p>
-
-  <p>
-    <a class="cta" href="https://github.com/Institut-du-Numerique-Responsable/green-claude">Voir sur GitHub</a>
-    <a class="cta secondary" href="https://github.com/Institut-du-Numerique-Responsable/green-claude#installation">Installer</a>
-  </p>
-
-  <h2>Comment ça marche</h2>
-  <div class="duo">
-    <div class="card">
-      <h3>Pendant que Claude code</h3>
-      <p>107 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : 38 règles renvoient à des critères précis, 67 à une famille et 2 à la Green Software Foundation. Claude les applique de lui-même en écrivant du code, sans qu'on le lui demande à chaque fois.</p>
+  <div class="hero">
+    <div class="hero-text">
+      <p class="kicker">Un plugin open source de l'Institut du Numérique Responsable</p>
+      <h1>Green Claude, un assistant IA plus sobre pour toute l'équipe</h1>
+      <p class="lead">Claude applique les règles d'écoconception du RGESN&nbsp;2024 et du GR491 pendant qu'il code, relit une user story ou cadre un projet d'IA. Vous l'installez une fois.</p>
+      <a class="button" href="#tuto">Suivre le tuto</a>
+      <a class="button ghost" href="#demo">Voir la démo</a>
     </div>
-    <div class="card">
-      <h3>Sur demande, un audit</h3>
-      <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep sur les règles), zéro coût de raisonnement, qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</p>
-    </div>
-    <div class="card">
-      <h3>Le détail de ton langage</h3>
-      <p>127 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++, Go, Kotlin, Swift et Shell. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel te concerne, d'après l'extension du fichier.</p>
-    </div>
-    <div class="card">
-      <h3>À chaque écriture, sans y penser</h3>
-      <p>Un hook optionnel relance l'audit après chaque fichier écrit par Claude Code, sans passer par une décision du modèle. Charger un skill dépend du modèle ; exécuter un hook, non.</p>
-    </div>
+    <!-- Le glyphe du logo, recadré et intégré à la page : aucune requête de
+         plus, net à toute taille, et l'encre suit le thème. Le JPEG reste
+         pour og:image, car les robots des réseaux sociaux ne lisent pas tous
+         le SVG. -->
+    <svg class="hero-logo" viewBox="-6 -4 112 108" role="img" aria-label="Green Claude, un prompt de terminal dont le curseur devient une pousse verte">
+      <path fill="none" stroke="currentColor" stroke-width="10.5" d="M0 54.5 L37 72.5 L0 90.5"/>
+      <rect fill="currentColor" x="57.4" y="50" width="8" height="49.5" rx="1"/>
+      <path fill="none" stroke="#4a8a54" stroke-width="4" stroke-linecap="round" d="M61.4 50 C61.4 43 65 39 65 33"/>
+      <path fill="#407850" d="M64 33 Q61.8 9.2 38 9 Q40.2 32.8 64 33 Z"/>
+      <path fill="#509058" d="M66 32 Q94.1 28.9 99 1 Q70.9 4.1 66 32 Z"/>
+    </svg>
   </div>
 
-  <h2>Exemple concret</h2>
-  <p>Ce code, tout à fait banal :</p>
-  <pre><code>import _ from 'lodash';
+  <main class="read">
+    <p class="callout">Chaque échange avec un assistant IA consomme de l'énergie, et le code ou le service qui en sort tournera des années. Green Claude agit aux deux endroits : il garde la session sobre et il conçoit des livrables plus légers. Développeurs, product owners, métiers, designers : tout le monde y gagne.</p>
+
+    <section id="demo" aria-labelledby="demo-titre">
+      <h2 id="demo-titre">La démonstration en 2 minutes</h2>
+      <figure>
+        <!-- preload="none" : seule l'affiche (7 Ko) est téléchargée. La vidéo
+             (600 Ko, 15 images par seconde, sans son) ne part qu'au clic. -->
+        <video controls preload="none" playsinline width="1080" height="750" poster="assets/video/green-claude-demo-poster.webp" aria-describedby="demo-desc">
+          <source src="assets/video/green-claude-demo.mp4" type="video/mp4">
+          <a href="assets/video/green-claude-demo.mp4">Télécharger la vidéo de démonstration (MP4, 600 Ko)</a>
+        </video>
+        <figcaption id="demo-desc">Vidéo sans son, sous-titrée, de 2 minutes 06. Le site d'une bibliothèque de quartier fait une requête SQL par livre. Sans le plugin, Claude ajoute la fonctionnalité demandée et laisse le défaut. Avec le plugin et une ligne de consigne, il corrige la requête de lui-même. Un audit demandé en français courant liste ensuite les défauts confirmés (FAIL) et ceux à vérifier (REVIEW), sans rien modifier. Les appels à Claude sont réels. <a href="assets/video/green-claude-demo.mp4" download>Télécharger la vidéo (MP4, 600 Ko)</a></figcaption>
+      </figure>
+      <p>Mesuré sur la même demande, modèle Sonnet, quatre essais par configuration : sans le plugin, la requête reste fautive 4 fois sur 4. Avec le plugin et la ligne de consigne dans <code>CLAUDE.md</code>, Claude la corrige 4 fois sur 4. La <a href="https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code">démonstration complète sur le site de l'INR</a> montre aussi Green Codex dans Codex.</p>
+    </section>
+
+    <section id="pour-qui" aria-labelledby="qui-titre">
+      <h2 id="qui-titre">Pour qui ?</h2>
+      <p>Pour toute personne qui travaille avec Claude sur un produit numérique. Le RGESN couvre la stratégie, les spécifications, l'expérience utilisateur et les contenus avant d'arriver au code, et Green Claude en porte les 9 familles.</p>
+      <ul class="who">
+        <li>
+          <h3>Product owners</h3>
+          <p>Ajouter des critères environnementaux à une user story (ECO-SPEC-01) et écarter les fonctionnalités dont personne n'a besoin (ECO-SPEC-05).</p>
+        </li>
+        <li>
+          <h3>Métiers et chefs de projet</h3>
+          <p>Vérifier qu'un projet a vraiment besoin d'IA générative (ECO-ALGO-01) et choisir un modèle à la taille du besoin (ECO-ALGO-02).</p>
+        </li>
+        <li>
+          <h3>Designers UX et UI</h3>
+          <p>Repérer dans un parcours la lecture automatique, le défilement infini ou des polices trop lourdes (ECO-UX-01, 02 et 05).</p>
+        </li>
+        <li>
+          <h3>Rédaction et communication</h3>
+          <p>Dimensionner images, vidéos et icônes avant publication (ECO-CONT-01 à 03).</p>
+        </li>
+        <li>
+          <h3>Direction, achats et DSI</h3>
+          <p>Évaluer un service tiers avant de l'intégrer (ECO-SPEC-04) et suivre le score d'écoconception d'un dépôt dans le temps.</p>
+        </li>
+        <li>
+          <h3>Développeuses et développeurs</h3>
+          <p>Un code sobre dès la première ligne, 127 règles propres à 24 langages et frameworks, un audit déterministe pour relire le reste.</p>
+        </li>
+      </ul>
+    </section>
+
+    <section id="tuto" aria-labelledby="tuto-titre">
+      <h2 id="tuto-titre">Tuto : votre première demande, sans écrire de code</h2>
+      <ol class="steps">
+        <li>
+          <h3>Choisir l'outil</h3>
+          <p><strong>Claude.ai</strong>, dans le navigateur, convient pour relire un document, une user story ou un cadrage. <strong>Claude Code</strong>, dans l'application de bureau ou le terminal, travaille sur les fichiers d'un projet.</p>
+        </li>
+        <li>
+          <h3>Installer le skill</h3>
+          <p>Sur Claude.ai : téléchargez <a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/releases/latest/download/green-claude-claude-ai.zip">l'archive green-claude-claude-ai.zip</a>, puis ouvrez Settings, Capabilities, Skills et choisissez Upload skill. L'exécution de code doit être activée.</p>
+          <p>Dans Claude Code, tapez ces deux commandes :</p>
+          <pre><code>/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
+/plugin install green-claude@green-claude</code></pre>
+        </li>
+        <li>
+          <h3>Poser votre question en français courant</h3>
+          <p>Le skill se charge quand votre demande parle d'écoconception, de sobriété ou du RGESN. Nommez-le pour être sûr qu'il s'active. Quelques demandes à copier :</p>
+          <p class="prompt"><b>Product owner</b>Avec green-claude, relis cette user story et propose des critères d'acceptation environnementaux : [collez la story]</p>
+          <p class="prompt"><b>Métier</b>Avec green-claude, faut-il de l'IA générative pour trier nos demandes clients, ou une règle simple suffit-elle ?</p>
+          <p class="prompt"><b>Designer</b>Audit écoconception de ce parcours selon le RGESN : [décrivez les écrans]</p>
+          <p class="prompt"><b>Communication</b>Vérifie la sobriété des images et vidéos de ce dossier avant publication.</p>
+        </li>
+        <li>
+          <h3>Lire la réponse</h3>
+          <p>Claude cite la règle et le critère RGESN derrière chaque remarque, puis propose une correction. En audit, FAIL signale un défaut confirmé et REVIEW un point à trancher par vous. Rien n'est modifié sans votre accord.</p>
+        </li>
+        <li>
+          <h3>Le rendre automatique</h3>
+          <p>Dans un projet Claude Code, ajoutez cette ligne au fichier <code>CLAUDE.md</code>. Claude appliquera les règles à chaque demande, même quand vous ne pensez pas à le préciser :</p>
+          <pre><code>Avant de modifier du code, charge le skill green-claude et applique ses règles au code que tu touches.</code></pre>
+        </li>
+      </ol>
+    </section>
+
+    <section class="ink" aria-labelledby="tok-titre">
+      <h2 id="tok-titre">Moins de tokens, c'est aussi du numérique responsable</h2>
+      <p>Un token généré inutilement mobilise du calcul, de l'électricité et du refroidissement dans un centre de données. Les 30 règles NR-TOK de l'INR s'appliquent à toutes les conversations, quel que soit votre métier : des réponses qui vont droit au but, un contexte chargé à la demande, le plus petit modèle qui fait le travail.</p>
+      <p>La qualité passe en premier (NR-TOK-027). Aucune économie ne justifie une perte de justesse, de sécurité ou d'accessibilité. En fin de tâche, Claude dresse un bilan de sobriété avec les mesures disponibles, sans jamais inventer de chiffre.</p>
+    </section>
+
+    <section aria-labelledby="fonctionnement-titre">
+      <h2 id="fonctionnement-titre">Comment ça marche</h2>
+      <div class="duo">
+        <div>
+          <h3>Pendant que Claude travaille</h3>
+          <p>107 règles d'éco-conception alignées sur les 9 familles du RGESN 2024 : 38 règles renvoient à des critères précis, 67 à une famille et 2 à la Green Software Foundation. Claude les applique de lui-même, sans qu'on le lui demande à chaque fois.</p>
+        </div>
+        <div>
+          <h3>Sur demande, un audit</h3>
+          <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep sur les règles), zéro coût de raisonnement, qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</p>
+        </div>
+        <div>
+          <h3>Le détail de chaque langage</h3>
+          <p>127 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++, Go, Kotlin, Swift, Shell et leurs frameworks. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel vous concerne, d'après l'extension du fichier.</p>
+        </div>
+        <div>
+          <h3>À chaque écriture, sans y penser</h3>
+          <p>Un hook optionnel relance l'audit après chaque fichier écrit par Claude Code, sans passer par une décision du modèle. Charger un skill dépend du modèle ; exécuter un hook, non.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="exemple-titre">
+      <h2 id="exemple-titre">Exemple concret pour les développeurs</h2>
+      <p>Ce code, tout à fait banal :</p>
+      <pre><code>import _ from 'lodash';
 
 app.get('/api/users', (req, res) => {
   db.query('SELECT * FROM users', (err, rows) => {
     res.json(rows);
   });
 });</code></pre>
-  <p><code>eco-audit.sh api.js</code> (sortie réelle, non retouchée ; les règles sont en anglais) :</p>
-  <pre><code>[High] ECO-FRONT-01 — No heavy library for a minor need
+      <p><code>eco-audit.sh api.js</code> (sortie réelle, non retouchée ; les règles sont en anglais) :</p>
+      <pre><code>[High] ECO-FRONT-01 — No heavy library for a minor need
   File           : api.js
   Category       : 6. Frontend
   RGESN          : 6.x
@@ -234,56 +408,55 @@ app.get('/api/users', (req, res) => {
   Recommendation : Targeted imports (import { x } from 'lib/x'); native APIs first (fetch, Intl, URL, structuredClone, Date/Temporal) before adding a dependency.
 
 3 ecodesign issue(s) found.</code></pre>
-  <p>En pratique, pas besoin de lancer l'audit toi-même sur ce genre de code : en mode proactif, Claude évite <code>lodash</code> pour une seule fonction et <code>SELECT *</code> dès l'écriture, avant même qu'un audit ait lieu.</p>
-
-  <h2>En 30 secondes</h2>
-  <pre><code>/plugin marketplace add Institut-du-Numerique-Responsable/green-claude
-/plugin install green-claude@green-claude</code></pre>
-  <p>Rien d'autre à faire : Claude Code charge le skill automatiquement dans les sessions suivantes et gère ses mises à jour. Tape <code>/green-claude</code> pour voir la checklist complète.</p>
-  <p>Alternative via <code>install.sh</code>, nécessaire pour câbler en plus les hooks (audit après écriture, cache local) :</p>
-  <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
+      <p>En mode proactif, Claude évite <code>lodash</code> pour une seule fonction et <code>SELECT *</code> dès l'écriture, avant même qu'un audit ait lieu.</p>
+      <p>Pour câbler en plus les hooks (audit après écriture, cache local), installez depuis le dépôt :</p>
+      <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
 cd green-claude && ./install.sh</code></pre>
-  <p>Pour <strong>Claude.ai</strong> et l'<strong>API Skills</strong>, qui attendent une archive plutôt qu'un dépôt, <code>scripts/package-skill.sh</code> fabrique les deux zips attendus.</p>
+      <p>Pour l'<strong>API Skills</strong>, <code>scripts/package-skill.sh</code> fabrique l'archive attendue.</p>
+    </section>
 
-  <h2>Ce que contient le projet</h2>
-  <ul>
-    <li>Un skill Claude Code qui s'invoque tout seul dès qu'il s'agit d'écrire ou de revoir du code.</li>
-    <li>107 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
-    <li>127 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
-    <li>13 pratiques d’usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
-    <li>30 règles de sobriété des tokens de l’INR (NR-TOK) pour les agents IA : réponses, contexte, opérations, choix du modèle, mesure et bilan de session.</li>
-    <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des questions autonomes préfixées <code>[cache]</code>, avertissement aux heures de pointe.</li>
-    <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
-  </ul>
+    <section aria-labelledby="contenu-titre">
+      <h2 id="contenu-titre">Ce que contient le projet</h2>
+      <ul>
+        <li>Un skill Claude Code qui s'invoque tout seul dès qu'il s'agit d'écrire ou de revoir du code.</li>
+        <li>107 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
+        <li>127 règles propres à un langage ou un framework, chargées seulement quand un fichier de ce langage est en jeu.</li>
+        <li>13 pratiques d'usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
+        <li>30 règles de sobriété des tokens de l'INR (NR-TOK) pour les agents IA : réponses, contexte, opérations, choix du modèle, mesure et bilan de session.</li>
+        <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des questions autonomes préfixées <code>[cache]</code>, avertissement aux heures de pointe.</li>
+        <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
+      </ul>
+    </section>
 
-  <h2>Pourquoi c'est important</h2>
-  <p>Le code généré par l'IA va tourner pendant des années chez des utilisateurs qu'on ne verra jamais. C'est là que se joue l'essentiel de l'empreinte du « coder avec l'IA », pas pendant la session de génération. Green Claude s'attaque à ce moment précis, en s'appuyant sur des référentiels publics français et internationaux plutôt que sur des règles maison.</p>
+    <section aria-labelledby="decisions-titre">
+      <h2 id="decisions-titre">Ce que l'équipe décide, l'audit s'en souvient</h2>
+      <p>Un candidat écarté une fois revient au tour suivant. Écarté six fois, il apprend à toute l'équipe à survoler l'audit, ce qui coûte plus cher que la règle ne rapporte. Deux fichiers versionnés à la racine du dépôt ferment la question : <code>.green-claude/decisions.md</code> pour ce qui a été tranché, où <code>ACCEPTED</code> fait taire une règle sur un fichier précis et <code>TODO</code> garde la dette visible, et <code>.green-claude/ignore</code> pour les fichiers hors périmètre, comme une suite de tests ou un corpus de règles qui contiennent du code fautif sans jamais l'exécuter. L'audit annonce combien de constats il a tus et où, donc rien ne disparaît sans trace.</p>
+    </section>
 
-  <nav aria-label="Documentation du projet">
-    <h2>Documentation et règles</h2>
-    <ul>
-      <li><a href="languages/">Règles par langage et framework</a> : Python, JavaScript, SQL, Shell et les autres environnements couverts.</li>
-      <li><a href="water-electricity-detection.html">Sobriété IA : eau, électricité et limites des mesures</a></li>
-      <li><a href="security-audit.html">Documentation de l'audit de sécurité</a></li>
-      <li><a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CONTRIBUTING.md">Contribuer aux règles et aux tests</a></li>
-      <li><a href="https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code">Écoconcevoir avec un assistant de code</a> : la démarche présentée sur le site de l'INR.</li>
-      <li><a href="llms.txt">Index pour les assistants IA</a> et <a href="ai.json">métadonnées du projet</a></li>
-    </ul>
-  </nav>
+    <section aria-labelledby="skill-titre">
+      <h2 id="skill-titre">Pourquoi un skill plutôt qu'une checklist</h2>
+      <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant au lieu d'imposer les 277 règles à chaque échange, et vérifie le code déjà produit via un script déterministe.</p>
+      <p>Charger un skill reste une décision du modèle. Pour les équipes qui veulent une vérification qui ne dépende de personne, le hook d'audit s'exécute après chaque écriture de fichier de code et renvoie ses trouvailles à Claude, qui corrige avant de continuer.</p>
+    </section>
 
-  <h2>Ce que l'équipe décide, l'audit s'en souvient</h2>
-  <p>Un candidat écarté une fois revient au tour suivant. Écarté six fois, il apprend à toute l'équipe à survoler l'audit, ce qui coûte plus cher que la règle ne rapporte. Deux fichiers versionnés à la racine du dépôt ferment la question : <code>.green-claude/decisions.md</code> pour ce qui a été tranché, où <code>ACCEPTED</code> fait taire une règle sur un fichier précis et <code>TODO</code> garde la dette visible, et <code>.green-claude/ignore</code> pour les fichiers hors périmètre, comme une suite de tests ou un corpus de règles qui contiennent du code fautif sans jamais l'exécuter. L'audit annonce combien de constats il a tus et où, donc rien ne disparaît sans trace.</p>
+    <nav aria-label="Documentation du projet">
+      <h2>Documentation et règles</h2>
+      <ul>
+        <li><a href="languages/">Règles par langage et framework</a> : Python, JavaScript, SQL, Shell et les autres environnements couverts.</li>
+        <li><a href="water-electricity-detection.html">Sobriété IA : eau, électricité et limites des mesures</a></li>
+        <li><a href="security-audit.html">Documentation de l'audit de sécurité</a></li>
+        <li><a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CONTRIBUTING.md">Contribuer aux règles et aux tests</a></li>
+        <li><a href="https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code">Écoconcevoir avec un assistant de code</a> : la démarche présentée sur le site de l'INR.</li>
+        <li><a href="llms.txt">Index pour les assistants IA</a> et <a href="ai.json">métadonnées du projet</a></li>
+      </ul>
+    </nav>
 
-<h2>Pourquoi un skill, pas une checklist</h2>
-  <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant plutôt que d'imposer les 250 règles à chaque échange, et vérifie le code déjà produit via un script déterministe. La checklist reste un document consulté ; le skill s'exécute dans la session de travail elle-même.</p>
-
-  <p>Reste que charger un skill est une décision du modèle. Pour les équipes qui veulent une vérification qui ne dépende de personne, le hook d'audit s'exécute après chaque écriture de fichier de code et renvoie ses trouvailles à Claude, qui corrige avant de continuer.</p>
-
-  <footer>
-    <p>Une production de l'<strong>Institut du Numérique Responsable</strong>, 2026, code sous Apache-2.0, règles et documentation sous CC BY 4.0.<br>
-    Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page, un logo vectoriel qui sert aussi de favicon et suit le thème. <strong>6,6 Ko transférés</strong> en deux requêtes à la première visite, hors mesure d'audience.</p>
-    <p>Mesure d'audience&nbsp;: Matomo auto-hébergé, <strong>sans cookie ni traceur tiers</strong>, chargé une fois la page rendue. Aucune donnée n'est transmise à un tiers, et rien n'est écrit sur votre appareil.</p>
-  </footer>
-</main>
+    <footer>
+      <p>Une production de l'<strong>Institut du Numérique Responsable</strong>, 2026, code sous Apache-2.0, règles et documentation sous CC BY 4.0. Green Claude existe aussi pour Codex (Green Codex) et Mistral Vibe (Green Vibe).</p>
+      <p>Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page, un logo vectoriel qui sert aussi de favicon. <strong>18 Ko transférés</strong> en trois requêtes à la première visite, hors mesure d'audience. La vidéo ne se télécharge qu'au clic sur lecture.</p>
+      <p>Mesure d'audience&nbsp;: Matomo auto-hébergé, <strong>sans cookie ni traceur tiers</strong>, chargé une fois la page rendue. Aucune donnée n'est transmise à un tiers, et rien n'est écrit sur votre appareil.</p>
+    </footer>
+  </main>
+</div>
 </body>
 </html>
