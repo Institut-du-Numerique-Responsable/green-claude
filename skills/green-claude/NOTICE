@@ -18,7 +18,14 @@ from Green Codex credit Institut du Numérique Responsable under CC BY 4.0;
 their identifiers and adaptations are recorded in those fields.
 References to RGESN, GR491, Green Software Foundation, W3C and YellowLabTools
 do not relicense those sources or imply their endorsement.
-Graphify and Caveman are independent MIT-licensed tools cited as examples.
+Graphify (MIT) and stop-slop (MIT) are independent tools cited as examples.
+
+Some ideas of the NR-TOK token sobriety rules (rules/tokens.json) were
+inspired by Caveman (Copyright 2026 Julius Brussee, Apache License 2.0,
+https://github.com/JuliusBrussee/caveman). The Institut du Numérique
+Responsable reworked and rewrote those rules.
+This project is independent of Caveman and its author: referring to it implies
+no endorsement, affiliation or participation.
 
 Apache-2.0 redistribution requires preservation of applicable legal notices;
 it does not require a credit on every user interface. This NOTICE provides

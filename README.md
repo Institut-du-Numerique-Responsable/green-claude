@@ -8,7 +8,7 @@
 
 **Green Claude** helps [Claude Code](https://claude.com/claude-code) write code that uses fewer resources, with eco-design rules and a local audit tool.
 
-A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, and 16 responsible-use practices**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
+A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, 16 responsible-use practices and 30 token sobriety rules**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 The skill guides the model when loaded; its application is not guaranteed on every response. The audit flags candidates for review, without certifying RGESN compliance or measuring energy savings. Optional hooks run the audit after supported code-writing operations.
 
@@ -203,7 +203,23 @@ Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/
 
 The skill applies these rules to its own replies: no em dash, no phrase that announces an idea instead of delivering it, no pseudo-cleft sentence, no emphatic presentative or detached fake subordinate clause, no epanorthosis, verbal anaphora or binary antithesis, no counted announcement or announced list. They hold in every language ("Writing your replies" section of [`SKILL.md`](skills/green-claude/SKILL.md)).
 
-> The third-party tools cited (graphify, caveman, stop-slop) are verified illustrative examples (open source, MIT license). The project doesn't audit them and doesn't depend on them.
+> The third-party tools cited are verified open source: graphify and stop-slop under the MIT license, caveman under the Apache License 2.0 (see [Attribution and third-party licenses](#attribution-and-third-party-licenses)). The project doesn't audit them and doesn't depend on them.
+
+## Token sobriety for AI agents
+
+[`skills/green-claude/rules/tokens.json`](skills/green-claude/rules/tokens.json) holds the 30 NR-TOK rules of the Institut du Numérique Responsable. They cut the tokens consumed, the model calls and the needless processing without degrading quality, security, maintainability or understanding of the code. They target development agents such as Claude Code, OpenAI Codex and Mistral Vibe.
+
+| Family | Rules | Examples |
+|---|---|---|
+| A. Reply sobriety | NR-TOK-001 to 006 | answer directly, no redundant conclusion, few messages between tool calls |
+| B. Context management | NR-TOK-007 to 014 | load what is needed, targeted search, compress logs while keeping errors, numbers and paths |
+| C. Operation sobriety | NR-TOK-015 to 022 | investigate before changing, targeted changes, stop at the acceptance criteria |
+| D. Model optimization | NR-TOK-023 to 026 | proportionate model, deterministic local processing, cache |
+| E. Quality and measurement | NR-TOK-027 to 030 | no saving at the cost of quality, measure, session report |
+
+Seven rules are mandatory: NR-TOK-007, 011, 015, 016, 022, 027 and 030. NR-TOK-023 to 026 and NR-TOK-028 depend on what the environment allows. The others apply by default. Several overlap with the responsible-use practices: each rule's `related` field names them.
+
+`eco-audit.sh --rules tokens` prints them in compact form, followed by the session report format required by NR-TOK-030. The report closes any task that ran tools or changed files, never a plain question. It lists the rules applied, the optimizations, the available measurements, the tests and the limits. It invents no metric and gives a saving percentage only against a comparable baseline. Cutting tokens, cutting costs and cutting environmental impact remain three separate goals.
 
 ---
 
@@ -290,6 +306,14 @@ have been verified.
 ## Maintainers
 
 - [Guillaume Gallon](https://github.com/gridboy) ([LinkedIn](https://www.linkedin.com/in/ggallon/)) — [Institut du Numérique Responsable](https://institutnr.org)
+
+## Attribution and third-party licenses
+
+### Caveman
+
+A few ideas of the NR-TOK rules ([`rules/tokens.json`](skills/green-claude/rules/tokens.json)) come from the open source project [Caveman](https://github.com/JuliusBrussee/caveman) (Copyright 2026 Julius Brussee, Apache License 2.0). The INR reworked and rewrote those rules for the goals and reference frameworks of responsible digital practice.
+
+This project is independent of Caveman and its author. Referring to Caveman implies no endorsement, affiliation or participation on their part.
 
 ## License
 

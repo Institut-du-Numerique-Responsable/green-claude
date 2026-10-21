@@ -24,6 +24,7 @@ def outputs():
     languages = sorted((rules / "langages").glob("*.json"))
     eco = rule_count(read_json(rules / "ecoconception.json"))
     usage = rule_count(read_json(rules / "usage.json"))
+    tokens = rule_count(read_json(rules / "tokens.json"))
     lang = sum(rule_count(read_json(path)) for path in languages)
     metadata = {
         "@context": "https://schema.org",
@@ -31,7 +32,7 @@ def outputs():
         "@id": SITE + "#software",
         "name": "Green Claude",
         "description": ("Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. "
-                        f"{eco + usage + lang} règles : {eco} transverses, {lang} pour {len(languages)} langages et frameworks, {usage} pratiques d'usage."),
+                        f"{eco + usage + tokens + lang} règles : {eco} transverses, {lang} pour {len(languages)} langages et frameworks, {usage} pratiques d'usage, {tokens} règles de sobriété des tokens."),
         "version": plugin["version"],
         "url": SITE,
         "codeRepository": plugin["repository"],

@@ -43,7 +43,7 @@
   "@type": "SoftwareSourceCode",
   "@id": "https://institut-du-numerique-responsable.github.io/green-claude/#software",
   "name": "Green Claude",
-  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 250 règles : 107 transverses, 127 pour 24 langages et frameworks, 16 pratiques d'usage.",
+  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 280 règles : 107 transverses, 127 pour 24 langages et frameworks, 16 pratiques d'usage, 30 règles de sobriété des tokens.",
   "version": "1.4.0",
   "url": "https://institut-du-numerique-responsable.github.io/green-claude/",
   "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
@@ -251,6 +251,7 @@ cd green-claude && ./install.sh</code></pre>
     <li>107 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
     <li>127 règles propres à un langage (Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++), chargées seulement quand un fichier de ce langage est en jeu.</li>
     <li>16 pratiques d’usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
+    <li>30 règles de sobriété des tokens de l’INR (NR-TOK) pour les agents IA : réponses, contexte, opérations, choix du modèle, mesure et bilan de session.</li>
     <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des questions autonomes préfixées <code>[cache]</code>, avertissement aux heures de pointe.</li>
     <li>Un score de densité (<code>eco-score.sh</code>) pour suivre l'évolution d'un dépôt dans le temps, et une intégration continue qui vérifie les règles à chaque contribution.</li>
   </ul>

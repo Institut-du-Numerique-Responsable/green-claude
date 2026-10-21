@@ -29,11 +29,11 @@ model, which costs computation and the energy behind it. After the session, the
 code you leave behind runs on every user's machine, on every request, for years.
 Both matter; only one of them stops when the conversation does.
 
-Three rule sets: `rules/ecoconception.json` (107 rules, RGESN 2024 / GR491 /
+Four rule sets: `rules/ecoconception.json` (107 rules, RGESN 2024 / GR491 /
 Green Software Foundation / W3C WSG) while you write or modify code,
 `rules/langages/*.json` (127 rules across 24 languages and frameworks) for the language you're
-working in, and `rules/usage.json` (16 responsible-use practices) during the
-conversation itself. Using Claude Code efficiently is also using it soberly.
+working in, and, during the conversation itself, `rules/usage.json` (16
+responsible-use practices) and `rules/tokens.json` (30 token sobriety rules). Using Claude Code efficiently is also using it soberly.
 
 Do not read these JSON files whole. They carry the regexes, examples and notes
 the audit script needs, which is several times the context of the rules
@@ -46,7 +46,7 @@ themselves. `eco-audit.sh --rules` prints what you need, one line per rule (see
 |---|---|---|
 | Proactive (default) | Always, as soon as you write or modify code | Apply the relevant families from `ecoconception.json`, unprompted; load them with `eco-audit.sh --rules <family>` |
 | Audit | "eco-design audit", "check the sobriety", `--eco-check` | `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` (see *Finding the scripts*) |
-| Browse | `/green-claude` | Full checklist of the 9 RGESN families + 16 responsible-use practices: `eco-audit.sh --rules all` |
+| Browse | `/green-claude` | Full checklist of the 9 RGESN families, 16 responsible-use practices and 30 token sobriety rules: `eco-audit.sh --rules all` |
 
 ## Before you write anything
 
@@ -136,7 +136,7 @@ outcome the user must never be handed.
 
 `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` is a deterministic
 script (grep/awk) with no reasoning cost for detection. Run it rather than
-grepping by hand: it carries 250 rules, their thresholds, their per-language
+grepping by hand: it carries 280 rules, their thresholds, their per-language
 scoping and their known false positives, none of which a hand-written grep
 reproduces. Interpret and prioritize its output (High impact first), and read
 *Common mistakes* below before relaying a result as-is.
@@ -222,6 +222,27 @@ costs fewer tokens and less reading time.
 - If the `stop-slop` skill is installed, run it on your reply before sending.
   It catches the AI writing patterns these rules do not list.
 
+## Token sobriety
+
+`rules/tokens.json` holds the 30 NR-TOK rules of the Institut du Numérique
+Responsable. Print them with `eco-audit.sh --rules tokens` when a session
+starts on real work. Always apply the mandatory ones:
+
+- NR-TOK-007: start from the files the task names, never the whole repository.
+- NR-TOK-011: a summary keeps errors verbatim, and negations, numbers, units,
+  paths, identifiers, commands and code exactly.
+- NR-TOK-015: locate the cause before editing; no chain of trial fixes.
+- NR-TOK-016: edit the lines that change, never the whole file.
+- NR-TOK-022: stop once the acceptance criteria pass.
+- NR-TOK-027: no saving justifies a loss of security, correctness,
+  accessibility, maintainability or clarity.
+- NR-TOK-030: after a task that ran tools or changed files, end with the short
+  report printed by `--rules tokens`. Skip it for a plain question. Never invent
+  a metric: write "unavailable".
+
+NR-TOK-023 to 026 and NR-TOK-028 apply when the environment allows them (model
+choice, cache, metrics). The others apply by default.
+
 ## Recording a decision
 
 A candidate you dismiss once will come back on the next run, and the run after
@@ -255,7 +276,8 @@ a decision, not a mistake.
 
 ## Browse mode (`/green-claude`)
 
-Checklist of the 9 RGESN families and the 16 responsible-use practices, with each rule's
+Checklist of the 9 RGESN families, the 16 responsible-use practices and the 30
+token sobriety rules, with each rule's
 title and recommendation. Useful for a design review before any code is written.
 Print it with `bash "$SKILL_DIR/scripts/eco-audit.sh" --rules all` rather than
 reading the JSON files.
