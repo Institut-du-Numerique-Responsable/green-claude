@@ -6,6 +6,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-21
+
 ### Ajouté
 
 - Page de présentation (`docs/index.html`) refaite aux couleurs de l’INR : public élargi aux product owners, métiers, designers et rédacteurs, tutoriel en cinq étapes pour une première demande sans code (Claude.ai ou Claude Code), demandes à copier par profil, encadré sur la sobriété des tokens. Vidéo de démonstration de 2 minutes intégrée (`docs/assets/video/`, 600 Ko, chargée au clic seulement, affiche de 7 Ko).
