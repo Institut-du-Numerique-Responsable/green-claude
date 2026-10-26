@@ -6,6 +6,14 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Corrigé
+
+- Faux positifs sur les scripts qui génèrent des fichiers bureautiques (retour d'usage GPC-ONR) :
+  - ECO-HEB-11 ne se déclenche plus quand on lit un JSON ou un CSV (`read_text`, `json.load`, `csv.reader`…), ni quand le fichier écrit dans une archive déjà compressée (`ZIP_DEFLATED`, `zlib`, `lzma`, `bz2`) ;
+  - ECO-CONT-01 ignore les PNG et JPEG embarqués dans un document OOXML (`xl/media/`, `word/media/`, `ppt/media/`, `add_picture`), où Office ne lit pas le WebP de façon fiable ;
+  - ECO-STRAT-03 ne signale plus un fichier Office produit en même temps qu'un équivalent ouvert (CSV, JSON, ODF).
+- Tests de non-régression dans `test-eco-audit.sh`, dans les deux sens : silence sur le cas légitime, détection maintenue sans la bonne pratique.
+
 ## [1.5.0] - 2026-10-21
 
 ### Ajouté

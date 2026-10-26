@@ -1463,4 +1463,32 @@ OUT="$(bash eco-audit.sh "$TMP/valeur_concat.php")"
 echo "$OUT" | grep -q 'ECO-BACK-10' || fail "valeur concaténée dans une requête PHP non détectée"
 true
 
+# Générateurs de fichiers bureautiques (retour d'usage GPC-ONR) : un script qui
+# lit des données, écrit une archive déjà compressée, embarque des PNG dans un
+# classeur OOXML et publie aussi du CSV ne doit déclencher ni ECO-HEB-11, ni
+# ECO-CONT-01, ni ECO-STRAT-03. Sans ces bonnes pratiques, les règles parlent.
+cat > "$TMP/build_classeur.py" <<'EOF'
+import csv, json, zipfile
+ref = json.loads(open("data/referentiel.json").read())
+lignes = list(csv.DictReader(open("data/liens.csv")))
+with open("sortie.csv", "w") as f:
+    csv.writer(f).writerows(lignes)
+with zipfile.ZipFile("Template.xlsx", "w", zipfile.ZIP_DEFLATED) as z:
+    z.writestr("xl/media/logo.png", open("logo.png", "rb").read())
+EOF
+OUT="$(bash eco-audit.sh "$TMP/build_classeur.py")"
+echo "$OUT" | grep -q 'ECO-HEB-11' && fail "faux positif : lecture JSON/CSV ou archive ZIP_DEFLATED signalée sans compression"
+echo "$OUT" | grep -q 'ECO-CONT-01' && fail "faux positif : PNG embarqué dans un classeur OOXML"
+echo "$OUT" | grep -q 'ECO-STRAT-03' && fail "faux positif : xlsx produit à côté d'un CSV"
+cat > "$TMP/export_brut.py" <<'EOF'
+import json
+Path("export.json").write_text(json.dumps(rows))
+save("rapport.xlsx")
+html = '<img src="photo.png">'
+EOF
+OUT="$(bash eco-audit.sh "$TMP/export_brut.py")"
+echo "$OUT" | grep -q 'ECO-HEB-11' || fail "écriture JSON non compressée non détectée"
+echo "$OUT" | grep -q 'ECO-CONT-01' || fail "image PNG hors classeur non détectée"
+true
+
 echo "OK - suite complete"
