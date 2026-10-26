@@ -78,7 +78,15 @@
           ],
           "three_u": [
             "usable"
-          ]
+          ],
+          "exclude_file_patterns": [
+            "csv\\.writer",
+            "csv\\.DictWriter",
+            "to_csv\\(",
+            "json\\.dump",
+            "\\.od[stp][\"']"
+          ],
+          "note": "An Office file produced alongside an open equivalent (CSV, JSON, ODF) in the same file already follows the rule: the open format is offered, the Office file is a convenience."
         },
         {
           "id": "ECO-STRAT-04",
@@ -823,7 +831,7 @@
             "\"image\"[[:space:]]*:"
           ],
           "enrich": "image",
-          "enrich_note": "A pattern cannot tell whether an image is already compressed or correctly sized. scripts/inspect-image.sh resolves the real file when it can (not a remote URL) and adds its actual weight and dimensions to the report, asserting nothing when the file cannot be resolved.",
+          "enrich_note": "A pattern cannot tell whether an image is already compressed or correctly sized. scripts/inspect-image.sh resolves the real file when it can (not a remote URL) and adds its actual weight and dimensions to the report, asserting nothing when the file cannot be resolved. A file that embeds images in an OOXML document (xl/media, word/media, ppt/media) is out of scope: Office applications require PNG or JPEG there and do not reliably read WebP.",
           "recommendation": "Convert to WebP/AVIF, serve suitable sizes through srcset, and compress as a matter of course.",
           "example": {
             "bad": "<img src=\"photo.jpg\" width=\"1600\">",
@@ -835,6 +843,13 @@
             "images",
             "webp",
             "compression"
+          ],
+          "exclude_file_patterns": [
+            "xl/media/",
+            "word/media/",
+            "ppt/media/",
+            "add_picture\\(",
+            "openpyxl\\.drawing\\.image"
           ]
         },
         {
@@ -1953,7 +1968,11 @@
             "brotli",
             "snappy",
             "ContentEncoding",
-            "compress"
+            "compress",
+            "ZIP_DEFLATED",
+            "zlib",
+            "lzma",
+            "bz2"
           ],
           "extensions": [
             "py",
@@ -1972,7 +1991,7 @@
             "kt"
           ],
           "recommendation": "Compress large or repetitive payloads once you have benchmarked the codec against your own data, weighing CPU and latency against storage and network. Do not assume one codec always wins.",
-          "note": "Writing a text payload with no compression mentioned anywhere in the file is the candidate. On a small file compression costs more than it saves, so the size is what settles it.",
+          "note": "Writing a text payload with no compression mentioned anywhere in the file is the candidate. On a small file compression costs more than it saves, so the size is what settles it. Reading a JSON or CSV file is not writing one, and a payload written into a deflated archive (zipfile, zlib, lzma, bz2) is already compressed.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
           "source_note": "Adapted from the Green Codex rule DB-EFF-008 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
@@ -1980,6 +1999,14 @@
             "compression",
             "storage",
             "network"
+          ],
+          "exclude_patterns": [
+            "read_text\\(",
+            "read_bytes\\(",
+            "json\\.loads?\\(",
+            "csv\\.(Dict)?[Rr]eader",
+            "readFile",
+            "pd\\.read_"
           ]
         },
         {
