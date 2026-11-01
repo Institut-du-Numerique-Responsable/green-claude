@@ -2,6 +2,9 @@
 
 🇫🇷 [Lire en français](README.fr.md)
 
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-CC785C?logo=claude&logoColor=white)](https://github.com/Institut-du-Numerique-Responsable/green-claude)
+[![Audit](https://img.shields.io/badge/audit-Bash%2FAWK-4EAA25?logo=gnubash&logoColor=white)](hooks/)
+[![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](scripts/)
 [![Licenses](https://img.shields.io/badge/licenses-Apache--2.0%20%2B%20CC%20BY%204.0-green.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Institut-du-Numerique-Responsable/green-claude)](https://github.com/Institut-du-Numerique-Responsable/green-claude/releases)
 [![Site](https://img.shields.io/badge/site-green--claude-blue)](https://institut-du-numerique-responsable.github.io/green-claude/)
