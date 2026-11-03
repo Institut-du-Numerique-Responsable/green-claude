@@ -93,16 +93,15 @@
           "title": "Polling loop",
           "description": "A loop that sleeps and re-tests keeps a shell, and often a subprocess, alive doing nothing. Left in a cron job or a container entrypoint, it runs for the lifetime of the machine.",
           "impact": "Medium",
-          "patterns": [
-            "sleep[[:space:]]+[0-9]"
-          ],
+          "patterns": [],
+          "detector": "polling_loop",
           "exclude_file_patterns": [
             "inotifywait",
             "^[[:space:]]*wait[[:space:]]*$",
             "trap[[:space:]]"
           ],
           "recommendation": "Block on the event instead: wait for the PID, inotifywait, a queue, or a signal. Where polling is the only option, widen the interval and give the loop a bound.",
-          "note": "Only sleep is looked for: a while loop reading a stream is not polling, and flagging it would fire on every read loop in a repository. A sleep between retries with a bounded count is legitimate, so read the loop before acting.",
+          "note": "Only a sleep inside a loop body (between do and done) is reported; a single pause outside any loop is not polling. Only sleep is looked for: a while loop reading a stream is not polling, and flagging it would fire on every read loop in a repository. A sleep between retries with a bounded count is legitimate, so read the loop before acting.",
           "rgesn_ref": "7.x",
           "gr491_famille": "Backend",
           "tags": [
