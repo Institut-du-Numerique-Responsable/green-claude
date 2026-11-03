@@ -1491,4 +1491,58 @@ echo "$OUT" | grep -q 'ECO-HEB-11' || fail "écriture JSON non compressée non d
 echo "$OUT" | grep -q 'ECO-CONT-01' || fail "image PNG hors classeur non détectée"
 true
 
+# Faux positifs relevés en administrant des serveurs (novembre 2026).
+# ECO-FRONT-05 : un return qui se poursuit par une ligne commençant par un
+# opérateur fait partie de la même expression.
+cat > "$TMP/return_operateur.php" <<'EOF'
+<?php
+function accepte($m, $id)
+{
+    return $m->hasTo('a@example.org')
+        && $m->id === $id;
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_operateur.php")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : ligne de suite d'un return (&&) prise pour du code mort"
+cat > "$TMP/return_operateur_mort.php" <<'EOF'
+<?php
+function f($a, $b)
+{
+    return $a
+        && $b;
+    echo "jamais";
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_operateur_mort.php")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort après un return sur deux lignes non détecté"
+
+# ECO-SH-04 : un sleep isolé n'est pas une boucle d'attente ; dans une boucle, si.
+cat > "$TMP/sleep_isole.sh" <<'EOF'
+#!/bin/bash
+systemctl restart exim4
+sleep 8
+tail -n 20 /var/log/exim4/mainlog
+EOF
+OUT="$(bash eco-audit.sh "$TMP/sleep_isole.sh")"
+echo "$OUT" | grep -q 'ECO-SH-04' && fail "faux positif : sleep isolé signalé comme boucle d'attente"
+cat > "$TMP/sleep_boucle_ligne.sh" <<'EOF'
+#!/bin/bash
+until curl -sf http://localhost/ ; do sleep 5; done
+EOF
+OUT="$(bash eco-audit.sh "$TMP/sleep_boucle_ligne.sh")"
+echo "$OUT" | grep -q 'ECO-SH-04' || fail "boucle d'attente sur une ligne non détectée"
+
+# ECO-HEB-05 : une substitution sed qui remplace TLS 1.0/1.1 par 1.2/1.3 corrige
+# la configuration ; la configuration obsolète, elle, reste signalée.
+cat > "$TMP/tls_correction.sh" <<'EOF'
+#!/bin/bash
+sed -i -E 's/^(\s*)ssl_protocols TLSv1 TLSv1\.1 TLSv1\.2 TLSv1\.3;/\1ssl_protocols TLSv1.2 TLSv1.3;/' /etc/nginx/nginx.conf
+EOF
+OUT="$(bash eco-audit.sh "$TMP/tls_correction.sh")"
+echo "$OUT" | grep -q 'ECO-HEB-05' && fail "faux positif : sed qui retire TLS 1.0/1.1 signalé comme protocole obsolète"
+printf 'ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;\n' > "$TMP/tls_obsolete.conf"
+OUT="$(bash eco-audit.sh "$TMP/tls_obsolete.conf")"
+echo "$OUT" | grep -q 'ECO-HEB-05' || fail "configuration TLS 1.0/1.1 non détectée"
+true
+
 echo "OK - suite complete"

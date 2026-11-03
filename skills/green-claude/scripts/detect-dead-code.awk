@@ -86,8 +86,18 @@ function blank_strings(s,   out, i, n, c, q, esc) {
         if (pending <= 0) {
             pending = 0
             dead_depth = depth
+            stmt_open = (trimmed !~ /;[ \t]*$/)
             flagged_this_zone = 0
         }
+        next
+    }
+
+    # Instruction return/throw qui se poursuit sur la ligne suivante par un
+    # opérateur (`return $a` puis `    && $b;`) : la ligne de suite fait partie
+    # de l'expression, pas du code mort. Elle reste ouverte tant qu'aucune
+    # ligne ne se termine par un point-virgule.
+    if (dead_depth >= 0 && stmt_open && trimmed ~ /^(&&|\|\||\?\?|\?|:|\.|->|\+|-|\*|\/|%|and[ \t]|or[ \t]|xor[ \t])/) {
+        stmt_open = (trimmed !~ /;[ \t]*$/)
         next
     }
 
@@ -137,6 +147,7 @@ function blank_strings(s,   out, i, n, c, q, esc) {
         } else {
             dead_depth = depth
             flagged_this_zone = 0
+            stmt_open = (trimmed !~ /;[ \t]*$/ && trimmed !~ /[{}][ \t]*$/)
         }
     }
 }

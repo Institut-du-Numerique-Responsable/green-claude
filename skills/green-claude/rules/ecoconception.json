@@ -1822,6 +1822,9 @@
             "SSLv23_method",
             "TLSv1([^.0-9]|$)"
           ],
+          "exclude_patterns": [
+            "sed[[:space:]].*TLSv1\\.2[[:space:]]+TLSv1\\.3"
+          ],
           "recommendation": "Configure a minimum of TLS 1.2, ideally 1.3, on the server or in outbound connection options.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",

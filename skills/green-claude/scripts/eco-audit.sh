@@ -247,7 +247,7 @@ if [ "${1:-}" = "--list-rules" ]; then
             .metadata.name as $lang
             | [.categories[] as $c | $c.rules[]]
             | .[]
-            | select((.patterns // []) | length == 0)
+            | select(((.patterns // []) | length == 0) and ((.detector // "") == ""))
             | "[\(.impact)] \(.id) — \(.title) (\($lang))\n  \(.recommendation)\n"' "$lang_json"
     done
     echo "=== Responsible use practices (context, brief, memory, verification, compute) ==="
@@ -379,7 +379,7 @@ for arg in "$@"; do
             .metadata.extensions as $exts
             | [.categories[] as $c | $c.rules[] | . + {category: $c.name, exts: $exts}]
             | .[]
-            | select((.patterns // []) | length > 0)' "$lang_json" >> "$lang_rules"
+            | select(((.patterns // []) | length > 0) or ((.detector // "") != ""))' "$lang_json" >> "$lang_rules"
     done <<EOF
 $(lang_file_for_ext "$(ext_of "$arg")")
 EOF

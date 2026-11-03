@@ -13,6 +13,11 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
   - ECO-CONT-01 ignore les PNG et JPEG embarqués dans un document OOXML (`xl/media/`, `word/media/`, `ppt/media/`, `add_picture`), où Office ne lit pas le WebP de façon fiable ;
   - ECO-STRAT-03 ne signale plus un fichier Office produit en même temps qu'un équivalent ouvert (CSV, JSON, ODF).
 - Tests de non-régression dans `test-eco-audit.sh`, dans les deux sens : silence sur le cas légitime, détection maintenue sans la bonne pratique.
+- Faux positifs relevés en administrant des serveurs (novembre 2026) :
+  - ECO-FRONT-05 ne prend plus pour du code mort la ligne de suite d'un `return` qui commence par un opérateur (`&&`, `||`, `.`, `->`, `?`…) ; le code qui suit la fin de l'instruction reste signalé ;
+  - ECO-SH-04 ne signale plus qu'un `sleep` placé dans le corps d'une boucle (nouveau détecteur `detect-polling-loop.awk`) : une pause isolée n'est pas une attente active ;
+  - ECO-HEB-05 ignore une substitution `sed` qui remplace TLS 1.0/1.1 par TLS 1.2/1.3 ; une configuration obsolète reste signalée.
+- Les règles de langage (`rules/langages/`) peuvent désormais utiliser un détecteur multi-lignes, comme les règles générales.
 
 ## [1.5.0] - 2026-10-21
 
