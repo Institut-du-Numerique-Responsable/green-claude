@@ -54,12 +54,14 @@ for file in sample.sh sample.zsh sample.jl sample.nim sample.zig sample.astro sa
         fail "score omitted $file"
     fi
 done
-printf 'sleep 1\n' > sample.zsh
+# Une vraie boucle d'attente : un sleep isolé n'est plus signalé (ECO-SH-04).
+printf 'while true; do sleep 1; done\n' > sample.zsh
 if payload sample.zsh | bash "$TMP/audit.sh" > "$TMP/out" 2>&1; then
     fail 'PostToolUse omitted Zsh rule'
 fi
 grep -q ECO-SH-04 "$TMP/out" || fail 'Zsh finding missing'
-printf 'sleep 1\n' > sample.sh
+# Une vraie boucle d'attente : un sleep isolé n'est plus signalé (ECO-SH-04).
+printf 'while true; do sleep 1; done\n' > sample.sh
 git add sample.sh
 if GREEN_CLAUDE_STRICT=1 bash "$TMP/pre-commit.sh" > "$TMP/out" 2>&1; then
     fail 'pre-commit omitted Shell rule'
