@@ -693,24 +693,32 @@ true
 
 # 31. Empaquetage : les deux canaux qui attendent un zip (API Skills, upload
 # Claude.ai) exigent un dossier unique à la racine, nommé comme le skill, et
-# une description sous leur limite respective — 1024 et 200 caractères.
+# une description sous leur limite respective — 1024 et 200 caractères. Ils
+# refusent aussi un nom qui contient « claude » ou « anthropic » (issue #54).
 if command -v zip >/dev/null 2>&1; then
     DIST="$TMP/dist"
     bash package-skill.sh "$DIST" >/dev/null 2>&1 || fail "package-skill.sh a échoué"
     [ -f "$DIST/green-claude-api.zip" ] || fail "archive API absente"
     [ -f "$DIST/green-claude-claude-ai.zip" ] || fail "archive Claude.ai absente"
 
-    RACINES=$(unzip -l "$DIST/green-claude-api.zip" | awk 'NR>3 && $4 != "" {split($4,a,"/"); print a[1]}' | sort -u | grep -v '^-' || true)
-    [ "$RACINES" = "green-claude" ] || fail "l'archive doit contenir un seul dossier racine nommé green-claude (trouvé : $RACINES)"
+    for ARCHIVE in green-claude-api.zip green-claude-claude-ai.zip; do
+        RACINES=$(unzip -l "$DIST/$ARCHIVE" | awk 'NR>3 && $4 != "" {split($4,a,"/"); print a[1]}' | sort -u | grep -v '^-' || true)
+        [ "$RACINES" = "green-coding" ] || fail "$ARCHIVE doit contenir un seul dossier racine nommé green-coding (trouvé : $RACINES)"
+        NOM=$(unzip -p "$DIST/$ARCHIVE" green-coding/SKILL.md | awk -F': ' '/^name: /{print $2; exit}')
+        [ "$NOM" = "green-coding" ] || fail "$ARCHIVE : name doit valoir green-coding, comme le dossier racine (trouvé : $NOM)"
+        printf '%s' "$NOM" | grep -Eq 'claude|anthropic' && fail "$ARCHIVE : le nom contient un mot réservé"
+        unzip -p "$DIST/$ARCHIVE" green-coding/SKILL.md | grep -q 'skills/green-claude' \
+            && fail "$ARCHIVE : un chemin de repli pointe encore vers skills/green-claude"
+    done
 
-    DESC=$(unzip -p "$DIST/green-claude-claude-ai.zip" green-claude/SKILL.md | awk -F'description: ' '/^description: /{print $2}')
+    DESC=$(unzip -p "$DIST/green-claude-claude-ai.zip" green-coding/SKILL.md | awk -F'description: ' '/^description: /{print $2}')
     N=$(printf '%s' "$DESC" | wc -c | tr -d ' ')
     [ "$N" -le 200 ] || fail "description de la variante Claude.ai : $N caractères, limite 200"
     [ "$N" -gt 0 ] || fail "description absente de la variante Claude.ai"
 
-    unzip -p "$DIST/green-claude-api.zip" green-claude/rules/langages/python.json >/dev/null 2>&1 \
+    unzip -p "$DIST/green-claude-api.zip" green-coding/rules/langages/python.json >/dev/null 2>&1 \
         || fail "les règles par langage manquent dans l'archive"
-    unzip -p "$DIST/green-claude-api.zip" green-claude/rules/usage.json >/dev/null 2>&1 \
+    unzip -p "$DIST/green-claude-api.zip" green-coding/rules/usage.json >/dev/null 2>&1 \
         || fail "les pratiques d'usage responsable manquent dans l'archive"
 fi
 

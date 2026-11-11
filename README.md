@@ -53,9 +53,9 @@ bash skills/green-claude/scripts/package-skill.sh    # writes into dist/
 | Channel | Archive | How to install |
 |---|---|---|
 | Claude.ai | `dist/green-claude-claude-ai.zip` | Settings → Capabilities → Skills → Upload skill (code execution must be enabled) |
-| Claude API | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-claude"))` |
+| Claude API | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-coding"))` |
 
-The archives contain the same skill, with a description adapted to each channel. Running the audit requires `bash` and `jq` in the execution environment.
+The archives contain the same skill, with a description adapted to each channel. There it is named `green-coding`: Claude.ai and the API reject a skill name that contains "claude". Running the audit requires `bash` and `jq` in the execution environment.
 
 ## Usage
 
