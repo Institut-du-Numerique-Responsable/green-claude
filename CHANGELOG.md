@@ -8,6 +8,7 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Corrigé
 
+- L’archive Claude.ai était refusée à l’import : « Skill name in SKILL.md cannot contain the reserved word 'claude' » (#54). Dans les deux archives (`green-claude-claude-ai.zip`, `green-claude-api.zip`), le skill s’appelle désormais `green-coding`, dans le champ `name` comme pour le dossier racine. Les noms des fichiers zip et le plugin Claude Code ne changent pas. `package-skill.sh` refuse un nom qui contient un mot réservé, et `test-eco-audit.sh` le vérifie.
 - Faux positifs sur les scripts qui génèrent des fichiers bureautiques (retour d'usage GPC-ONR) :
   - ECO-HEB-11 ne se déclenche plus quand on lit un JSON ou un CSV (`read_text`, `json.load`, `csv.reader`…), ni quand le fichier écrit dans une archive déjà compressée (`ZIP_DEFLATED`, `zlib`, `lzma`, `bz2`) ;
   - ECO-CONT-01 ignore les PNG et JPEG embarqués dans un document OOXML (`xl/media/`, `word/media/`, `ppt/media/`, `add_picture`), où Office ne lit pas le WebP de façon fiable ;

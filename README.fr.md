@@ -50,9 +50,9 @@ bash skills/green-claude/scripts/package-skill.sh    # écrit dans dist/
 | Canal | Archive | Installation |
 |---|---|---|
 | Claude.ai | `dist/green-claude-claude-ai.zip` | Réglages → Fonctionnalités → Skills → Téléverser (l'exécution de code doit être activée) |
-| API Claude | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-claude"))` |
+| API Claude | `dist/green-claude-api.zip` | `client.beta.skills.create(files=files_from_dir("green-coding"))` |
 
-Les archives contiennent le même skill, avec une description adaptée à chaque canal. L’audit nécessite `bash` et `jq` dans l’environnement d’exécution.
+Les archives contiennent le même skill, avec une description adaptée à chaque canal. Il s’y appelle `green-coding` : Claude.ai et l’API refusent un nom de skill qui contient « claude ». L’audit nécessite `bash` et `jq` dans l’environnement d’exécution.
 
 ## Utilisation
 
