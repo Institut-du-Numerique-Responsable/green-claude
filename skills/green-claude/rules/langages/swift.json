@@ -1,17 +1,18 @@
 {
   "metadata": {
     "name": "Ecodesign for Swift",
-    "description": "Ecodesign rules for Swift code: battery-aware background work, reused sessions, streamed data, no blocking of the main thread.",
+    "description": "Ecodesign rules for Swift code: battery-aware sensors, timers and background work, reused sessions that respect Low Data Mode, downsampled images, SwiftUI object lifetime, bounded Core Data fetches, no blocking of the main thread.",
     "globs": "**/*.swift",
     "extensions": [
       "swift"
     ],
-    "version": "1.0.0",
+    "version": "1.1.0",
     "sources": [
       "https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/",
-      "https://gr491.isit-europe.org/"
+      "https://gr491.isit-europe.org/",
+      "https://developer.apple.com/library/archive/documentation/Performance/Conceptual/EnergyGuide-iOS/"
     ],
-    "count": 5,
+    "count": 15,
     "type": "code_audit"
   },
   "categories": {
@@ -72,6 +73,128 @@
             "ios",
             "polling"
           ]
+        },
+        {
+          "id": "ECO-SW-06",
+          "title": "Highest location accuracy requested",
+          "description": "kCLLocationAccuracyBest and BestForNavigation keep GPS powered at full rate. Most features need a street or a city, which Wi-Fi and cell positioning give for a fraction of the energy.",
+          "impact": "High",
+          "patterns": [
+            "desiredAccuracy[[:space:]]*=[[:space:]]*kCLLocationAccuracyBest"
+          ],
+          "recommendation": "Ask for the coarsest accuracy the feature needs (kCLLocationAccuracyHundredMeters, kCLLocationAccuracyKilometer, or reduced accuracy), and raise it only while the user is navigating.",
+          "example": {
+            "bad": "manager.desiredAccuracy = kCLLocationAccuracyBest",
+            "good": "manager.desiredAccuracy = kCLLocationAccuracyHundredMeters"
+          },
+          "note": "Turn-by-turn navigation and fitness tracking legitimately need the best accuracy. The question is whether this feature does.",
+          "rgesn_ref": "4.x",
+          "gr491_famille": "UX/UI",
+          "tags": [
+            "swift",
+            "ios",
+            "battery",
+            "location"
+          ]
+        },
+        {
+          "id": "ECO-SW-07",
+          "title": "Location kept running in the background",
+          "description": "allowsBackgroundLocationUpdates lets location run after the app leaves the screen. Without pausesLocationUpdatesAutomatically or a stop, GPS stays on for hours.",
+          "impact": "Medium",
+          "patterns": [
+            "allowsBackgroundLocationUpdates[[:space:]]*=[[:space:]]*true"
+          ],
+          "exclude_file_patterns": [
+            "pausesLocationUpdatesAutomatically[[:space:]]*=[[:space:]]*true",
+            "startMonitoringSignificantLocationChanges"
+          ],
+          "recommendation": "Prefer significant-change or visit monitoring in the background. If continuous updates are required, set pausesLocationUpdatesAutomatically and an activityType so the system can pause them.",
+          "note": "The rule stays silent when the file lets the system pause updates or uses significant-change monitoring.",
+          "rgesn_ref": "4.x",
+          "gr491_famille": "UX/UI",
+          "tags": [
+            "swift",
+            "ios",
+            "battery",
+            "location",
+            "background"
+          ]
+        },
+        {
+          "id": "ECO-SW-08",
+          "title": "Timer with no tolerance",
+          "description": "A timer without tolerance fires at the exact instant, so the system cannot group its wake-up with others. Apple's Energy Efficiency Guide asks for a tolerance of at least 10% of the interval.",
+          "impact": "Low",
+          "patterns": [
+            "Timer\\.scheduledTimer\\(",
+            "Timer\\.publish\\(every:"
+          ],
+          "exclude_file_patterns": [
+            "\\.tolerance[[:space:]]*=",
+            "tolerance:"
+          ],
+          "recommendation": "Set timer.tolerance to at least a tenth of the interval, or pass tolerance: to Timer.publish.",
+          "example": {
+            "bad": "Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in check() }",
+            "good": "let t = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in check() }\nt.tolerance = 2"
+          },
+          "note": "One tolerance anywhere in the file silences the rule. A one-shot timer gains little from it.",
+          "rgesn_ref": "7.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "swift",
+            "timers",
+            "battery"
+          ]
+        },
+        {
+          "id": "ECO-SW-09",
+          "title": "Screen kept awake",
+          "description": "isIdleTimerDisabled = true stops the screen from dimming and locking. The display is the largest energy draw on a phone, and it stays on for as long as the flag is set.",
+          "impact": "Medium",
+          "patterns": [
+            "isIdleTimerDisabled[[:space:]]*=[[:space:]]*true"
+          ],
+          "exclude_file_patterns": [
+            "isIdleTimerDisabled[[:space:]]*=[[:space:]]*false"
+          ],
+          "recommendation": "Set it only while the feature that needs it runs (video playback, navigation), and set it back to false when that ends or the view disappears.",
+          "note": "The rule stays silent when the same file sets the flag back to false.",
+          "rgesn_ref": "4.x",
+          "gr491_famille": "UX/UI",
+          "tags": [
+            "swift",
+            "ios",
+            "battery",
+            "display"
+          ]
+        },
+        {
+          "id": "ECO-SW-10",
+          "title": "Heavy background task that does not wait for power",
+          "description": "A BGProcessingTaskRequest is meant for long work: indexing, cleanup, model updates. Without requiresExternalPower it can run on battery while the user sleeps.",
+          "impact": "Medium",
+          "patterns": [
+            "BGProcessingTaskRequest\\("
+          ],
+          "exclude_file_patterns": [
+            "requiresExternalPower[[:space:]]*=[[:space:]]*true"
+          ],
+          "recommendation": "Set requiresExternalPower = true (and requiresNetworkConnectivity only if needed) so the work runs while the device charges.",
+          "example": {
+            "bad": "let request = BGProcessingTaskRequest(identifier: id)",
+            "good": "let request = BGProcessingTaskRequest(identifier: id)\nrequest.requiresExternalPower = true"
+          },
+          "rgesn_ref": "8.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "swift",
+            "ios",
+            "background",
+            "battery"
+          ],
+          "note": "One requiresExternalPower = true anywhere in the file silences the rule. Work that must finish overnight on battery (a backup the user asked for) can keep it off on purpose."
         }
       ]
     },
@@ -104,21 +227,27 @@
         },
         {
           "id": "ECO-SW-04",
-          "title": "Whole file or response held in memory",
-          "description": "Data(contentsOf:) loads everything before anything can be used. On a large download that is a memory spike, and on a slow connection it is a wait with nothing on screen.",
-          "impact": "Medium",
+          "title": "Remote resource loaded synchronously and whole",
+          "description": "Data(contentsOf:) on a web URL downloads the whole response on the calling thread, with no cache, no timeout control and nothing on screen until the last byte lands. On the main thread it freezes the interface for as long as the network takes.",
+          "impact": "High",
           "patterns": [
-            "Data\\(contentsOf:",
-            "String\\(contentsOf:"
+            "(Data|String)\\(contentsOf:[[:space:]]*URL\\(string:",
+            "(Data|String)\\(contentsOf:[^)]*https?://"
           ],
-          "recommendation": "Use URLSession download or stream tasks, decode incrementally, and bound what you keep.",
-          "rgesn_ref": "9.1",
+          "recommendation": "Fetch with a shared URLSession (data(from:) or a download task for large files), which reuses connections, honours the HTTP cache and runs off the main thread.",
+          "rgesn_ref": "7.2",
           "gr491_famille": "Backend",
           "tags": [
             "swift",
-            "memory",
-            "streams"
-          ]
+            "network",
+            "blocking",
+            "memory"
+          ],
+          "example": {
+            "bad": "let data = try Data(contentsOf: URL(string: \"https://api.example.org/feed\")!)",
+            "good": "let (data, _) = try await session.data(from: feedURL)"
+          },
+          "note": "Only a URL built from a string literal or an http(s) address is matched. Reading a local file whole is usually fine for small, bounded files (settings, a JSON store, a bundled resource), so the rule no longer flags Data(contentsOf: fileURL)."
         },
         {
           "id": "ECO-SW-05",
@@ -140,6 +269,122 @@
             "swift",
             "network",
             "connections"
+          ]
+        },
+        {
+          "id": "ECO-SW-11",
+          "title": "Network session ignores Low Data Mode",
+          "description": "Low Data Mode and expensive networks (cellular, personal hotspot) are the user telling apps to hold back. A session that never sets allowsConstrainedNetworkAccess or allowsExpensiveNetworkAccess downloads the same on a metered link as on Wi-Fi.",
+          "impact": "Low",
+          "patterns": [
+            "URLSessionConfiguration\\.(default|background)"
+          ],
+          "exclude_file_patterns": [
+            "allowsConstrainedNetworkAccess",
+            "allowsExpensiveNetworkAccess"
+          ],
+          "recommendation": "For prefetching, sync and large media, set allowsConstrainedNetworkAccess = false (and allowsExpensiveNetworkAccess = false where it fits), and fall back to a lighter request when it fails with constrained network.",
+          "note": "Requests the user explicitly asked for may go through anyway. The point is background and optional traffic.",
+          "rgesn_ref": "7.x",
+          "gr491_famille": "Frontend",
+          "tags": [
+            "swift",
+            "network",
+            "low-data-mode"
+          ]
+        },
+        {
+          "id": "ECO-SW-12",
+          "title": "Image decoded at full size for a small display",
+          "description": "UIImage(data:) and NSImage(contentsOf:) decode every pixel. A 12-megapixel photo shown as a 100-point thumbnail takes about 48 MB once decoded, for a few kilobytes on screen.",
+          "impact": "Medium",
+          "patterns": [
+            "UIImage\\(data:",
+            "UIImage\\(contentsOfFile:",
+            "NSImage\\(contentsOf:",
+            "NSImage\\(data:"
+          ],
+          "exclude_file_patterns": [
+            "CGImageSourceCreateThumbnailAtIndex",
+            "preparingThumbnail",
+            "byPreparingThumbnail",
+            "kCGImageSourceThumbnailMaxPixelSize"
+          ],
+          "recommendation": "Downsample to the display size with CGImageSourceCreateThumbnailAtIndex (kCGImageSourceThumbnailMaxPixelSize) or preparingThumbnail(of:), and cache the result.",
+          "note": "A full-size view, an editor or an image already sized for its slot is fine. The rule stays silent when the file downsamples.",
+          "rgesn_ref": "5.x",
+          "gr491_famille": "Frontend",
+          "tags": [
+            "swift",
+            "images",
+            "memory"
+          ]
+        },
+        {
+          "id": "ECO-SW-13",
+          "title": "Observed object created by the view",
+          "description": "@ObservedObject var model = Model() builds a new object every time SwiftUI recreates the view, which can be many times a second. Each new object redoes its setup: network calls, file reads, subscriptions.",
+          "impact": "Medium",
+          "patterns": [
+            "@ObservedObject[[:space:]]+(private[[:space:]]+)?var[[:space:]]+[A-Za-z_][A-Za-z0-9_]*([[:space:]]*:[^=]+)?[[:space:]]*=[[:space:]]*[A-Z][A-Za-z0-9_.]*\\("
+          ],
+          "recommendation": "Use @StateObject (or @State with an @Observable class) for an object the view owns, and @ObservedObject only for one passed in.",
+          "example": {
+            "bad": "@ObservedObject var model = FeedModel()",
+            "good": "@StateObject private var model = FeedModel()"
+          },
+          "rgesn_ref": "6.x",
+          "gr491_famille": "Frontend",
+          "tags": [
+            "swift",
+            "swiftui",
+            "rendering"
+          ]
+        },
+        {
+          "id": "ECO-SW-14",
+          "title": "Core Data fetch with no limit",
+          "description": "An NSFetchRequest with no fetchLimit or fetchBatchSize loads every matching object into memory, the Core Data equivalent of SELECT * without LIMIT.",
+          "impact": "Medium",
+          "patterns": [
+            "NSFetchRequest<",
+            "NSFetchRequest\\(entityName:"
+          ],
+          "exclude_file_patterns": [
+            "fetchLimit",
+            "fetchBatchSize",
+            "propertiesToFetch",
+            "resultType[[:space:]]*=[[:space:]]*\\.countResultType"
+          ],
+          "recommendation": "Set fetchBatchSize for lists, fetchLimit when you need a few rows, propertiesToFetch for a subset of fields, or count(for:) when you only need the number.",
+          "example": {
+            "bad": "let request = NSFetchRequest<Item>(entityName: \"Item\")",
+            "good": "let request = NSFetchRequest<Item>(entityName: \"Item\")\nrequest.fetchBatchSize = 50"
+          },
+          "note": "One limit anywhere in the file silences the rule, so a file with several fetches needs each checked.",
+          "rgesn_ref": "7.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "swift",
+            "coredata",
+            "database"
+          ]
+        },
+        {
+          "id": "ECO-SW-15",
+          "title": "UserDefaults synchronize()",
+          "description": "synchronize() is deprecated and forces a write the system already schedules. Called after every change, it adds disk writes for nothing.",
+          "impact": "Low",
+          "patterns": [
+            "UserDefaults\\.standard\\.synchronize\\(\\)",
+            "[Dd]efaults\\.synchronize\\(\\)"
+          ],
+          "recommendation": "Remove the call. UserDefaults saves on its own.",
+          "rgesn_ref": "7.x",
+          "gr491_famille": "Backend",
+          "tags": [
+            "swift",
+            "storage"
           ]
         }
       ]

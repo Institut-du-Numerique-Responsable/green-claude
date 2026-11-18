@@ -11,7 +11,7 @@
 
 **Green Claude** helps [Claude Code](https://claude.com/claude-code) write code that uses fewer resources, with eco-design rules and a local audit tool.
 
-A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 127 rules for 24 languages and frameworks, 13 responsible-use practices and 30 token sobriety rules**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
+A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 137 rules for 24 languages and frameworks, 13 responsible-use practices and 30 token sobriety rules**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 The skill guides the model when loaded; its application is not guaranteed on every response. The audit flags candidates for review, without certifying RGESN compliance or measuring energy savings. Optional hooks run the audit after supported code-writing operations.
 
@@ -134,7 +134,7 @@ Rules with no detectable pattern (process, governance) are skipped by the audit 
 
 ---
 
-## Language rules: 127 rules loaded on demand
+## Language rules: 137 rules loaded on demand
 
 The 107 rules above hold whatever the language. They set the goal without saying how to reach it in Python or in Java: "avoid N+1 queries" doesn't choose between `select_related`, `JOIN FETCH`, `Include` and `with()`.
 

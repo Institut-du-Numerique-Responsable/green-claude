@@ -43,7 +43,7 @@
   "@type": "SoftwareSourceCode",
   "@id": "https://institut-du-numerique-responsable.github.io/green-claude/#software",
   "name": "Green Claude",
-  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 277 règles : 107 transverses, 127 pour 24 langages et frameworks, 13 pratiques d'usage, 30 règles de sobriété des tokens.",
+  "description": "Skill open source pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe et pratiques d'usage responsable. 287 règles : 107 transverses, 137 pour 24 langages et frameworks, 13 pratiques d'usage, 30 règles de sobriété des tokens.",
   "version": "1.5.0",
   "url": "https://institut-du-numerique-responsable.github.io/green-claude/",
   "codeRepository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
@@ -311,7 +311,7 @@
         </li>
         <li>
           <h3>Développeuses et développeurs</h3>
-          <p>Un code sobre dès la première ligne, 127 règles propres à 24 langages et frameworks, un audit déterministe pour relire le reste.</p>
+          <p>Un code sobre dès la première ligne, 137 règles propres à 24 langages et frameworks, un audit déterministe pour relire le reste.</p>
         </li>
       </ul>
     </section>
@@ -369,7 +369,7 @@
         </div>
         <div>
           <h3>Le détail de chaque langage</h3>
-          <p>127 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++, Go, Kotlin, Swift, Shell et leurs frameworks. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel vous concerne, d'après l'extension du fichier.</p>
+          <p>137 règles propres à Python, SQL, JavaScript/TypeScript, Java, C#, PHP, Ruby, Rust, C, C++, Go, Kotlin, Swift, Shell et leurs frameworks. Une requête N+1 se corrige avec <code>select_related</code> en Django et <code>JOIN FETCH</code> en JPA : l'audit sait lequel vous concerne, d'après l'extension du fichier.</p>
         </div>
         <div>
           <h3>À chaque écriture, sans y penser</h3>
@@ -420,7 +420,7 @@ cd green-claude && ./install.sh</code></pre>
       <ul>
         <li>Un skill Claude Code qui s'invoque tout seul dès qu'il s'agit d'écrire ou de revoir du code.</li>
         <li>107 règles d'éco-conception couvrant les 9 familles du <a href="https://ecoresponsable.numerique.gouv.fr/publications/referentiel-general-ecoconception/">RGESN 2024</a>, dont l'Algorithmie et l'IA frugale, reliées au <a href="https://gr491.isit-europe.org/">GR491</a>, avec des règles complémentaires sourcées du <a href="https://w3c.github.io/sustainableweb-wsg/">W3C Web Sustainability Guidelines</a> et des seuils repris de <a href="https://github.com/YellowLabTools/YellowLabTools">YellowLabTools</a>.</li>
-        <li>127 règles propres à un langage ou un framework, chargées seulement quand un fichier de ce langage est en jeu.</li>
+        <li>137 règles propres à un langage ou un framework, chargées seulement quand un fichier de ce langage est en jeu.</li>
         <li>13 pratiques d'usage responsable maintenues par le projet, sans attribution personnelle non vérifiée.</li>
         <li>30 règles de sobriété des tokens de l'INR (NR-TOK) pour les agents IA : réponses, contexte, opérations, choix du modèle, mesure et bilan de session.</li>
         <li>Des hooks optionnels, proposés à l'installation et jamais imposés : cadrage avant écriture, audit après chaque écriture de code, audit avant commit, cache local des questions autonomes préfixées <code>[cache]</code>, avertissement aux heures de pointe.</li>
@@ -435,7 +435,7 @@ cd green-claude && ./install.sh</code></pre>
 
     <section aria-labelledby="skill-titre">
       <h2 id="skill-titre">Pourquoi un skill plutôt qu'une checklist</h2>
-      <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant au lieu d'imposer les 277 règles à chaque échange, et vérifie le code déjà produit via un script déterministe.</p>
+      <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant au lieu d'imposer les 287 règles à chaque échange, et vérifie le code déjà produit via un script déterministe.</p>
       <p>Charger un skill reste une décision du modèle. Pour les équipes qui veulent une vérification qui ne dépende de personne, le hook d'audit s'exécute après chaque écriture de fichier de code et renvoie ses trouvailles à Claude, qui corrige avant de continuer.</p>
     </section>
 

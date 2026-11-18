@@ -8,7 +8,7 @@
 
 **Green Claude** aide [Claude Code](https://claude.com/claude-code) à proposer du code moins gourmand en ressources, grâce à des règles d’éco-conception et à un audit local.
 
-Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 127 règles pour 24 langages et frameworks, 13 pratiques d’usage responsable et 30 règles de sobriété des tokens**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
+Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 137 règles pour 24 langages et frameworks, 13 pratiques d’usage responsable et 30 règles de sobriété des tokens**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 Le skill guide le modèle lorsqu’il est chargé ; son application n’est pas garantie à chaque réponse. L’audit détecte des problèmes potentiels à examiner, sans certifier la conformité RGESN ni mesurer une économie d’énergie. Les hooks optionnels permettent de lancer cet audit après les écritures de code prises en charge.
 
@@ -131,7 +131,7 @@ Les règles sans motif détectable (démarche, gouvernance) sont ignorées par l
 
 ---
 
-## Les règles par langage : 127 règles chargées à la demande
+## Les règles par langage : 137 règles chargées à la demande
 
 Les 107 règles ci-dessus valent quel que soit le langage. Elles fixent l'objectif sans dire comment l'atteindre en Python ou en Java : « éviter les requêtes N+1 » ne tranche pas entre `select_related`, `JOIN FETCH`, `Include` et `with()`.
 
