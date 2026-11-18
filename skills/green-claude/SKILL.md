@@ -31,7 +31,7 @@ Both matter; only one of them stops when the conversation does.
 
 Four rule sets: `rules/ecoconception.json` (107 rules, RGESN 2024 / GR491 /
 Green Software Foundation / W3C WSG) while you write or modify code,
-`rules/langages/*.json` (127 rules across 24 languages and frameworks) for the language you're
+`rules/langages/*.json` (137 rules across 24 languages and frameworks) for the language you're
 working in, and, during the conversation itself, `rules/usage.json` (13
 responsible-use practices) and `rules/tokens.json` (30 token sobriety rules). Using Claude Code efficiently is also using it soberly.
 
@@ -136,7 +136,7 @@ outcome the user must never be handed.
 
 `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` is a deterministic
 script (grep/awk) with no reasoning cost for detection. Run it rather than
-grepping by hand: it carries 277 rules, their thresholds, their per-language
+grepping by hand: it carries 287 rules, their thresholds, their per-language
 scoping and their known false positives, none of which a hand-written grep
 reproduces. Interpret and prioritize its output (High impact first), and read
 *Common mistakes* below before relaying a result as-is.

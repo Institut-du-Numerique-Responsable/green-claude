@@ -946,7 +946,7 @@ func start() {
     locationManager.startUpdatingLocation()
     Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in refresh() }
     DispatchQueue.main.sync { render() }
-    let d = Data(contentsOf: url)
+    let d = Data(contentsOf: URL(string: "https://example.org/feed.json")!)
     let s = URLSession(configuration: .default)
 }
 EOF
@@ -1551,6 +1551,159 @@ echo "$OUT" | grep -q 'ECO-HEB-05' && fail "faux positif : sed qui retire TLS 1.
 printf 'ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;\n' > "$TMP/tls_obsolete.conf"
 OUT="$(bash eco-audit.sh "$TMP/tls_obsolete.conf")"
 echo "$OUT" | grep -q 'ECO-HEB-05' || fail "configuration TLS 1.0/1.1 non détectée"
+true
+
+# Faux positifs relevés sur une app macOS en Swift (purge-app, novembre 2026).
+# ECO-FRONT-05 : un return qui ouvre une closure (`return x.map { y in`), une
+# chaîne d'appels qui en ouvre une (`.filter { ... in`) ou un `#else` ne
+# laissent aucun code mort derrière eux. Le code après la fin de l'instruction,
+# lui, reste signalé.
+cat > "$TMP/return_closure.swift" <<'EOF'
+func roots(_ groups: [Group], byID: [String: App]) -> [Root] {
+    return groups.compactMap { group in
+        guard let id = group.id, let app = byID[id] else { return nil }
+        let root = Root(app: app)
+        return root
+    }
+}
+func shims(_ names: [String], bin: URL) -> [URL] {
+    return names
+        .filter { name in
+            let lower = name.lowercased()
+            return !lower.hasPrefix(".")
+        }
+        .map { bin.appendingPathComponent($0) }
+}
+func waitForHelper() async -> Status {
+    return await withCheckedContinuation { (continuation: CheckedContinuation<Status, Never>) in
+        let box = ResumeOnce(continuation)
+        box.resume(.ready)
+    }
+}
+func isRunning(_ id: String) -> Bool {
+    #if os(macOS)
+    return NSWorkspace.shared.runningApplications.contains { $0.bundleIdentifier == id }
+    #else
+    return false
+    #endif
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_closure.swift")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : closure ouverte par un return, ou #else, pris pour du code mort"
+cat > "$TMP/return_closure_mort.swift" <<'EOF'
+func f(_ xs: [Int]) -> [Int] {
+    return xs.map { x in
+        x * 2
+    }
+    print("jamais")
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_closure_mort.swift")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort après un return qui ouvre une closure non détecté"
+true
+
+# Même app : chaîne multiligne `"""`, closure refermée sur la ligne du return
+# puis suite par `||`, `@unknown default:` et suite par `==`.
+cat > "$TMP/return_swift_divers.swift" <<'EOF'
+func message(_ n: Int) -> String {
+    if n == 0 {
+        return String(localized: """
+        Nothing matched your safe settings right now.
+        """)
+    }
+    return String(localized: "Moved \(n) items")
+}
+var visible: Bool {
+    return devices.contains { filter.matches($0) }
+        || !running.isEmpty
+        || last.contains { filter.matches($0) }
+}
+func hasLoginItem(_ status: Status) -> Bool {
+    switch status {
+    case .enabled: return true
+    case .notFound: return false
+    @unknown default: return false
+    }
+}
+func isLoginLaunch(_ event: Event) -> Bool {
+    return event.code
+        == launchedAsLoginItem
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_swift_divers.swift")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' && fail "faux positif : chaîne \"\"\", suite par ||/==, ou @unknown default pris pour du code mort"
+cat > "$TMP/return_triple_mort.swift" <<'EOF'
+func f() -> String {
+    return """
+    texte
+    """
+    print("jamais")
+}
+EOF
+OUT="$(bash eco-audit.sh "$TMP/return_triple_mort.swift")"
+echo "$OUT" | grep -q 'ECO-FRONT-05' || fail "code mort après un return de chaîne multiligne non détecté"
+true
+
+# Règles Swift (ECO-SW-04 à ECO-SW-15) : chaque règle parle sur la forme
+# fautive et se tait sur la bonne pratique.
+cat > "$TMP/swift_fautif.swift" <<'EOF'
+let feed = try Data(contentsOf: URL(string: "https://api.example.org/feed")!)
+manager.desiredAccuracy = kCLLocationAccuracyBest
+manager.allowsBackgroundLocationUpdates = true
+let t = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in check() }
+UIApplication.shared.isIdleTimerDisabled = true
+let request = BGProcessingTaskRequest(identifier: "org.example.index")
+let config = URLSessionConfiguration.default
+let photo = UIImage(data: bytes)
+@ObservedObject var model = FeedModel()
+let fetch = NSFetchRequest<Item>(entityName: "Item")
+UserDefaults.standard.synchronize()
+EOF
+OUT="$(bash eco-audit.sh "$TMP/swift_fautif.swift")"
+for id in 04 06 07 08 09 10 11 12 13 14 15; do
+    echo "$OUT" | grep -q "ECO-SW-$id" || fail "Swift : ECO-SW-$id non détectée sur la forme fautive"
+done
+cat > "$TMP/swift_sobre.swift" <<'EOF'
+let settings = try Data(contentsOf: settingsFileURL)
+let (feed, _) = try await session.data(from: feedURL)
+manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+manager.allowsBackgroundLocationUpdates = true
+manager.pausesLocationUpdatesAutomatically = true
+let t = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in check() }
+t.tolerance = 2
+t.invalidate()
+UIApplication.shared.isIdleTimerDisabled = true
+UIApplication.shared.isIdleTimerDisabled = false
+let request = BGProcessingTaskRequest(identifier: "org.example.index")
+request.requiresExternalPower = true
+let config = URLSessionConfiguration.default
+config.allowsConstrainedNetworkAccess = false
+let photo = UIImage(data: bytes)
+let thumb = photo?.preparingThumbnail(of: size)
+@StateObject private var model = FeedModel()
+@ObservedObject var shared: FeedModel
+let fetch = NSFetchRequest<Item>(entityName: "Item")
+fetch.fetchBatchSize = 50
+EOF
+OUT="$(bash eco-audit.sh "$TMP/swift_sobre.swift")"
+for id in 02 04 06 07 08 09 10 11 12 13 14 15; do
+    echo "$OUT" | grep -q "ECO-SW-$id" && fail "Swift : faux positif ECO-SW-$id sur la bonne pratique"
+done
+true
+
+# ECO-CONT-01 : en Swift, `.png` est souvent un format passé à une API
+# (representation(using: .png), UTType.png, pngData()), pas un fichier image.
+cat > "$TMP/format_png.swift" <<'EOF'
+let data = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])
+let type = UTType.png
+let bytes = image.pngData()
+let jpeg = image.jpegData(compressionQuality: 0.8)
+EOF
+OUT="$(bash eco-audit.sh "$TMP/format_png.swift")"
+echo "$OUT" | grep -q 'ECO-CONT-01' && fail "faux positif : format d'image Swift pris pour un fichier image"
+printf 'let hero = NSImage(named: "hero.png")\n' > "$TMP/fichier_png.swift"
+OUT="$(bash eco-audit.sh "$TMP/fichier_png.swift")"
+echo "$OUT" | grep -q 'ECO-CONT-01' || fail "fichier PNG référencé en Swift non détecté"
 true
 
 echo "OK - suite complete"

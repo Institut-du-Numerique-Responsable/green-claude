@@ -28,10 +28,33 @@ function count_char(s, c,   n, i) {
     return n
 }
 
-function blank_strings(s,   out, i, n, c, q, esc) {
-    out = ""; n = length(s); q = ""; esc = 0
-    for (i = 1; i <= n; i++) {
+# Solde des délimiteurs ouverts : ( [ { comptent +1, ) ] } -1. Une accolade
+# compte comme une parenthèse : `return xs.map { x in` (Swift, Kotlin, Ruby)
+# ouvre une closure qui fait partie de l'expression retournée.
+function open_balance(s) {
+    return count_char(s, "(") + count_char(s, "[") + count_char(s, "{") \
+         - count_char(s, ")") - count_char(s, "]") - count_char(s, "}")
+}
+
+# Une chaîne sur plusieurs lignes (`"""` en Swift, Kotlin, Python) se suit
+# d'une ligne à l'autre avec `intriple`. Son ouverture s'écrit "(" et sa
+# fermeture ")" : `return """` reste une instruction en attente jusqu'au
+# `"""` final, comme une parenthèse ouverte.
+function blank_strings(s,   out, i, n, c, q, esc, end) {
+    out = ""; n = length(s); q = ""; esc = 0; i = 1
+    if (intriple) {
+        end = index(s, "\"\"\"")
+        if (end == 0) return ""
+        intriple = 0; out = ")"; i = end + 3
+    }
+    for (; i <= n; i++) {
         c = substr(s, i, 1)
+        if (q == "" && substr(s, i, 3) == "\"\"\"") {
+            end = index(substr(s, i + 3), "\"\"\"")
+            if (end == 0) { intriple = 1; return out "(" }
+            out = out "\"\""; i = i + 3 + end + 1
+            continue
+        }
         if (q != "") {
             if (esc) { esc = 0; continue }
             if (c == "\\") { esc = 1; continue }
@@ -78,11 +101,12 @@ function blank_strings(s,   out, i, n, c, q, esc) {
         }
     }
 
-    # Instruction return/throw encore ouverte (parenthèses ou crochets non
-    # refermés) : ses lignes de suite sont l'expression retournée, pas du code
-    # mort. La zone surveillée ne commence qu'une fois l'instruction refermée.
+    # Instruction return/throw encore ouverte (parenthèses, crochets ou
+    # closure non refermés) : ses lignes de suite sont l'expression retournée,
+    # pas du code mort. La zone surveillée ne commence qu'une fois
+    # l'instruction refermée.
     if (pending > 0) {
-        pending += count_char(line, "(") + count_char(line, "[") - count_char(line, ")") - count_char(line, "]")
+        pending += open_balance(line)
         if (pending <= 0) {
             pending = 0
             dead_depth = depth
@@ -96,7 +120,11 @@ function blank_strings(s,   out, i, n, c, q, esc) {
     # opérateur (`return $a` puis `    && $b;`) : la ligne de suite fait partie
     # de l'expression, pas du code mort. Elle reste ouverte tant qu'aucune
     # ligne ne se termine par un point-virgule.
-    if (dead_depth >= 0 && stmt_open && trimmed ~ /^(&&|\|\||\?\?|\?|:|\.|->|\+|-|\*|\/|%|and[ \t]|or[ \t]|xor[ \t])/) {
+    # Si cette ligne de suite ouvre une closure ou un appel qui continue plus
+    # bas (`.filter { name in`), l'instruction redevient en attente.
+    if (dead_depth >= 0 && stmt_open && trimmed ~ /^(&&|\|\||\?\?|\?|:|\.|->|\+|-|\*|\/|%|==|!=|<|>|and[ \t]|or[ \t]|xor[ \t])/) {
+        suite = open_balance(line)
+        if (suite > 0) { pending = suite; dead_depth = -1; next }
         stmt_open = (trimmed !~ /;[ \t]*$/)
         next
     }
@@ -110,8 +138,10 @@ function blank_strings(s,   out, i, n, c, q, esc) {
                 flagged_this_zone = 1
             }
             dead_depth = -1  # bloc refermé : fin de la zone surveillée
-        } else if (trimmed ~ /^(case[ \t(]|default[ \t]*:)/) {
+        } else if (trimmed ~ /^(case[ \t(]|default[ \t]*:|@unknown[ \t]+default[ \t]*:)/) {
             dead_depth = -1  # nouveau case : pas mort, juste une autre entrée
+        } else if (trimmed ~ /^#(else|elseif|endif)([ \t]|$)/) {
+            dead_depth = -1  # compilation conditionnelle (Swift, C) : autre branche
         } else if (trimmed !~ /^(\/\/|\*|\/\*)/ && trimmed != "" && !flagged_this_zone) {
             printf "%d:%s\n", NR, orig
             flagged_this_zone = 1  # une seule ligne signalée par zone morte
@@ -139,7 +169,7 @@ function blank_strings(s,   out, i, n, c, q, esc) {
         # partie de l'expression, on la recompte.
         apres = substr(line, RSTART + RLENGTH - 1)
         if (count_char(apres, "}") > count_char(apres, "{")) closed_here = 1
-        ouvertes = count_char(apres, "(") + count_char(apres, "[") - count_char(apres, ")") - count_char(apres, "]")
+        ouvertes = open_balance(apres)
     }
     if (dead_depth < 0 && !guarded && !closed_here && trimmed ~ /(^|[^[:alnum:]_.])(return|throw|break|continue)([ \t;()]|$)/) {
         if (ouvertes > 0) {
@@ -147,7 +177,10 @@ function blank_strings(s,   out, i, n, c, q, esc) {
         } else {
             dead_depth = depth
             flagged_this_zone = 0
-            stmt_open = (trimmed !~ /;[ \t]*$/ && trimmed !~ /[{}][ \t]*$/)
+            # Une closure ouverte et refermée sur la ligne du return
+            # (`return xs.contains { ... }`) n'achève pas l'instruction : la
+            # ligne suivante peut encore commencer par `||`.
+            stmt_open = (trimmed !~ /;[ \t]*$/ && (trimmed !~ /[{}][ \t]*$/ || index(apres, "{") > 0))
         }
     }
 }
