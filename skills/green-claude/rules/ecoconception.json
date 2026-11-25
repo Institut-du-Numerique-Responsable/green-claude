@@ -828,7 +828,10 @@
             "apple-touch-icon",
             "rel[[:space:]]*=[[:space:]]*[\"']manifest",
             "\"logo\"[[:space:]]*:",
-            "\"image\"[[:space:]]*:"
+            "\"image\"[[:space:]]*:",
+            "(using|format|as|fileType|type)[[:space:]]*:[[:space:]]*\\.(png|jpe?g)([^A-Za-z]|$)",
+            "UTType\\.(png|jpeg)",
+            "\\.(png|jpeg)Data\\("
           ],
           "enrich": "image",
           "enrich_note": "A pattern cannot tell whether an image is already compressed or correctly sized. scripts/inspect-image.sh resolves the real file when it can (not a remote URL) and adds its actual weight and dimensions to the report, asserting nothing when the file cannot be resolved. A file that embeds images in an OOXML document (xl/media, word/media, ppt/media) is out of scope: Office applications require PNG or JPEG there and do not reliably read WebP.",

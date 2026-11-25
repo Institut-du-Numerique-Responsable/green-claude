@@ -28,7 +28,7 @@ Each page lists all rules specific to that language, grouped by category.
 | [solid](./solid.md) | 2 | `solid.json` |
 | [sql](./sql.md) | 11 | `sql.json` |
 | [svelte](./svelte.md) | 2 | `svelte.json` |
-| [swift](./swift.md) | 5 | `swift.json` |
+| [swift](./swift.md) | 15 | `swift.json` |
 | [vue](./vue.md) | 2 | `vue.json` |
 | [zig](./zig.md) | 2 | `zig.json` |
 
