@@ -6,7 +6,13 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Ajouté
+
+- `eco-audit.sh` cite la ligne de chaque résultat (`File : views.py:12`) et jusqu’à quatre occurrences suivantes (`Also at lines`). Les numéros renvoient au fichier réel, même quand l’audit a retiré des commentaires ou le texte HTML avant la recherche. Claude n’a plus à relancer un grep pour localiser un résultat. `--help` affiche l’usage.
+
 ### Corrigé
+
+- Sur un fichier inexistant ou une option inconnue (`--help`), `eco-audit.sh` concluait « No ecodesign issue found ». Il nomme maintenant l’argument fautif et sort en code 2 sans rien analyser.
 
 - L’archive Claude.ai était refusée à l’import : « Skill name in SKILL.md cannot contain the reserved word 'claude' » (#54). Dans les deux archives (`green-claude-claude-ai.zip`, `green-claude-api.zip`), le skill s’appelle désormais `green-coding`, dans le champ `name` comme pour le dossier racine. Les noms des fichiers zip et le plugin Claude Code ne changent pas. `package-skill.sh` refuse un nom qui contient un mot réservé, et `test-eco-audit.sh` le vérifie.
 - Faux positifs sur les scripts qui génèrent des fichiers bureautiques (retour d'usage GPC-ONR) :

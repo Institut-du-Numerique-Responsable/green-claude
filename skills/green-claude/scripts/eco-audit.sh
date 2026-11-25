@@ -27,7 +27,7 @@ source "$SCRIPT_DIR/audit-common.sh"
 # Les détecteurs awk, eux, travaillent sur le fichier d'origine : ils ont besoin
 # des numéros de ligne réels et de la structure complète des blocs.
 clean_source() {
-    local file="$1" ext line_comment="" block=0
+    local file="$1" map="$2" ext line_comment="" block=0
     ext="$(ext_of "$1")"
 
     case "$ext" in
@@ -38,10 +38,20 @@ clean_source() {
         css|scss|sass)                          block=1 ;;
     esac
 
+    # Chaque ligne arrive préfixée de son numéro d'origine (« N<TAB>texte »).
+    # Le nettoyage retire ou découpe des lignes, donc la version nettoyée ne
+    # garde pas la numérotation du fichier : le numéro d'origine part dans
+    # « $map », une ligne par ligne produite, et l'audit s'en sert pour citer
+    # fichier:ligne.
     case "$ext" in
         html|htm|vue|svelte) strip_markup_text "$file" ;;
-        *)                   cat "$file" ;;
-    esac | awk -v lc="$line_comment" -v block="$block" '
+        *)                   awk '{ print NR "\t" $0 }' "$file" ;;
+    esac | awk -v lc="$line_comment" -v block="$block" -v map="$map" '
+        {
+            tab = index($0, "\t")
+            src = substr($0, 1, tab - 1)
+            $0 = substr($0, tab + 1)
+        }
         block && inblock {
             if ($0 ~ /\*\//) { sub(/^.*\*\//, ""); inblock = 0 } else { next }
         }
@@ -52,7 +62,7 @@ clean_source() {
             if (match($0, /\/\*/)) { $0 = substr($0, 1, RSTART - 1); inblock = 1 }
         }
         lc != "" && $0 ~ lc { next }
-        { print }'
+        { print; print src > map }'
 }
 
 # Contenu textuel des pages de balisage : seuls l'intérieur des balises et les
@@ -64,12 +74,12 @@ strip_markup_text() {
         line = $0
         low = tolower(line)
         if (!raw && low ~ /<(script|style)[ >]/) {
-            print line
+            print NR "\t" line
             if (low !~ /<\/(script|style)>/) raw = 1
             next
         }
         if (raw) {
-            print line
+            print NR "\t" line
             if (low ~ /<\/(script|style)>/) raw = 0
             next
         }
@@ -93,9 +103,9 @@ strip_markup_text() {
             c = substr(line, i, 1)
             if (c == "<") intag = 1
             if (intag) out = out c
-            if (c == ">") { intag = 0; print out; out = "" }
+            if (c == ">") { intag = 0; print NR "\t" out; out = "" }
         }
-        if (out != "") print out
+        if (out != "") print NR "\t" out
     }' "$1"
 }
 
@@ -263,12 +273,39 @@ if [ "${1:-}" = "--list-rules" ]; then
     exit 0
 fi
 
+usage() {
+    echo "Usage: eco-audit.sh <file> [file...]"
+    echo "        eco-audit.sh --list-rules [language]"
+    echo "        eco-audit.sh --list-langs"
+    echo "        eco-audit.sh --rules [family|language|file|usage|tokens|all]..."
+}
+
 if [ $# -eq 0 ]; then
-    echo "Usage: eco-audit.sh <file> [file...]" >&2
-    echo "        eco-audit.sh --list-rules [language]" >&2
-    echo "        eco-audit.sh --list-langs" >&2
-    echo "        eco-audit.sh --rules [family|language|file|usage|tokens|all]..." >&2
+    usage >&2
     exit 1
+fi
+
+case "$1" in
+    -h|--help) usage; exit 0 ;;
+esac
+
+# Un argument qui n'est pas un fichier lisible arrête l'audit avant toute
+# détection. Avant, l'audit ignorait cet argument et affichait « No ecodesign
+# issue found » pour un fichier qu'il n'avait pas lu.
+bad_args=0
+for arg in "$@"; do
+    if [ -f "$arg" ] && [ -r "$arg" ]; then
+        continue
+    fi
+    case "$arg" in
+        -*) echo "Unknown option: $arg (see eco-audit.sh --help)." >&2 ;;
+        *)  echo "File not found or unreadable: $arg" >&2 ;;
+    esac
+    bad_args=1
+done
+if [ "$bad_args" -ne 0 ]; then
+    echo "Audit not run: nothing was analysed." >&2
+    exit 2
 fi
 
 # A caller auditing a temporary snapshot can preserve the source identity.
@@ -357,7 +394,9 @@ for arg in "$@"; do
     CLEANED_NAMES[clean_index]=""
     if [ -f "$arg" ]; then
         CLEANED_NAMES[clean_index]="$(cleaned_name "$arg")"
-        clean_source "$arg" > "$CLEAN_DIR/${CLEANED_NAMES[clean_index]}"
+        : > "$CLEAN_DIR/${CLEANED_NAMES[clean_index]}.map"
+        clean_source "$arg" "$CLEAN_DIR/${CLEANED_NAMES[clean_index]}.map" \
+            > "$CLEAN_DIR/${CLEANED_NAMES[clean_index]}"
     fi
     clean_index=$((clean_index + 1))
 done
@@ -444,6 +483,7 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
             grep -qiE -- "$file_excludes" "$fscan" 2>/dev/null && continue
         fi
         matches=""
+        match_lines=""
         if [ -n "$detector" ]; then
             # Détecteur dédié multi-lignes (grep ligne-par-ligne ne sait pas
             # voir une imbrication répartie sur plusieurs lignes).
@@ -462,19 +502,33 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
             # fichier propre.
             # Motifs cherchés sur la version nettoyée (sans prose ni commentaires).
             scanned="$CLEAN_DIR/$cleaned"
-            [ -f "$scanned" ] || scanned="$file"
-            if [ -n "$excludes" ]; then
-                # `grep -q` en aval sort dès la première ligne retenue, ce qui
-                # envoie un SIGPIPE au grep amont. Avec `set -o pipefail`, le
-                # pipeline renvoie alors 141 et la règle se taisait — un faux
-                # négatif qui n'apparaissait que sur les fichiers assez gros
-                # pour que le tube se remplisse, donc là où il y a le plus à
-                # trouver. `head -1` remplace le `-q` et pipefail est neutralisé
-                # le temps du pipeline.
-                matches=$(set +o pipefail; grep -iE -- "$patterns" "$scanned" 2>/dev/null | grep -vE -- "$excludes" | head -1)
-                if [ -n "$matches" ]; then matches="match"; fi
-            else
-                matches=$(grep -qiE -- "$patterns" "$scanned" 2>/dev/null && echo "match" || true)
+            map="$scanned.map"
+            if [ ! -f "$scanned" ]; then scanned="$file"; map=""; fi
+            # `head` en aval ferme le tube dès qu'il a ses lignes, ce qui envoie
+            # un SIGPIPE au grep amont. Avec `set -o pipefail`, le pipeline
+            # renverrait 141 et la règle se tairait, un faux négatif limité aux
+            # fichiers assez gros pour remplir le tube, donc là où il y a le
+            # plus à trouver. pipefail est neutralisé le temps du pipeline.
+            # Les exclusions s'appliquent à la ligne préfixée « N: » de grep -n :
+            # aucune n'est ancrée en début de ligne, le préfixe ne les gêne pas.
+            # La plupart des couples règle × fichier ne correspondent pas. Le
+            # `grep -q` de tête les écarte, et le pipeline qui relève les
+            # numéros ne tourne que sur un candidat.
+            hits=""
+            if grep -qiE -- "$patterns" "$scanned" 2>/dev/null; then
+                hits=$(set +o pipefail
+                       grep -niE -- "$patterns" "$scanned" 2>/dev/null \
+                       | if [ -n "$excludes" ]; then grep -vE -- "$excludes"; else cat; fi \
+                       | cut -d: -f1 | head -5)
+            fi
+            # Numéros de la version nettoyée ramenés à ceux du fichier réel, pour
+            # que le rapport cite fichier:ligne sans nouvelle recherche.
+            if [ -n "$hits" ]; then
+                if [ -n "$map" ]; then
+                    hits=$(printf '%s\n' "$hits" | awk 'NR == FNR { m[FNR] = $0; next } { print m[$1] }' "$map" -)
+                fi
+                match_lines=$(printf '%s' "$hits" | paste -sd' ' -)
+                matches="match"
             fi
         fi
         # Enrichissement calculé avant l'affichage : certaines règles n'ont de
@@ -506,7 +560,19 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
         fi
         if [ -n "$matches" ]; then
             echo "[$impact] $id — $title"
-            echo "  File           : $source_file"
+            # fichier:ligne (première occurrence), puis les suivantes, cinq au
+            # plus. Les détecteurs awk impriment déjà « N:texte » sur leurs
+            # lignes Line : leur premier numéro sert de la même façon.
+            if [ "$matches" = "match" ]; then
+                first_line="${match_lines%% *}"
+                other_lines="${match_lines#"$first_line"}"
+                other_lines="${other_lines# }"
+            else
+                first_line="$(printf '%s\n' "$matches" | head -1 | grep -oE '^[0-9]+' || true)"
+                other_lines=""
+            fi
+            echo "  File           : $source_file${first_line:+:$first_line}"
+            [ -n "$other_lines" ] && echo "  Also at lines  : $other_lines"
             if [ "$matches" != "match" ]; then
                 echo "$matches" | head -5 | sed 's/^/  Line           : /'
             fi
