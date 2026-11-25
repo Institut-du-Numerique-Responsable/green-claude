@@ -64,9 +64,29 @@ echo "$OUT" | grep -q 'ECO-BACK-01' && fail "--list-rules liste une règle déte
 echo "$OUT" | grep -q 'ECO-BACK-03' && fail "--list-rules liste une règle détectable par détecteur (ECO-BACK-03)"
 echo "$OUT" | grep -q 'ECO-STRAT-01' || fail "--list-rules omet une règle de démarche réelle (ECO-STRAT-01)"
 
-# 6. Fichier inexistant : ne doit pas faire planter l'audit.
-bash eco-audit.sh "$TMP/n-existe-pas.js" >/dev/null 2>&1 \
-    || fail "l'audit échoue sur un fichier inexistant au lieu de l'ignorer"
+# 6. Fichier inexistant ou option inconnue : l'audit refuse de conclure.
+# Avant, l'audit ignorait l'argument et affichait « No ecodesign issue found ».
+OUT="$(bash eco-audit.sh "$TMP/n-existe-pas.js" 2>&1)" \
+    && fail "l'audit réussit sur un fichier inexistant"
+echo "$OUT" | grep -q 'No ecodesign issue found' \
+    && fail "l'audit déclare propre un fichier inexistant"
+echo "$OUT" | grep -q 'File not found or unreadable' \
+    || fail "l'audit ne nomme pas le fichier introuvable"
+OUT="$(bash eco-audit.sh --nimporte 2>&1)" && fail "l'audit accepte une option inconnue"
+echo "$OUT" | grep -q 'Unknown option: --nimporte' || fail "option inconnue non signalée"
+OUT="$(bash eco-audit.sh --help)"
+echo "$OUT" | grep -q '^Usage:' || fail "--help n'affiche pas l'usage"
+
+# 6b. Numéros de ligne : le rapport cite fichier:ligne dans le fichier réel,
+# commentaires compris dans le décompte.
+printf '%s\n' '-- requête' '-- autre commentaire' 'SELECT id FROM a;' 'SELECT * FROM users;' > "$TMP/lignes.sql"
+OUT="$(bash eco-audit.sh "$TMP/lignes.sql")"
+echo "$OUT" | grep -q "File           : $TMP/lignes.sql:4\$" \
+    || fail "le rapport ne cite pas la ligne réelle du SELECT * (attendu :4)"
+printf '%s\n' '<p>texte</p>' '<!-- note -->' '<div><img src="a.jpg"><img src="b.webp"></div>' > "$TMP/lignes.html"
+OUT="$(bash eco-audit.sh "$TMP/lignes.html")"
+echo "$OUT" | grep -qE "File           : $TMP/lignes.html:3\$" \
+    || fail "ligne fausse sur une page HTML découpée par balise (attendu :3)"
 
 # 7. Enrichissement image (ECO-CONT-01) : dimensions/poids réels si le
 # fichier est résolvable sur disque, silence sur une URL distante ou un

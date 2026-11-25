@@ -8,10 +8,12 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- `eco-audit.sh` cite la ligne de chaque résultat (`File : views.py:12`) et jusqu’à quatre occurrences suivantes (`Also at lines`). Les numéros renvoient au fichier réel, même quand l’audit a retiré des commentaires ou le texte HTML avant la recherche. Claude n’a plus à relancer un grep pour localiser un résultat. `--help` affiche l’usage.
 - Dix règles Swift (ECO-SW-06 à ECO-SW-15), tirées de l'Energy Efficiency Guide d'Apple et du RGESN : précision de localisation maximale, localisation laissée en arrière-plan, timer sans tolérance, écran maintenu allumé, tâche de fond lourde qui n'attend pas le secteur, session réseau qui ignore le mode Données réduites, image décodée en pleine taille, `@ObservedObject` créé par la vue, requête Core Data sans limite, `UserDefaults.synchronize()`. Chacune se tait quand le fichier applique déjà la bonne pratique. Le total passe à 137 règles de langage et 287 règles.
 
 ### Corrigé
 
+- Sur un fichier inexistant ou une option inconnue (`--help`), `eco-audit.sh` concluait « No ecodesign issue found ». Il nomme maintenant l’argument fautif et sort en code 2 sans rien analyser.
 - Faux positifs relevés sur une app macOS en Swift (purge-app, 259 fichiers Swift : 98 signalements avant, 8 après, dont 3 nouveaux et fondés) :
   - ECO-FRONT-05 ne prend plus pour du code mort l'intérieur d'une closure ouverte par un `return` (`return xs.map { x in`) ou par une ligne de suite (`.filter { name in`), une chaîne multiligne `"""`, une suite par `==`, `!=`, `<`, `>`, ni une branche `#else`/`#endif` ou `@unknown default:` ; le code qui suit la fin de l'instruction reste signalé ;
   - ECO-SW-04 ne vise plus que le chargement synchrone d'une ressource web (`Data(contentsOf: URL(string: "https://…"))`) et passe en impact élevé ; lire en entier un petit fichier local (réglages, magasin JSON, ressource du bundle) n'est plus signalé ;
