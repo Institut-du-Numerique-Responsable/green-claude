@@ -405,9 +405,15 @@ cleaned_name() {
     esac
 }
 CLEANED_NAMES=()
+# Extension de chaque fichier, calculée ici une fois pour toutes. La recalculer
+# dans la boucle des règles lançait un sous-shell, printf et tr par règle et par
+# fichier : environ 120 processus sur 155 pour auditer un fichier d'une ligne,
+# soit l'essentiel de la latence du hook PostToolUse.
+FILE_EXTS=()
 clean_index=0
 for arg in "$@"; do
     CLEANED_NAMES[clean_index]=""
+    FILE_EXTS[clean_index]="$(ext_of "$arg")"
     if [ -f "$arg" ]; then
         CLEANED_NAMES[clean_index]="$(cleaned_name "$arg")"
         : > "$CLEAN_DIR/${CLEANED_NAMES[clean_index]}.map"
@@ -485,7 +491,7 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
         filter_file="${filter_file#./}"
         # Règle propre à un langage : ne s'applique qu'aux fichiers de ce langage.
         if [ -n "$exts" ]; then
-            file_ext="$(ext_of "$file")"
+            file_ext="${FILE_EXTS[file_index - 1]}"
             case " $exts " in
                 *" $file_ext "*) ;;
                 *) continue ;;
