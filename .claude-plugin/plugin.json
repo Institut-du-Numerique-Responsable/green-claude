@@ -22,9 +22,14 @@
   ],
   "version": "1.6.1",
   "author": {
-    "name": "Institut du Numérique Responsable"
+    "name": "Institut du Numérique Responsable",
+    "url": "https://institutnr.org"
   },
   "homepage": "https://institut-du-numerique-responsable.github.io/green-claude/",
   "repository": "https://github.com/Institut-du-Numerique-Responsable/green-claude",
-  "license": "Apache-2.0 AND CC-BY-4.0"
+  "license": "Apache-2.0 AND CC-BY-4.0",
+  "icon": ".claude-plugin/icon.png",
+  "documentationUrl": "https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md",
+  "supportUrl": "https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/SUPPORT.md",
+  "privacyPolicyUrl": "https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/PRIVACY.md"
 }

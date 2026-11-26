@@ -32,6 +32,12 @@ The rules draw on RGESN 2024, GR491, the Green Software Foundation and the W3C W
 
 Claude Code then handles updates (`/plugin update green-claude`) without a manual `git pull`.
 
+The same marketplace lists the INR's other plugins for Claude Code. Perf Sentinel writes integration tests that catch N+1 queries and redundant or slow I/O before production:
+
+```
+/plugin install perf-sentinel@green-claude
+```
+
 ### Via install.sh
 
 ```bash
