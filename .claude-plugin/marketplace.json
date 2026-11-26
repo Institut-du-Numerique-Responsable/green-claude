@@ -4,12 +4,39 @@
     "name": "Institut du Numérique Responsable",
     "url": "https://institutnr.org/"
   },
-  "description": "Eco-design skill for Claude Code: 107 rules for digital sobriety (RGESN 2024 / GR491). Automatically applies eco-conception best practices during coding. Covers AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, and algorithms. Open source, Apache-2.0 (code) and CC BY 4.0 (rules and documentation).",
+  "description": "Plugins de l'Institut du Numérique Responsable pour Claude Code : écoconception et sobriété numérique (Green Claude), détection des anti-patterns de performance (Perf Sentinel). / Responsible digital plugins for Claude Code by the Institut du Numérique Responsable.",
   "plugins": [
     {
       "name": "green-claude",
       "source": "./",
-      "description": "Applies RGESN/GR491 eco-design rules while Claude Code writes or reviews code, with deterministic audit and responsible usage practices. 107 rules for AI sobriety (water, electricity, CPU, GPU), frontend, backend, hosting, algorithms. Open source, Apache-2.0 (code) and CC BY 4.0 (rules and documentation)."
+      "description": "Applies 287 eco-design rules (RGESN 2024, GR491, W3C WSG, Green Software Foundation) while Claude Code writes or reviews code: 107 general rules, 137 for 24 languages and frameworks, 13 responsible-use practices, 30 token sobriety rules. Deterministic local audit with file:line, optional hooks, lean mode. Apache-2.0 (code), CC BY 4.0 (rules).",
+      "category": "sustainability",
+      "tags": [
+        "eco-design",
+        "green-it",
+        "digital-sobriety",
+        "rgesn",
+        "gr491",
+        "token-sobriety",
+        "audit"
+      ],
+      "homepage": "https://institut-du-numerique-responsable.github.io/green-claude/"
+    },
+    {
+      "name": "perf-sentinel",
+      "source": {
+        "source": "github",
+        "repo": "Institut-du-Numerique-Responsable/perf-sentinel-claude"
+      },
+      "description": "Writes performance integration tests that surface N+1, redundant and slow I/O before production, and ranks production findings from Perf Sentinel Hub to fix.",
+      "category": "performance",
+      "tags": [
+        "performance",
+        "n-plus-one",
+        "integration-tests",
+        "carbon-aware"
+      ],
+      "homepage": "https://github.com/Institut-du-Numerique-Responsable/perf-sentinel-claude"
     }
   ]
 }

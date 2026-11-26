@@ -6,6 +6,11 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Ajouté
+
+- Le marketplace `green-claude` liste aussi Perf Sentinel (`/plugin install perf-sentinel@green-claude`), avec catégorie, tags et description à jour (287 règles) pour chaque plugin.
+- Champs de l’annuaire des plugins d’Anthropic dans `plugin.json` : icône carrée 1024 px (`.claude-plugin/icon.png`), `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, URL de l’auteur. Nouveau `PRIVACY.md` : le plugin ne collecte aucune donnée et ses scripts ne font aucun appel réseau.
+
 ## [1.6.1] - 2026-11-26
 
 ### Ajouté

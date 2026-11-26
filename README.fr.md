@@ -29,6 +29,12 @@ Les règles s’appuient sur le RGESN 2024, le GR491, la Green Software Foundati
 
 Claude Code gère alors les mises à jour (`/plugin update green-claude`) sans repasser par un `git pull` manuel.
 
+Le même marketplace liste les autres plugins de l’INR pour Claude Code. Perf Sentinel écrit des tests d’intégration qui détectent les requêtes N+1 et les entrées-sorties redondantes ou lentes avant la production :
+
+```
+/plugin install perf-sentinel@green-claude
+```
+
 ### Via install.sh
 
 ```bash
