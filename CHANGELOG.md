@@ -6,6 +6,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-26
+
 ### Ajouté
 
 - Mode économe `GREEN_CLAUDE_LEAN` (bloc `env` de `settings.json`) : `report` coupe le bilan NR-TOK-030 de fin de tâche, `brief` le rappel des trois questions avant une demande de code, `audit` réduit la sortie du hook `PostToolUse` à une ligne par résultat ; `all` coupe les trois. Les valeurs se combinent avec des virgules. La détection ne change pas. Sur un fichier Python à 6 résultats, le hook d’audit passe de 4 470 à 1 811 octets. Ludovic NACHURY a demandé ce mode.
@@ -171,7 +173,9 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 - Règles d'écoconception alignées sur le RGESN 2024 et le GR491.
 - Site GitHub Pages et documentation initiale.
 
-[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/green-claude--v1.3.0...v1.4.0
 [1.3.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/green-claude--v1.2.0...green-claude--v1.3.0
 [1.2.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.0.1...green-claude--v1.2.0
