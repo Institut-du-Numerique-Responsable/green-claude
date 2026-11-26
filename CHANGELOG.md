@@ -6,6 +6,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-11-26
+
 ### Ajouté
 
 - Page de présentation et README : la démarche « numérique responsable by design » et le bon sens paysan qui inspire les règles, illustrés par des règles réelles (ECO-FRONT-01, ECO-ALGO-02, ECO-BACK-01, ECO-BACK-04, ECO-PY-11). Mots-clés `green IT by design`, `responsible digital` et `numérique responsable` ajoutés à `plugin.json`.
@@ -190,7 +192,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 - Règles d'écoconception alignées sur le RGESN 2024 et le GR491.
 - Site GitHub Pages et documentation initiale.
 
-[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/green-claude--v1.3.0...v1.4.0

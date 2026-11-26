@@ -10,7 +10,7 @@ description: |
   "vérifie la sobriété de ce code", "écoconception"), or via /green-claude to
   walk through the rule checklist.
 author: Institut du Numérique Responsable
-version: 1.6.0
+version: 1.6.1
 license: CC-BY-4.0 (content); Apache-2.0 (scripts); see LICENSE
 user-invocable: true
 ---
