@@ -24,3 +24,12 @@ is_auditable_file() {
         *) return 1 ;;
     esac
 }
+
+# Mode économe : GREEN_CLAUDE_LEAN liste ce qu'on coupe (report, brief, audit),
+# ou « all ». À régler dans le bloc "env" de ~/.claude/settings.json.
+lean_on() {
+    case ",$(printf '%s' "${GREEN_CLAUDE_LEAN:-}" | tr -d ' ' | tr '[:upper:]' '[:lower:]')," in
+        *,all,*|*,1,*|*,"$1",*) return 0 ;;
+    esac
+    return 1
+}

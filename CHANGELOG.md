@@ -6,8 +6,12 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-26
+
 ### Ajouté
 
+- Mode économe `GREEN_CLAUDE_LEAN` (bloc `env` de `settings.json`) : `report` coupe le bilan NR-TOK-030 de fin de tâche, `brief` le rappel des trois questions avant une demande de code, `audit` réduit la sortie du hook `PostToolUse` à une ligne par résultat ; `all` coupe les trois. Les valeurs se combinent avec des virgules. La détection ne change pas. Sur un fichier Python à 6 résultats, le hook d’audit passe de 4 470 à 1 811 octets. Ludovic NACHURY a demandé ce mode.
+- Section « Options et configuration » dans les README : options de `eco-audit.sh` et `eco-score.sh`, codes de sortie, et toutes les variables d’environnement `GREEN_CLAUDE_*` avec leur valeur par défaut.
 - `eco-audit.sh --compact` : une ligne par résultat (`[impact] ID titre — fichier:ligne — recommandation`). `SKILL.md` en fait la commande d’audit par défaut, puis demande l’audit complet sur les fichiers retenus, pour l’exemple corrigé et la `Note`.
 - Détecteur `detect-string-concat-loop.awk` pour ECO-PY-07 : il signale `out += c.client.nom` dans le corps d’une boucle quand la variable a reçu une chaîne, et se tait hors boucle comme sur un compteur numérique.
 - `eco-audit.sh` cite la ligne de chaque résultat (`File : views.py:12`) et jusqu’à quatre occurrences suivantes (`Also at lines`). Les numéros renvoient au fichier réel, même quand l’audit a retiré des commentaires ou le texte HTML avant la recherche. Claude n’a plus à relancer un grep pour localiser un résultat. `--help` affiche l’usage.
@@ -169,7 +173,9 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 - Règles d'écoconception alignées sur le RGESN 2024 et le GR491.
 - Site GitHub Pages et documentation initiale.
 
-[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/green-claude--v1.3.0...v1.4.0
 [1.3.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/green-claude--v1.2.0...green-claude--v1.3.0
 [1.2.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.0.1...green-claude--v1.2.0

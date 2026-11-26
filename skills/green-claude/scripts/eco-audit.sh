@@ -175,6 +175,12 @@ if [ "${1:-}" = "--rules" ]; then
     # Les règles de sobriété des tokens portent une priorité, pas un impact,
     # et le format du bilan de session exigé par NR-TOK-030.
     TOKENS='(.categories[] | "## \(.name)", (.rules[] | "[\(.priority)] \(.id) \(.title) — \(.recommendation)")), "## Session report (NR-TOK-030)", .metadata.report_format'
+    # Mode économe : le bilan de fin de tâche coûte plus de tokens qu'une
+    # tâche courte n'en économise. Le dire ici, c'est le dire là où Claude lit
+    # le format du bilan.
+    if lean_on report; then
+        TOKENS='(.categories[] | "## \(.name)", (.rules[] | "[\(.priority)] \(.id) \(.title) — \(.recommendation)")), "## Session report (NR-TOK-030)", "Off: GREEN_CLAUDE_LEAN disables it. Do not write the report."'
+    fi
     if [ $# -eq 0 ]; then
         echo "Families : $(jq -r '[.categories[].name | sub("^[0-9]+\\. "; "") | ascii_downcase] | join(", ")' "$RULES_FILE")"
         echo "Languages: $(for lang_json in "$LANG_DIR"/*.json; do basename "$lang_json" .json; done | paste -sd' ' -)"
