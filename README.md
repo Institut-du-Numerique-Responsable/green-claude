@@ -204,7 +204,7 @@ Coding with AI also uses resources during the session. Green Claude therefore ma
 
 Full detail: [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
 
-The skill applies these rules to its own replies: no em dash, no phrase that announces an idea instead of delivering it, no pseudo-cleft sentence, no emphatic presentative or detached fake subordinate clause, no epanorthosis, verbal anaphora or binary antithesis, no counted announcement or announced list. They hold in every language ("Writing your replies" section of [`SKILL.md`](skills/green-claude/SKILL.md)).
+The skill applies these rules to its own replies: no em dash, no phrase that announces an idea instead of delivering it, no pseudo-cleft sentence, no emphatic presentative or detached fake subordinate clause, no epanorthosis, verbal anaphora or binary antithesis, no counted announcement or announced list. They hold in every language ([`references/style.md`](skills/green-claude/references/style.md)).
 
 > The third-party tools cited are verified open source: graphify and stop-slop under the MIT license, caveman under the Apache License 2.0 (see [Attribution and third-party licenses](#attribution-and-third-party-licenses)). The project doesn't audit them and doesn't depend on them.
 

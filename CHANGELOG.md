@@ -8,11 +8,20 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ### Ajouté
 
+- `eco-audit.sh --compact` : une ligne par résultat (`[impact] ID titre — fichier:ligne — recommandation`). `SKILL.md` en fait la commande d’audit par défaut, puis demande l’audit complet sur les fichiers retenus, pour l’exemple corrigé et la `Note`.
+- Détecteur `detect-string-concat-loop.awk` pour ECO-PY-07 : il signale `out += c.client.nom` dans le corps d’une boucle quand la variable a reçu une chaîne, et se tait hors boucle comme sur un compteur numérique.
 - `eco-audit.sh` cite la ligne de chaque résultat (`File : views.py:12`) et jusqu’à quatre occurrences suivantes (`Also at lines`). Les numéros renvoient au fichier réel, même quand l’audit a retiré des commentaires ou le texte HTML avant la recherche. Claude n’a plus à relancer un grep pour localiser un résultat. `--help` affiche l’usage.
 - Dix règles Swift (ECO-SW-06 à ECO-SW-15), tirées de l'Energy Efficiency Guide d'Apple et du RGESN : précision de localisation maximale, localisation laissée en arrière-plan, timer sans tolérance, écran maintenu allumé, tâche de fond lourde qui n'attend pas le secteur, session réseau qui ignore le mode Données réduites, image décodée en pleine taille, `@ObservedObject` créé par la vue, requête Core Data sans limite, `UserDefaults.synchronize()`. Chacune se tait quand le fichier applique déjà la bonne pratique. Le total passe à 137 règles de langage et 287 règles.
 
 ### Corrigé
 
+- ECO-HEB-11 ne prend plus une lecture pour une écriture : `open()` à un argument, mode `"r"`, `file_get_contents`, `File.read`, `os.ReadFile`. Écrire un CSV sans compression reste signalé.
+- ECO-PY-10 se tait quand le fichier crée une `requests.Session()` ou un client `httpx`/`aiohttp`.
+- `install.sh` ne copie plus le skill dans `~/.claude/skills` quand le plugin Claude Code est installé en portée utilisateur : le skill apparaissait deux fois (`green-claude` et `green-claude:green-claude`). Il signale une copie existante et donne la commande pour la retirer. Les hooks d’audit et de pre-commit retrouvent les scripts du plugin.
+
+### Modifié
+
+- `SKILL.md` : la description cite d’abord les déclencheurs implicites (lenteur, requête N+1, pagination, poids du bundle ou des images). La consigne sur le compromis apparaît une fois au lieu de trois, *Common mistakes* rejoint *Reporting what you find*, et les règles de style des réponses passent dans `references/style.md`.
 - Sur un fichier inexistant ou une option inconnue (`--help`), `eco-audit.sh` concluait « No ecodesign issue found ». Il nomme maintenant l’argument fautif et sort en code 2 sans rien analyser.
 - Faux positifs relevés sur une app macOS en Swift (purge-app, 259 fichiers Swift : 98 signalements avant, 8 après, dont 3 nouveaux et fondés) :
   - ECO-FRONT-05 ne prend plus pour du code mort l'intérieur d'une closure ouverte par un `return` (`return xs.map { x in`) ou par une ligne de suite (`.filter { name in`), une chaîne multiligne `"""`, une suite par `==`, `!=`, `<`, `>`, ni une branche `#else`/`#endif` ou `@unknown default:` ; le code qui suit la fin de l'instruction reste signalé ;
