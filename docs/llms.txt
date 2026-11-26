@@ -1,14 +1,17 @@
 # Green Claude
 
-> Skill open source de l'Institut du Numérique Responsable pour Claude Code : règles d'éco-conception RGESN/GR491, audit déterministe de code et pratiques de sobriété d'usage.
+> Plugin open source de l'Institut du Numérique Responsable pour Claude Code et Claude.ai : 287 règles d'éco-conception (RGESN 2024, GR491, W3C WSG), un audit déterministe qui cite fichier et ligne, et 30 règles de sobriété des tokens pour les agents IA. Version 1.6.0. Le projet fait du numérique responsable (Green IT) by design : Claude applique les règles pendant qu'il écrit le code, au lieu de laisser un audit relever les défauts après la mise en ligne.
 
-Les résultats du script sont des candidats à vérifier en contexte, pas une certification RGESN ni une mesure d'énergie. Les hooks sont optionnels ; le cache exige une demande autonome préfixée `[cache]`.
+Les résultats du script sont des candidats à vérifier en contexte, pas une certification RGESN ni une mesure d'énergie. Les hooks sont optionnels ; le cache exige une demande autonome préfixée `[cache]`. La variable `GREEN_CLAUDE_LEAN` (mode économe) coupe le bilan de fin de tâche, le rappel du hook brief et le détail des résultats d'audit, sans changer la détection.
 
 ## Installation et utilisation
 
 - [README français](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md): installation, audit, hooks et limites.
 - [English README](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.md): installation and usage.
 - [Instructions du skill](https://raw.githubusercontent.com/Institut-du-Numerique-Responsable/green-claude/main/skills/green-claude/SKILL.md): modes, sélection des règles et interprétation des alertes.
+- [Options et configuration](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md#options-et-configuration): options de `eco-audit.sh` (`--compact`, `--rules`, codes de sortie) et variables `GREEN_CLAUDE_*`.
+- [Mode économe](https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md#mode-%C3%A9conome): valeurs `report`, `brief`, `audit`, `all` et exemples avant/après.
+- [Dernière version](https://github.com/Institut-du-Numerique-Responsable/green-claude/releases/latest): archives `green-claude-claude-ai.zip` (Claude.ai) et `green-claude-api.zip` (API Skills).
 
 ## Règles et documentation
 

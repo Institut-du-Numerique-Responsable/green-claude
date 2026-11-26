@@ -17,6 +17,17 @@
     "url": "https://institutnr.org"
   },
   "runtimePlatform": "Claude Code",
+  "targetProduct": {
+    "@type": "SoftwareApplication",
+    "name": "Claude Code",
+    "applicationCategory": "DeveloperApplication"
+  },
+  "programmingLanguage": [
+    "Bash",
+    "AWK",
+    "Python"
+  ],
+  "isAccessibleForFree": true,
   "inLanguage": [
     "fr",
     "en"
@@ -35,6 +46,9 @@
     "CPU optimization",
     "GPU optimization",
     "frugal AI",
-    "green IT"
+    "green IT",
+    "green IT by design",
+    "responsible digital",
+    "numérique responsable"
   ]
 }

@@ -40,6 +40,10 @@ def outputs():
                     "https://creativecommons.org/licenses/by/4.0/"],
         "author": {"@type": "Organization", "name": plugin["author"]["name"], "url": "https://institutnr.org"},
         "runtimePlatform": "Claude Code",
+        "targetProduct": {"@type": "SoftwareApplication", "name": "Claude Code",
+                          "applicationCategory": "DeveloperApplication"},
+        "programmingLanguage": ["Bash", "AWK", "Python"],
+        "isAccessibleForFree": True,
         "inLanguage": ["fr", "en"],
         "keywords": plugin["keywords"],
     }
