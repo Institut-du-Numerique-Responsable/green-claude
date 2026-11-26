@@ -224,6 +224,139 @@ Seven rules are mandatory: NR-TOK-007, 011, 015, 016, 022, 027 and 030. NR-TOK-0
 
 `eco-audit.sh --rules tokens` prints them in compact form, followed by the session report format required by NR-TOK-030. The report closes any task that ran tools or changed files, never a plain question. It lists the rules applied, the optimizations, the available measurements, the tests and the limits. It invents no metric and gives a saving percentage only against a comparable baseline. Cutting tokens, cutting costs and cutting environmental impact remain three separate goals.
 
+### Lean mode
+
+Green Claude adds text to the session: a session report at the end of each task (NR-TOK-030), a reminder of three questions before each code request, and the full detail of every finding after each file Claude writes. You need that text while you learn the rules. Once you know them, you pay for it in tokens on every task. Lean mode switches each of them off, one by one or all together, and leaves the detection as it is.
+
+Ludovic NACHURY asked for lean mode.
+
+#### Turning it on
+
+Lean mode reads one environment variable, `GREEN_CLAUDE_LEAN`. Claude Code passes the `env` block of its settings to the hooks and to the commands Claude runs. Set the variable in that block.
+
+For every project, in `~/.claude/settings.json`:
+
+```json
+{
+  "env": { "GREEN_CLAUDE_LEAN": "all" }
+}
+```
+
+For one project only, in `.claude/settings.json` at the root of the repository (commit it to share the choice with your team, or use `.claude/settings.local.json` to keep it to yourself):
+
+```json
+{
+  "env": { "GREEN_CLAUDE_LEAN": "report,audit" }
+}
+```
+
+Restart Claude Code after a change: it reads the settings at startup. To go back to the default, delete the line or set an empty value (`""`).
+
+#### Values
+
+Values combine with commas. Case and spaces do not matter: `report, Audit` works.
+
+| Value | What it switches off | What stays |
+|---|---|---|
+| `report` | The NR-TOK-030 session report at the end of a task. | The other token sobriety rules. |
+| `brief` | The reminder of three questions before a code request (`green-claude-brief.sh`, about 600 bytes on each matching request). | The same three rules in `SKILL.md`. |
+| `audit` | The full blocks and the instructions printed by the `PostToolUse` audit hook. | One line per finding, with `file:line`. |
+| `all` | All three. | Detection and findings. |
+
+#### What changes, with examples
+
+**`audit`.** After Claude writes this file:
+
+```python
+import requests
+def report():
+    out = ""
+    for c in Commande.objects.all():
+        out += c.client.nom
+        requests.get("https://api.example.com/x")
+    data = open("big.csv").read()
+    return out
+```
+
+the default hook sends one block per finding, then instructions (4,470 bytes for these 6 findings):
+
+```
+[Green Claude] Éco-conception — motifs détectés dans ce que tu viens d'écrire (views.py) :
+
+[High] ECO-BACK-06 — Timeout and retry cap on every remote call
+  File           : views.py:6
+  Category       : 7. Backend
+  RGESN          : 7.2
+  Recommendation : Set a timeout on every outbound call, cap the number of retries, …
+  Instead of     : requests.get(url)
+  Write          : session.get(url, timeout=5)
+  Note           : The rule goes quiet as soon as the file mentions a timeout, …
+… (5 more blocks)
+Corrige ce qui est pertinent (impact Élevé en priorité). …
+```
+
+With `GREEN_CLAUDE_LEAN=audit`, the hook sends one line per finding (1,811 bytes):
+
+```
+[Green Claude] [High] ECO-BACK-06 Timeout and retry cap on every remote call — views.py:6 — Set a timeout on every outbound call, …
+[Green Claude] [High] ECO-PY-01 N+1 query on a walked queryset — views.py:4 — Load the associations you walk with select_related/prefetch_related …
+[Green Claude] [Medium] ECO-PY-05 File read entirely into memory — views.py:7 — Iterate the file line by line, …
+[Green Claude] [Low] ECO-PY-07 String concatenation in a loop — views.py:5 — Accumulate in a list then ''.join(...), …
+…
+```
+
+Claude gets the detail of a finding with `eco-audit.sh views.py`.
+
+**`report`.** By default, a task that ran tools or changed files ends with this report:
+
+```
+### Token sobriety
+- Rules: NR-TOK-007, NR-TOK-015, NR-TOK-016.
+- Optimizations: targeted search, edit of the changed lines only.
+- Measures: unavailable.
+- Quality: test-eco-audit.sh passes.
+- Limits: none.
+```
+
+With `report`, Claude ends the task without it. Claude learns this from `eco-audit.sh --rules tokens`, which `SKILL.md` has it run at the start of real work, and which prints:
+
+```
+## Session report (NR-TOK-030)
+Off: GREEN_CLAUDE_LEAN disables it. Do not write the report.
+```
+
+If Claude has not run that command in the session, it does not know the report is off and may still write it.
+
+**`brief`.** By default, a request such as « écris une fonction qui pagine les commandes » adds this reminder before Claude answers:
+
+```
+[Green Claude] Avant d'écrire, trois questions (ECO-ARCH-07, ECO-ALGO-08, USAGE-BRIEF-03) :
+1. Une hypothèse changerait-elle la forme du travail si elle était fausse ? …
+2. Quel est le moins de code qui résout ce problème ? …
+3. Si la demande nomme un modèle ou une approche IA : …
+```
+
+With `brief`, the hook prints nothing.
+
+#### Checking that it is on
+
+```bash
+# In a shell, for a one-off test without changing the settings:
+GREEN_CLAUDE_LEAN=report bash skills/green-claude/scripts/eco-audit.sh --rules tokens | tail -2
+# → Off: GREEN_CLAUDE_LEAN disables it. Do not write the report.
+```
+
+In a Claude Code session, ask Claude to run `echo "$GREEN_CLAUDE_LEAN"`: the value comes from the settings.
+
+#### Which value to pick
+
+- You are discovering the rules: leave lean mode off.
+- You know the rules and want short sessions: `all`.
+- You want to keep the reminder on design questions but drop the rest: `report,audit`.
+- You review every finding in detail: `report,brief`.
+
+The hooks installed by `install.sh` are copies: after an update of the repository, copy `hooks/green-claude-audit.sh` and `hooks/green-claude-brief.sh` to `~/.claude/hooks/` again, or the old copies keep ignoring lean mode.
+
 ---
 
 ## Limits and hooks
@@ -260,6 +393,87 @@ A test suite and a rule corpus **contain** faulty code without ever running it. 
 Both locations can be overridden with `GREEN_CLAUDE_DECISIONS` and `GREEN_CLAUDE_IGNORE`.
 
 These hooks wire into `~/.claude/settings.json`. If you answer "y", `install.sh` adds them there (other settings are preserved, and a backup of the original file is left at `settings.json.green-claude.bak`). Without `jq`, it prints the config to paste in by hand. To remove them: delete the `green-claude-*` entries from the file.
+
+---
+
+## Options and configuration
+
+### `eco-audit.sh`
+
+| Command | Effect |
+|---|---|
+| `eco-audit.sh <file>...` | Full audit: one block per finding with `file:line`, recommendation, corrected example and the rule's `Note`. |
+| `eco-audit.sh --compact <file>...` | One line per finding: `[impact] ID title — file:line — recommendation`. The skill uses it first, then the full audit on the files it keeps. |
+| `eco-audit.sh --rules [name...]` | Compact rules for a family (`backend`, `ux`…), a language (`python`), a file (`src/App.tsx`), `usage`, `tokens` or `all`. With no name, lists what exists. |
+| `eco-audit.sh --list-rules [language]` | Process rules with no detectable pattern, or the full checklist of one language. |
+| `eco-audit.sh --list-langs` | Covered languages and their globs. |
+| `eco-audit.sh -h`, `--help` | Usage. |
+
+Exit codes: `0` when the audit ran, with or without findings; `1` for a usage error, an unknown family or a missing `jq`; `2` when an argument is an unreadable file or an unknown option, and the script analyses nothing.
+
+Examples, on the `views.py` file shown under *Lean mode*:
+
+```console
+$ bash skills/green-claude/scripts/eco-audit.sh --compact views.py
+[High] ECO-BACK-06 Timeout and retry cap on every remote call — views.py:6 — Set a timeout on every outbound call, …
+[High] ECO-PY-01 N+1 query on a walked queryset — views.py:4 — Load the associations you walk with select_related/prefetch_related …
+[High] ECO-PY-02 Unbounded queryset materialised — views.py:4 — Paginate every exposed list; …
+[Medium] ECO-PY-05 File read entirely into memory — views.py:7 — Iterate the file line by line, …
+[Low] ECO-PY-07 String concatenation in a loop — views.py:5 — Accumulate in a list then ''.join(...), …
+[Medium] ECO-PY-10 HTTP connections not reused — views.py:6 — Reuse a requests.Session (or a shared httpx client); …
+6 ecodesign issue(s) found.
+
+$ bash skills/green-claude/scripts/eco-audit.sh --rules python      # Python rules, one line each
+$ bash skills/green-claude/scripts/eco-audit.sh --rules backend hosting
+$ bash skills/green-claude/scripts/eco-audit.sh src/*.py templates/*.html   # full audit of several files
+
+$ bash skills/green-claude/scripts/eco-audit.sh nope.py
+File not found or unreadable: nope.py
+Audit not run: nothing was analysed.
+$ echo $?
+2
+```
+
+### `eco-score.sh`
+
+| Command | Effect |
+|---|---|
+| `eco-score.sh [path...]` | Density of findings weighted by impact, for the current repository by default. |
+| `eco-score.sh --json [path...]` | The same score on one JSON line, to keep a history. |
+
+### Environment variables
+
+Set them in the `env` block of `~/.claude/settings.json` for the hooks and the commands Claude runs, or in your shell for `git commit` and manual audits.
+
+| Variable | Read by | Effect | Default |
+|---|---|---|---|
+| `GREEN_CLAUDE_LEAN` | skill, audit and brief hooks | Lean mode: `report`, `brief`, `audit` or `all` (see *Lean mode*). | empty: everything on |
+| `GREEN_CLAUDE_STRICT` | pre-commit hook | `1` stops the commit when the audit finds something in the staged content or cannot read it. | `0`: warns without blocking |
+| `GREEN_CLAUDE_DECISIONS` | `eco-audit.sh` | Path of the decision register. | `.green-claude/decisions.md` |
+| `GREEN_CLAUDE_IGNORE` | `eco-audit.sh` | Path of the list of files kept out of the audit. | `.green-claude/ignore` |
+| `GREEN_CLAUDE_CACHE_DIR` | cache hooks | Directory of the `[cache]` replies. | `~/.cache/green-claude` |
+| `GREEN_CLAUDE_SHA256_TOOL` | `eco-audit.sh` | Forces `shasum` or `sha256sum`. | the first one found |
+| `GREEN_CLAUDE_SOURCE_FILE`, `GREEN_CLAUDE_BASE_DIR` | hooks, internal | Real path and base directory of a file audited from a temporary copy. The hooks set them. | set by the hooks |
+
+Examples:
+
+```bash
+# Block the commit when the staged content has findings (the hook only warns by default):
+GREEN_CLAUDE_STRICT=1 git commit -m "feat: pagination"
+
+# Keep the decision register and the ignore list in a shared folder:
+GREEN_CLAUDE_DECISIONS=docs/green/decisions.md GREEN_CLAUDE_IGNORE=docs/green/ignore \
+    bash skills/green-claude/scripts/eco-audit.sh src/app.py
+```
+
+```json
+{
+  "env": {
+    "GREEN_CLAUDE_LEAN": "report,audit",
+    "GREEN_CLAUDE_CACHE_DIR": "/Users/me/.cache/green-claude"
+  }
+}
+```
 
 ---
 

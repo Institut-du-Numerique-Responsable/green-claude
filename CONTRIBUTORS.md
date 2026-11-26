@@ -15,6 +15,14 @@ This file lists all individuals who have contributed to the **Green Claude** pro
 
 ---
 
+## 💡 Feature Requests & Feedback
+
+| Name | Contribution |
+|------|--------------|
+| Ludovic NACHURY | Requested lean mode (`GREEN_CLAUDE_LEAN`) to cut the tokens spent on reports and reminders |
+
+---
+
 ## 📊 GitHub Contributors
 
 ### By Commit Count (via GitHub API)
@@ -146,5 +154,5 @@ Institut du Numérique Responsable, INR, sobriété numérique
 
 ---
 
-*Last updated: 2026-09-05*
+*Last updated: 2026-11-26*
 *Maintained by: Institut du Numérique Responsable*

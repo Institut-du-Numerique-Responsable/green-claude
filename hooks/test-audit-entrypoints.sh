@@ -78,5 +78,19 @@ fi
 [ ! -s "$TMP/out" ] || fail 'score emitted a result after audit failure'
 [ -s "$TMP/err" ] || fail 'score hid audit failure diagnostics'
 
+# Mode économe (GREEN_CLAUDE_LEAN) : hook d'audit compact, hook brief muet.
+rm -f .green-claude/decisions.md
+printf 'SELECT * FROM users;\n' > lean.sql
+GREEN_CLAUDE_LEAN=audit bash "$TMP/audit.sh" < <(payload lean.sql) > "$TMP/out" 2>&1 || true
+grep -q '^\[Green Claude\] \[High\] ECO-SQL-01 .*lean.sql:1' "$TMP/out" || fail 'lean audit: compact line missing'
+grep -q 'Recommendation :\|Corrige ce qui est pertinent' "$TMP/out" && fail 'lean audit: full block or instructions still printed'
+bash "$TMP/audit.sh" < <(payload lean.sql) > "$TMP/out" 2>&1 || true
+grep -q 'Recommendation :' "$TMP/out" || fail 'default audit lost its full block'
+brief_payload='{"prompt":"écris une fonction qui pagine les commandes"}'
+OUT="$(printf '%s' "$brief_payload" | bash "$ROOT/hooks/green-claude-brief.sh")"
+[ -n "$OUT" ] || fail 'default brief hook printed nothing on a code request'
+OUT="$(printf '%s' "$brief_payload" | GREEN_CLAUDE_LEAN='report, Brief' bash "$ROOT/hooks/green-claude-brief.sh")"
+[ -z "$OUT" ] || fail 'lean brief hook still printed its reminder'
+
 [ "$FAILURES" -eq 0 ] || exit 1
 echo 'OK - audit entry points verified'

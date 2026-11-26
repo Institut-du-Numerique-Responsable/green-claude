@@ -66,6 +66,15 @@ GREEN_CLAUDE_BASE_DIR="$(dirname "$FILE")"
 GREEN_CLAUDE_SOURCE_FILE="$FILE"
 export GREEN_CLAUDE_BASE_DIR GREEN_CLAUDE_SOURCE_FILE
 
+# Mode économe : une ligne par résultat, sans consigne autour. Claude sait
+# déjà quoi faire d'un signalement ; la répéter à chaque écriture coûte.
+if lean_on audit; then
+    REPORT="$("$AUDIT" --compact "$TARGET" 2>/dev/null)" || exit 0
+    grep -q '^\[' <<<"$REPORT" || exit 0
+    grep '^\[' <<<"$REPORT" | sed 's/^/[Green Claude] /' >&2
+    exit 2
+fi
+
 REPORT="$("$AUDIT" "$TARGET" 2>/dev/null)" || exit 0
 grep -q '^\[' <<<"$REPORT" || exit 0  # aucune issue : silence
 

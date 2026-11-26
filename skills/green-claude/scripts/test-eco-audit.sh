@@ -1768,4 +1768,12 @@ echo "$OUT" | grep -q 'Recommendation :' && fail "--compact affiche encore le bl
 OUT="$(bash eco-audit.sh --compact 2>&1)" && fail "--compact sans fichier réussit"
 true
 
+# Mode économe : --rules tokens annonce le bilan NR-TOK-030 coupé.
+OUT="$(GREEN_CLAUDE_LEAN=report bash eco-audit.sh --rules tokens)"
+echo "$OUT" | grep -q 'Off: GREEN_CLAUDE_LEAN disables it' || fail "--rules tokens n'annonce pas le bilan coupé"
+echo "$OUT" | grep -q '^- Measures:' && fail "--rules tokens affiche encore le format du bilan en mode économe"
+OUT="$(GREEN_CLAUDE_LEAN=brief bash eco-audit.sh --rules tokens)"
+echo "$OUT" | grep -q '^- Measures:' || fail "le bilan disparaît alors que report n'est pas coupé"
+true
+
 echo "OK - suite complete"

@@ -237,8 +237,9 @@ starts on real work. Always apply the mandatory ones:
 - NR-TOK-027: no saving justifies a loss of security, correctness,
   accessibility, maintainability or clarity.
 - NR-TOK-030: after a task that ran tools or changed files, end with the short
-  report printed by `--rules tokens`. Skip it for a plain question. Never invent
-  a metric: write "unavailable".
+  report printed by `--rules tokens`. Skip it for a plain question, and when
+  `--rules tokens` says the report is off (lean mode). Never invent a metric:
+  write "unavailable".
 
 NR-TOK-023 to 026 and NR-TOK-028 apply when the environment allows them (model
 choice, cache, metrics). The others apply by default.

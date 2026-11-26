@@ -17,6 +17,16 @@
 
 set -uo pipefail
 
+# Mode économe : GREEN_CLAUDE_LEAN liste ce qu'on coupe (report, brief, audit),
+# ou « all ». À régler dans le bloc "env" de ~/.claude/settings.json.
+lean_on() {
+    case ",$(printf '%s' "${GREEN_CLAUDE_LEAN:-}" | tr -d ' ' | tr '[:upper:]' '[:lower:]')," in
+        *,all,*|*,1,*|*,"$1",*) return 0 ;;
+    esac
+    return 1
+}
+lean_on brief && exit 0
+
 command -v jq >/dev/null 2>&1 || exit 0
 
 INPUT="$(cat)"
