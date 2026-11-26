@@ -1,6 +1,8 @@
 #!/bin/bash
 # Integration tests: real audit, hook payloads and Git index in a temporary repo.
 set -euo pipefail
+# Le mode économe de l'utilisateur ne doit pas changer ce que les tests vérifient.
+unset GREEN_CLAUDE_LEAN
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 AUDIT="$ROOT/skills/green-claude/scripts/eco-audit.sh"
 SCORE="$ROOT/skills/green-claude/scripts/eco-score.sh"

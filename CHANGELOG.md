@@ -6,12 +6,24 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-11-26
+
 ### Ajouté
 
 - Page de présentation et README : la démarche « numérique responsable by design » et le bon sens paysan qui inspire les règles, illustrés par des règles réelles (ECO-FRONT-01, ECO-ALGO-02, ECO-BACK-01, ECO-BACK-04, ECO-PY-11). Mots-clés `green IT by design`, `responsible digital` et `numérique responsable` ajoutés à `plugin.json`.
 - Page de présentation : étape « Le rendre automatique » du tuto mise à jour avec la ligne ciblée pour `CLAUDE.md`, mode économe dans l’encadré sur les tokens, exemple d’audit régénéré (`fichier:ligne`, `--compact`), sections « Adapter Green Claude à votre façon de travailler » et « Questions fréquentes », lien vers les notes de version.
 - Découvrabilité : bloc JSON-LD `FAQPage` reprenant la FAQ visible, `SoftwareSourceCode` enrichi (`targetProduct`, `programmingLanguage`, `isAccessibleForFree`), meta description ramenée sous 160 caractères, `theme-color`, `llms.txt` complété (options, mode économe, dernière version), `repository-overview.md` à jour sur le nombre de règles.
 - README : section « Charger le skill au bon moment », qui explique comment une ligne dans `CLAUDE.md` fait charger le skill sur les tâches qui décident du coût du code, et pourquoi la limiter à ces tâches.
+
+### Modifié
+
+- `eco-audit.sh` calcule l’extension de chaque fichier une seule fois, au lieu d’une fois par règle. Un fichier d’une ligne lançait environ 155 processus, dont 120 pour ce seul calcul ; il en lance 82. Le hook `PostToolUse` passe de 491 à 353 ms sur un fichier Python à six résultats, et l’audit des scripts et pages du dépôt de 3,9 à 2,3 s. Sortie identique.
+
+
+### Corrigé
+
+- `test-eco-audit.sh` et `test-audit-entrypoints.sh` échouaient chez un utilisateur qui a activé `GREEN_CLAUDE_LEAN` : ils héritaient de la variable. Ils la retirent maintenant au démarrage.
+
 
 ## [1.6.0] - 2026-11-26
 
@@ -180,7 +192,8 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 - Règles d'écoconception alignées sur le RGESN 2024 et le GR491.
 - Site GitHub Pages et documentation initiale.
 
-[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/Institut-du-Numerique-Responsable/green-claude/compare/green-claude--v1.3.0...v1.4.0

@@ -4,6 +4,8 @@
 # et cohérence de --list-rules avec les règles réellement détectables.
 # Lancer : bash scripts/test-eco-audit.sh
 set -euo pipefail
+# Le mode économe de l'utilisateur ne doit pas changer ce que les tests vérifient.
+unset GREEN_CLAUDE_LEAN
 cd "$(dirname "$0")"
 
 if ! command -v jq >/dev/null 2>&1; then
