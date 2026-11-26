@@ -8,6 +8,8 @@
 
 **Green Claude** aide [Claude Code](https://claude.com/claude-code) à proposer du code moins gourmand en ressources, grâce à des règles d’éco-conception et à un audit local.
 
+Le projet fait du numérique responsable, ou du Green IT, *by design* : Claude applique les règles au moment où il écrit le code, quand les choix se font et ne coûtent encore rien à changer. Un audit mené après la mise en ligne relève les mêmes défauts quand les corriger coûte bien plus cher. Beaucoup de ces règles relèvent du bon sens paysan, que le numérique a souvent perdu en route : on ne sort pas le tracteur pour planter trois radis (une bibliothèque entière pour une seule fonction), on ne retourne pas au puits pour chaque seau (une requête SQL par ligne affichée).
+
 Un projet de l’[Institut du Numérique Responsable](https://institutnr.org) : **107 règles générales, 137 règles pour 24 langages et frameworks, 13 pratiques d’usage responsable et 30 règles de sobriété des tokens**. La démarche est présentée sur le site de l’INR : [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 Le skill guide le modèle lorsqu’il est chargé ; son application n’est pas garantie à chaque réponse. L’audit détecte des problèmes potentiels à examiner, sans certifier la conformité RGESN ni mesurer une économie d’énergie. Les hooks optionnels permettent de lancer cet audit après les écritures de code prises en charge.
@@ -364,6 +366,18 @@ Un skill s'exécute *pendant* une session déjà lancée, et c'est le modèle qu
 - **Cache local explicite** (`hooks/green-claude-cache.sh`) : préfixer une question factuelle autonome par `[cache] `, par exemple `[cache] Quelle est la capitale de la France ?`. Seules ces demandes peuvent réutiliser une réponse pendant une heure sans appeler le modèle. Les demandes ordinaires atteignent toujours Claude. Ne pas utiliser ce préfixe pour un audit de code, une action ou une question liée aux fichiers ou aux échanges précédents : le cache ne suit pas ces changements. Une réponse en cache est affichée comme message du hook et n'entre pas dans le contexte de conversation de Claude.
 - **Avertissement heures creuses** (même hook) : signale les heures de pointe (hors 22h-6h UTC) sans bloquer.
 - **Cadrage avant écriture** (`hooks/green-claude-brief.sh`) : câblé en `UserPromptSubmit`. Sur une demande de production de code, il rappelle les trois règles qui décident de ce qui sera écrit — le moins de code qui résout le problème, challenger la demande et le modèle, poser la question avant de coder. Sur une question, il se tait. Ces règles figurent aussi dans le skill ; le hook les rappelle au moment de la demande.
+
+### Charger le skill au bon moment : une ligne dans `CLAUDE.md`
+
+Claude décide d’après la description du skill s’il le charge, et il peut s’en passer sur une tâche qui en avait besoin. Vous augmentez ce taux avec une ligne dans `~/.claude/CLAUDE.md`, que Claude Code lit au début de chaque session, dans tous les projets. Mettez plutôt la ligne dans le `CLAUDE.md` d’un dépôt pour la limiter à ce projet et la partager avec l’équipe.
+
+Nommez les tâches qui décident de ce que le code coûtera à l’exécution, et laissez de côté le reste. Charger `SKILL.md` ajoute environ 15 Ko de contexte : sur une faute de frappe ou un renommage, ce coût dépasse ce que la règle fait gagner. Le hook d’audit couvre ces petites modifications, puisqu’il vérifie chaque fichier écrit.
+
+```markdown
+- **Éco-conception (`green-claude:green-claude`)** : invoque-le quand la tâche décide de ce que le code coûtera à l’exécution : nouvelle fonctionnalité ou endpoint, accès aux données (requêtes, pagination, ORM), appels réseau, cache ou polling, images et assets, dépendances, formats de fichier, choix d’un framework ou d’un modèle d’IA, ou toute demande sur la vitesse, le poids ou un audit d’éco-conception. Ne l’invoque pas pour une faute de frappe, un renommage, un commentaire ou toute modification qui ne change pas le comportement. Le hook d’audit `PostToolUse` vérifie quand même chaque fichier écrit.
+```
+
+Avec `install.sh` à la place du plugin, le skill s’appelle `green-claude` : remplacez `green-claude:green-claude` dans la ligne. Les trois leviers se complètent. La description et la ligne de `CLAUDE.md` décident quand Claude lit les règles avant d’écrire, et le hook d’audit vérifie ce que Claude a écrit.
 
 ## Deux fichiers pour faire taire ce qui n'a pas à parler
 

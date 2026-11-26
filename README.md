@@ -11,6 +11,8 @@
 
 **Green Claude** helps [Claude Code](https://claude.com/claude-code) write code that uses fewer resources, with eco-design rules and a local audit tool.
 
+The project brings responsible digital, or green IT, *by design*: Claude applies the rules while it writes the code, when the choices are made and still cost nothing to change. An audit after launch finds the same defects when fixing them costs far more. Many of these rules are plain farmer's common sense, which software has often lost along the way: you don't take the tractor out to plant three radishes (a whole library for a single function), and you don't walk back to the well for every bucket (one SQL query per row displayed).
+
 A project by the [Institut du Numérique Responsable](https://institutnr.org): **107 general rules, 137 rules for 24 languages and frameworks, 13 responsible-use practices and 30 token sobriety rules**. The approach is presented on the INR website (in French): [Écoconcevoir avec un assistant de code](https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code).
 
 The skill guides the model when loaded; its application is not guaranteed on every response. The audit flags candidates for review, without certifying RGESN compliance or measuring energy savings. Optional hooks run the audit after supported code-writing operations.
@@ -367,6 +369,18 @@ A skill runs *during* a session that's already started, and the model decides wh
 - **Explicit local cache** (`hooks/green-claude-cache.sh`): prefix a self-contained factual question with `[cache] `, for example `[cache] What is the capital of France?`. Only these requests can reuse a response for one hour without calling the model. Ordinary requests always reach Claude. Do not use this prefix for code audits, actions, or questions that depend on files or previous messages: the cache does not track those changes. A cache hit is displayed as a hook message and is not added to Claude's conversation context.
 - **Off-peak warning** (same hook): flags peak hours (outside 22:00-06:00 UTC) without ever blocking.
 - **Framing before writing** (`hooks/green-claude-brief.sh`): wired as `UserPromptSubmit`. On a request to produce code, it recalls the three rules that decide what gets written at all — the least code that solves the problem, challenge the request and the model, ask before you build. On a question, it stays quiet. Those rules also live in the skill; the hook repeats them when the request is made.
+
+### Loading the skill at the right time: a line in `CLAUDE.md`
+
+Claude decides from the skill's description whether to load it, and it can skip the skill on a task that needed it. You can raise that rate with one line in `~/.claude/CLAUDE.md`, which Claude Code reads at the start of every session, in every project. Put the line in the `CLAUDE.md` of a repository instead to apply it to that project only, and to share it with your team.
+
+Name the tasks that decide what the code costs at runtime, and leave out the rest. Loading `SKILL.md` adds about 15 KB of context: on a typo fix or a rename, that costs more than the rule saves. The audit hook covers those small edits, since it checks every file written.
+
+```markdown
+- **Eco-design (`green-claude:green-claude`)**: invoke it when the task decides what the code costs at runtime: a new feature or endpoint, data access (queries, pagination, ORM), network calls, caching or polling, images and assets, dependencies, file formats, the choice of a framework or AI model, or any request about speed, weight or an eco-design audit. Skip it for typo fixes, renames, comments and other edits that change no behavior. The `PostToolUse` audit hook still checks every file written.
+```
+
+With `install.sh` instead of the plugin, the skill is called `green-claude`: replace `green-claude:green-claude` in the line. The three levers work together. The description and the `CLAUDE.md` line decide when Claude reads the rules before writing, and the audit hook checks what Claude wrote.
 
 ## Two files that silence what should not speak
 

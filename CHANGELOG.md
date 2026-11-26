@@ -6,6 +6,13 @@ nouvelles versions suivent [Semantic Versioning](https://semver.org/lang/fr/).
 
 ## [Unreleased]
 
+### Ajouté
+
+- Page de présentation et README : la démarche « numérique responsable by design » et le bon sens paysan qui inspire les règles, illustrés par des règles réelles (ECO-FRONT-01, ECO-ALGO-02, ECO-BACK-01, ECO-BACK-04, ECO-PY-11). Mots-clés `green IT by design`, `responsible digital` et `numérique responsable` ajoutés à `plugin.json`.
+- Page de présentation : étape « Le rendre automatique » du tuto mise à jour avec la ligne ciblée pour `CLAUDE.md`, mode économe dans l’encadré sur les tokens, exemple d’audit régénéré (`fichier:ligne`, `--compact`), sections « Adapter Green Claude à votre façon de travailler » et « Questions fréquentes », lien vers les notes de version.
+- Découvrabilité : bloc JSON-LD `FAQPage` reprenant la FAQ visible, `SoftwareSourceCode` enrichi (`targetProduct`, `programmingLanguage`, `isAccessibleForFree`), meta description ramenée sous 160 caractères, `theme-color`, `llms.txt` complété (options, mode économe, dernière version), `repository-overview.md` à jour sur le nombre de règles.
+- README : section « Charger le skill au bon moment », qui explique comment une ligne dans `CLAUDE.md` fait charger le skill sur les tâches qui décident du coût du code, et pourquoi la limiter à ces tâches.
+
 ## [1.6.0] - 2026-11-26
 
 ### Ajouté

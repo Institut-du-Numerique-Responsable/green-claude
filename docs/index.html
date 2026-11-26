@@ -4,18 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Green Claude : sobriété numérique pour Claude Code</title>
-  <meta name="description" content="Green Claude : skill open source pour Claude Code et Claude.ai, règles d'éco-conception RGESN/GR491 pour développeurs, product owners et métiers, audit de code, sobriété des tokens et démonstration vidéo.">
+  <meta name="description" content="Plugin open source de l'INR pour Claude Code et Claude.ai : règles d'écoconception RGESN 2024 et GR491, audit de code ligne à ligne, sobriété des tokens.">
   <meta name="author" content="Institut du Numérique Responsable - Guillaume Gallon, Robin Trassard, Guillaume Bourgeois (@bourgeoisguillaume01-glitch), Vincent Courboulay">
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="google-site-verification" content="jgumEgIuIzTPIIrXW3ot-CFd51RTcmmTdRNcSlqf2MA" />
   <meta name="rating" content="general">
   <meta name="referrer" content="origin-when-cross-origin">
+  <meta name="theme-color" content="#195675" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f1d26" media="(prefers-color-scheme: dark)">
   <link rel="canonical" href="https://institut-du-numerique-responsable.github.io/green-claude/">
   <link rel="sitemap" type="application/xml" href="sitemap.xml">
   <link rel="alternate" type="text/plain" href="llms.txt" title="Documentation pour les assistants IA">
   <link rel="describedby" type="application/ld+json" href="ai.json">
   <meta property="og:title" content="Green Claude : sobriété numérique pour Claude Code">
-  <meta property="og:description" content="Skill open source pour Claude : un assistant IA plus sobre pour toute l'équipe, développeurs, product owners et métiers (RGESN 2024 / GR491). Tuto et démo vidéo.">
+  <meta property="og:description" content="Un assistant IA plus sobre pour toute l'équipe : Claude applique le RGESN 2024 et le GR491 en codant, audite le code ligne à ligne et économise les tokens. Tuto, démo vidéo, mode économe.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://institut-du-numerique-responsable.github.io/green-claude/">
   <meta property="og:locale" content="fr_FR">
@@ -26,7 +28,7 @@
   <meta property="og:image:alt" content="Green Claude : un prompt de terminal dont le curseur devient une pousse verte">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Green Claude : sobriété numérique pour Claude Code">
-  <meta name="twitter:description" content="Skill open source pour un agent IA de code éco-conçu par défaut (RGESN 2024 / GR491 / WSG), plus un hook optionnel de cache local et heures creuses.">
+  <meta name="twitter:description" content="Plugin open source pour Claude Code : 287 règles d'écoconception (RGESN 2024, GR491, W3C WSG), audit déterministe ligne à ligne et mode économe en tokens.">
   <meta name="twitter:image" content="https://institut-du-numerique-responsable.github.io/green-claude/assets/logo.jpg">
   <meta name="twitter:image:alt" content="Green Claude : un prompt de terminal dont le curseur devient une pousse verte">
   <!-- Le logo complet servait d'icône : 10 Ko de JPEG pour un rendu 32x32.
@@ -57,6 +59,17 @@
     "url": "https://institutnr.org"
   },
   "runtimePlatform": "Claude Code",
+  "targetProduct": {
+    "@type": "SoftwareApplication",
+    "name": "Claude Code",
+    "applicationCategory": "DeveloperApplication"
+  },
+  "programmingLanguage": [
+    "Bash",
+    "AWK",
+    "Python"
+  ],
+  "isAccessibleForFree": true,
   "inLanguage": [
     "fr",
     "en"
@@ -75,7 +88,59 @@
     "CPU optimization",
     "GPU optimization",
     "frugal AI",
-    "green IT"
+    "green IT",
+    "green IT by design",
+    "responsible digital",
+    "numérique responsable"
+  ]
+}
+  </script>
+  <!-- FAQ : même texte que la section « Questions fréquentes » de la page. -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Green Claude certifie-t-il un service conforme au RGESN ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non. Le script d'audit signale des candidats à vérifier en contexte, et Claude les classe en défaut confirmé (FAIL) ou point à trancher (REVIEW). Seule une mesure d'exécution réelle, comme EcoIndex ou le nombre de requêtes et d'octets transférés, dit si la consommation baisse."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Le plugin consomme-t-il lui-même des tokens ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Un peu : le skill ne se charge que sur les tâches concernées, et l'audit tourne en local sans appel au modèle. Le mode économe (GREEN_CLAUDE_LEAN) retire le bilan de fin de tâche, le rappel avant une demande de code et le détail des résultats d'audit."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Fonctionne-t-il sans Claude Code ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Oui pour les règles : l'archive green-claude-claude-ai.zip s'importe dans Claude.ai, et green-claude-api.zip sert l'API Skills. Les hooks d'audit automatique demandent Claude Code."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Mon code est-il envoyé quelque part ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non. L'audit est un script Bash et awk qui s'exécute sur votre machine. Le code ne part que vers Claude, comme pour toute session Claude Code."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quels langages sont couverts ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Les règles transverses s'appliquent à tout projet. 137 règles ciblent 24 langages et frameworks, dont Python, JavaScript et TypeScript, SQL, Java, PHP, Go, Rust, Swift et Shell : la liste complète."
+      }
+    }
   ]
 }
   </script>
@@ -202,6 +267,8 @@
       border-radius: 4px; padding: 1rem; overflow-x: auto;
       font-size: 14px; line-height: 1.6; margin-bottom: 1rem;
     }
+    /* Une consigne en prose se lit mieux repliée qu'en défilement horizontal. */
+    pre.wrap { white-space: pre-wrap; }
     code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .92em; }
     footer { border-top: 1px solid var(--line); margin-top: 2rem;
              padding: 1.5rem 0 3rem; font-size: 15px; color: var(--muted); }
@@ -270,6 +337,19 @@
 
   <main class="read">
     <p class="callout">Chaque échange avec un assistant IA consomme de l'énergie, et le code ou le service qui en sort tournera des années. Green Claude agit aux deux endroits : il garde la session sobre et il conçoit des livrables plus légers. Développeurs, product owners, métiers, designers : tout le monde y gagne.</p>
+
+    <section id="by-design" aria-labelledby="design-titre">
+      <h2 id="design-titre">Le numérique responsable dès la conception</h2>
+      <p>Le numérique responsable cherche à réduire l'empreinte environnementale et sociale des services numériques. On l'aborde le plus souvent après coup : un audit relève les défauts d'un service déjà en ligne, et une partie reste en place parce que les corriger coûterait trop cher. Green Claude applique la démarche au moment où les choix se font, quand Claude écrit le code, rédige une spécification ou choisit un modèle d'IA. Le RGPD impose la même logique pour les données personnelles (<i lang="en">privacy by design</i>) ; on parle ici de Green IT, ou de numérique responsable, <i lang="en">by design</i>.</p>
+      <p>Beaucoup de règles relèvent du bon sens, celui qu'un paysan applique sans y penser et que le numérique a perdu en route, à force de croire la puissance de calcul et la bande passante gratuites :</p>
+      <ul>
+        <li>On ne sort pas le tracteur pour planter trois radis : une seule fonction ne justifie pas une bibliothèque entière (ECO-FRONT-01), et un tri qu'une règle simple ferait ne demande pas un grand modèle d'IA (ECO-ALGO-02).</li>
+        <li>On ne rapporte du champ que ce qu'on va manger : une requête lit les colonnes et les lignes dont la page a besoin (ECO-BACK-01) et pagine le reste (ECO-BACK-04).</li>
+        <li>On ne retourne pas au puits pour chaque seau : la page d'une bibliothèque charge sa liste de livres en une requête, au lieu d'une requête par livre (ECO-BACK-01).</li>
+        <li>On ne va pas voir toutes les cinq minutes si les tomates ont poussé : un événement prévient quand une donnée change, à la place d'une boucle qui interroge le serveur sans arrêt (ECO-PY-11).</li>
+      </ul>
+      <p>Green Claude met ce bon sens entre les mains de l'assistant. Claude l'applique à chaque ligne qu'il écrit, et l'audit vérifie ce qui lui a échappé.</p>
+    </section>
 
     <section id="demo" aria-labelledby="demo-titre">
       <h2 id="demo-titre">La démonstration en 2 minutes</h2>
@@ -344,8 +424,9 @@
         </li>
         <li>
           <h3>Le rendre automatique</h3>
-          <p>Dans un projet Claude Code, ajoutez cette ligne au fichier <code>CLAUDE.md</code>. Claude appliquera les règles à chaque demande, même quand vous ne pensez pas à le préciser :</p>
-          <pre><code>Avant de modifier du code, charge le skill green-claude et applique ses règles au code que tu touches.</code></pre>
+          <p>Ajoutez cette ligne au fichier <code>CLAUDE.md</code> : celui d'un projet pour l'équipe, ou <code>~/.claude/CLAUDE.md</code> pour tous vos projets. Claude chargera les règles sur les tâches qui décident du coût du code, même quand vous ne pensez pas à le préciser :</p>
+          <pre class="wrap"><code>Invoque green-claude:green-claude quand la tâche décide de ce que le code coûtera à l'exécution : nouvelle fonctionnalité, accès aux données, appels réseau, cache, images, dépendances, choix d'un framework ou d'un modèle d'IA. Ne l'invoque pas pour une faute de frappe ou un renommage.</code></pre>
+          <p>La ligne écarte les petites modifications : charger le skill ajoute environ 15 Ko de contexte, plus que ce qu'une faute de frappe corrigée fait gagner. Le hook d'audit vérifie chaque fichier écrit.</p>
         </li>
       </ol>
     </section>
@@ -354,6 +435,7 @@
       <h2 id="tok-titre">Moins de tokens, c'est aussi du numérique responsable</h2>
       <p>Un token généré inutilement mobilise du calcul, de l'électricité et du refroidissement dans un centre de données. Les 30 règles NR-TOK de l'INR s'appliquent à toutes les conversations, quel que soit votre métier : des réponses qui vont droit au but, un contexte chargé à la demande, le plus petit modèle qui fait le travail.</p>
       <p>La qualité passe en premier (NR-TOK-027). Aucune économie ne justifie une perte de justesse, de sécurité ou d'accessibilité. En fin de tâche, Claude dresse un bilan de sobriété avec les mesures disponibles, sans jamais inventer de chiffre.</p>
+      <p>Vous connaissez déjà les règles ? Le mode économe coupe ce bilan, le rappel avant chaque demande de code et le détail des résultats d'audit, sans toucher à la détection. Ajoutez <code>"env": { "GREEN_CLAUDE_LEAN": "all" }</code> à <code>~/.claude/settings.json</code> : sur un fichier à six résultats, le retour de l'audit passe de 4,5 à 1,8 Ko. Ludovic NACHURY a demandé ce mode. <a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md#mode-%C3%A9conome">Les valeurs et leurs effets</a></p>
     </section>
 
     <section aria-labelledby="fonctionnement-titre">
@@ -365,7 +447,7 @@
         </div>
         <div>
           <h3>Sur demande, un audit</h3>
-          <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep sur les règles), zéro coût de raisonnement, qui détecte les motifs contraires à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…).</p>
+          <p>« Audit éco-conception de ce fichier » lance un script déterministe (grep et awk sur les règles), sans coût de raisonnement. Il signale chaque motif contraire à l'éco-conception (SELECT *, bibliothèques lourdes, autoplay…) avec son fichier et sa ligne, puis Claude confirme ou écarte chaque candidat.</p>
         </div>
         <div>
           <h3>Le détail de chaque langage</h3>
@@ -388,28 +470,22 @@ app.get('/api/users', (req, res) => {
     res.json(rows);
   });
 });</code></pre>
-      <p><code>eco-audit.sh api.js</code> (sortie réelle, non retouchée ; les règles sont en anglais) :</p>
-      <pre><code>[High] ECO-FRONT-01 — No heavy library for a minor need
-  File           : api.js
-  Category       : 6. Frontend
-  RGESN          : 6.x
-  Recommendation : Prefer the language's native functions or lighter alternatives (date-fns, Alpine.js).
-
-[High] ECO-BACK-01 — Optimise SQL queries
-  File           : api.js
+      <p><code>eco-audit.sh --compact api.js</code> donne une ligne par candidat, avec sa ligne dans le fichier (sortie réelle, non retouchée ; les règles sont en anglais) :</p>
+      <pre class="wrap"><code>[High] ECO-FRONT-01 No heavy library for a minor need — api.js:1 — Prefer the language's native functions or lighter alternatives (date-fns, Alpine.js).
+[High] ECO-BACK-01 Optimise SQL queries — api.js:4 — Select only the columns you need, index the filtered columns, and avoid functions in WHERE clauses and N+1 queries.
+[High] ECO-JS-01 Whole-library import — api.js:1 — Targeted imports (import { x } from 'lib/x'); native APIs first (fetch, Intl, URL, structuredClone, Date/Temporal) before adding a dependency.
+3 ecodesign issue(s) found.</code></pre>
+      <p>Sans <code>--compact</code>, chaque candidat arrive avec la forme corrigée et la limite connue de la règle :</p>
+      <pre><code>[High] ECO-BACK-01 — Optimise SQL queries
+  File           : api.js:4
   Category       : 7. Backend
   RGESN          : 7.x
   Recommendation : Select only the columns you need, index the filtered columns, and avoid functions in WHERE clauses and N+1 queries.
-
-[High] ECO-JS-01 — Whole-library import
-  File           : api.js
-  Category       : JS/TS — dependencies and weight
-  RGESN          : 6.1, 6.2
-  Recommendation : Targeted imports (import { x } from 'lib/x'); native APIs first (fetch, Intl, URL, structuredClone, Date/Temporal) before adding a dependency.
-
-3 ecodesign issue(s) found.</code></pre>
+  Instead of     : SELECT * FROM users WHERE UPPER(email) = 'A@B.C'
+  Write          : SELECT id, email FROM users WHERE email = 'a@b.c'   -- index utilisable
+  Note           : The patterns work line by line: a SELECT * spread over several lines (SELECT\n  *\nFROM ...) is not detected, only the single-line form is.</code></pre>
       <p>En mode proactif, Claude évite <code>lodash</code> pour une seule fonction et <code>SELECT *</code> dès l'écriture, avant même qu'un audit ait lieu.</p>
-      <p>Pour câbler en plus les hooks (audit après écriture, cache local), installez depuis le dépôt :</p>
+      <p>Pour câbler en plus les hooks (audit après écriture, cadrage avant écriture, cache local), lancez le script d'installation du dépôt. Il repère le plugin s'il est déjà installé et ne copie pas le skill une seconde fois :</p>
       <pre><code>git clone https://github.com/Institut-du-Numerique-Responsable/green-claude.git
 cd green-claude && ./install.sh</code></pre>
       <p>Pour l'<strong>API Skills</strong>, <code>scripts/package-skill.sh</code> fabrique l'archive attendue.</p>
@@ -433,6 +509,31 @@ cd green-claude && ./install.sh</code></pre>
       <p>Un candidat écarté une fois revient au tour suivant. Écarté six fois, il apprend à toute l'équipe à survoler l'audit, ce qui coûte plus cher que la règle ne rapporte. Deux fichiers versionnés à la racine du dépôt ferment la question : <code>.green-claude/decisions.md</code> pour ce qui a été tranché, où <code>ACCEPTED</code> fait taire une règle sur un fichier précis et <code>TODO</code> garde la dette visible, et <code>.green-claude/ignore</code> pour les fichiers hors périmètre, comme une suite de tests ou un corpus de règles qui contiennent du code fautif sans jamais l'exécuter. L'audit annonce combien de constats il a tus et où, donc rien ne disparaît sans trace.</p>
     </section>
 
+    <section id="reglages" aria-labelledby="reglages-titre">
+      <h2 id="reglages-titre">Adapter Green Claude à votre façon de travailler</h2>
+      <ul>
+        <li><strong>Moins de texte, mêmes règles</strong> : <code>GREEN_CLAUDE_LEAN</code> coupe le bilan de fin de tâche (<code>report</code>), le rappel avant une demande de code (<code>brief</code>), le détail des résultats d'audit (<code>audit</code>), ou les trois (<code>all</code>).</li>
+        <li><strong>Un commit bloqué plutôt qu'un avertissement</strong> : <code>GREEN_CLAUDE_STRICT=1 git commit</code> interrompt le commit quand l'audit trouve un défaut dans le contenu indexé.</li>
+        <li><strong>Des décisions partagées</strong> : <code>.green-claude/decisions.md</code> et <code>.green-claude/ignore</code>, versionnés avec le code, ou à l'emplacement de votre choix avec <code>GREEN_CLAUDE_DECISIONS</code> et <code>GREEN_CLAUDE_IGNORE</code>.</li>
+        <li><strong>Le skill au bon moment</strong> : une ligne dans <code>CLAUDE.md</code>, décrite à l'étape 5 du tuto.</li>
+      </ul>
+      <p>Toutes les options des scripts, leurs codes de sortie et les variables d'environnement, avec des exemples : <a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/README.fr.md#options-et-configuration">Options et configuration</a>.</p>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-titre">
+      <h2 id="faq-titre">Questions fréquentes</h2>
+      <h3>Green Claude certifie-t-il un service conforme au RGESN ?</h3>
+      <p>Non. Le script d'audit signale des candidats à vérifier en contexte, et Claude les classe en défaut confirmé (FAIL) ou point à trancher (REVIEW). Seule une mesure d'exécution réelle, comme EcoIndex ou le nombre de requêtes et d'octets transférés, dit si la consommation baisse.</p>
+      <h3>Le plugin consomme-t-il lui-même des tokens ?</h3>
+      <p>Un peu : le skill ne se charge que sur les tâches concernées, et l'audit tourne en local sans appel au modèle. Le mode économe (<code>GREEN_CLAUDE_LEAN</code>) retire le bilan de fin de tâche, le rappel avant une demande de code et le détail des résultats d'audit.</p>
+      <h3>Fonctionne-t-il sans Claude Code ?</h3>
+      <p>Oui pour les règles : l'archive <code>green-claude-claude-ai.zip</code> s'importe dans Claude.ai, et <code>green-claude-api.zip</code> sert l'API Skills. Les hooks d'audit automatique demandent Claude Code.</p>
+      <h3>Mon code est-il envoyé quelque part ?</h3>
+      <p>Non. L'audit est un script Bash et awk qui s'exécute sur votre machine. Le code ne part que vers Claude, comme pour toute session Claude Code.</p>
+      <h3>Quels langages sont couverts ?</h3>
+      <p>Les règles transverses s'appliquent à tout projet. 137 règles ciblent 24 langages et frameworks, dont Python, JavaScript et TypeScript, SQL, Java, PHP, Go, Rust, Swift et Shell : <a href="languages/">la liste complète</a>.</p>
+    </section>
+
     <section aria-labelledby="skill-titre">
       <h2 id="skill-titre">Pourquoi un skill plutôt qu'une checklist</h2>
       <p>Une checklist RGESN en PDF dépend de la mémoire de qui l'a lue une fois, et personne ne la rouvre avant chaque ligne de code. Un skill Claude Code se charge à chaque session sans rappel, sélectionne les règles pertinentes pour ce qui s'écrit à l'instant au lieu d'imposer les 287 règles à chaque échange, et vérifie le code déjà produit via un script déterministe.</p>
@@ -445,6 +546,7 @@ cd green-claude && ./install.sh</code></pre>
         <li><a href="languages/">Règles par langage et framework</a> : Python, JavaScript, SQL, Shell et les autres environnements couverts.</li>
         <li><a href="water-electricity-detection.html">Sobriété IA : eau, électricité et limites des mesures</a></li>
         <li><a href="security-audit.html">Documentation de l'audit de sécurité</a></li>
+        <li><a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/releases/latest">Dernière version et notes de version</a>, et le <a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CHANGELOG.md">journal des changements</a></li>
         <li><a href="https://github.com/Institut-du-Numerique-Responsable/green-claude/blob/main/CONTRIBUTING.md">Contribuer aux règles et aux tests</a></li>
         <li><a href="https://institutnr.org/ecoconcevoir-avec-un-assistant-de-code">Écoconcevoir avec un assistant de code</a> : la démarche présentée sur le site de l'INR.</li>
         <li><a href="llms.txt">Index pour les assistants IA</a> et <a href="ai.json">métadonnées du projet</a></li>
@@ -453,7 +555,7 @@ cd green-claude && ./install.sh</code></pre>
 
     <footer>
       <p>Une production de l'<strong>Institut du Numérique Responsable</strong>, 2026, code sous Apache-2.0, règles et documentation sous CC BY 4.0. Green Claude existe aussi pour Codex (Green Codex) et Mistral Vibe (Green Vibe).</p>
-      <p>Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page, un logo vectoriel qui sert aussi de favicon. <strong>18 Ko transférés</strong> en trois requêtes à la première visite, hors mesure d'audience. La vidéo ne se télécharge qu'au clic sur lecture.</p>
+      <p>Cette page applique les règles qu'elle promeut : polices système, mode sombre natif, aucune bibliothèque de mise en page, un logo vectoriel qui sert aussi de favicon. <strong>21 Ko transférés</strong> en trois requêtes à la première visite, hors mesure d'audience. La vidéo ne se télécharge qu'au clic sur lecture.</p>
       <p>Mesure d'audience&nbsp;: Matomo auto-hébergé, <strong>sans cookie ni traceur tiers</strong>, chargé une fois la page rendue. Aucune donnée n'est transmise à un tiers, et rien n'est écrit sur votre appareil.</p>
     </footer>
   </main>

@@ -36,7 +36,7 @@ This repository is optimized for **search engines and human discovery** via:
 |---|---|---|
 | `skills/green-claude/` | **Core skill** (SPICE format) | Claude Code |
 | `skills/green-claude/SKILL.md` | Skill instructions | Claude, Humans |
-| `skills/green-claude/rules/` | **107 general eco-design rules** (JSON) | Audit engine |
+| `skills/green-claude/rules/` | **287 rules** (JSON): 107 general, 137 for 24 languages, 13 usage practices, 30 token sobriety rules | Audit engine |
 | `skills/green-claude/scripts/` | **Audit & scoring scripts** | Bash/jq |
 | `.claude-plugin/` | Plugin marketplace metadata | Claude Code |
 | `hooks/` | Optional Claude Code and Git hooks | Advanced users |
