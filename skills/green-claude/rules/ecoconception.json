@@ -1997,7 +1997,7 @@
             "kt"
           ],
           "recommendation": "Compress large or repetitive payloads once you have benchmarked the codec against your own data, weighing CPU and latency against storage and network. Do not assume one codec always wins.",
-          "note": "Writing a text payload with no compression mentioned anywhere in the file is the candidate. On a small file compression costs more than it saves, so the size is what settles it. Reading a JSON or CSV file is not writing one, and a payload written into a deflated archive (zipfile, zlib, lzma, bz2) is already compressed.",
+          "note": "Writing a text payload with no compression mentioned anywhere in the file is the candidate. On a small file compression costs more than it saves, so the size is what settles it. Reading a JSON or CSV file is not writing one (a single-argument open(), mode \"r\", readFile, file_get_contents, File.read…), and a payload written into a deflated archive (zipfile, zlib, lzma, bz2) is already compressed.",
           "rgesn_ref": "8.x",
           "gr491_famille": "Hébergement",
           "source_note": "Adapted from the Green Codex rule DB-EFF-008 (Institut du Numerique Responsable), whose rule content is published under CC BY 4.0. Reworded for this format; the patterns are specific to this audit.",
@@ -2012,7 +2012,15 @@
             "json\\.loads?\\(",
             "csv\\.(Dict)?[Rr]eader",
             "readFile",
-            "pd\\.read_"
+            "pd\\.read_",
+            "open\\([^,()]*\\)",
+            "[\"']r[bt]?[\"']",
+            "fopen\\([^,]*,[[:space:]]*[\"']r",
+            "file_get_contents\\(",
+            "File\\.(read|ReadAll)",
+            "Files\\.read",
+            "os\\.ReadFile\\(",
+            "\\.load\\("
           ]
         },
         {

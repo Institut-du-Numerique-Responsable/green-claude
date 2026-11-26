@@ -201,7 +201,7 @@ Coder avec l’IA mobilise des ressources pendant la session. Green Claude maint
 
 Détail complet : [`skills/green-claude/rules/usage.json`](skills/green-claude/rules/usage.json).
 
-Le skill applique ces consignes à ses propres réponses : pas de tiret quadratin, pas de formule qui annonce une idée au lieu de la livrer, pas de phrase pseudo-clivée, de présentatif emphatique ni de fausse subordonnée détachée, pas d'épanorthose, d'anaphore verbale ni d'antithèse binaire, pas d'annonce dénombrée ni d'énumération annoncée. Elles valent dans toutes les langues (section « Writing your replies » de [`SKILL.md`](skills/green-claude/SKILL.md)).
+Le skill applique ces consignes à ses propres réponses : pas de tiret quadratin, pas de formule qui annonce une idée au lieu de la livrer, pas de phrase pseudo-clivée, de présentatif emphatique ni de fausse subordonnée détachée, pas d'épanorthose, d'anaphore verbale ni d'antithèse binaire, pas d'annonce dénombrée ni d'énumération annoncée. Elles valent dans toutes les langues ([`references/style.md`](skills/green-claude/references/style.md)).
 
 > Les outils tiers cités sont open source et vérifiés : graphify et stop-slop sous licence MIT, caveman sous licence Apache 2.0 (voir [Attribution et licences tierces](#attribution-et-licences-tierces)). Le projet ne les audite pas et n'en dépend pas.
 

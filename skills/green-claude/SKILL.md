@@ -1,13 +1,14 @@
 ---
 name: green-claude
 description: |
-  Use when Claude writes, modifies or reviews code (file formats, network
-  requests, images/assets, loops, caching, pagination, dependencies, framework
-  or AI model choice), when the user asks for a sobriety audit ("eco-design
-  audit", "check this code for sobriety", "--eco-check", "RGESN", "GR491",
-  "eco-design", "green IT", "audit éco-conception", "vérifie la sobriété de ce
-  code", "écoconception"), or when invoked via /green-claude to walk through the
-  rule checklist.
+  Use when Claude writes, modifies or reviews code, and especially when the task
+  touches performance or weight: "it's slow", "optimise this query", N+1
+  queries, pagination, caching, polling, bundle or image size, payloads,
+  dependencies, file formats, or the choice of a framework or AI model. Also
+  use for a sobriety audit ("eco-design audit", "check this code for sobriety",
+  "--eco-check", "RGESN", "GR491", "green IT", "audit éco-conception",
+  "vérifie la sobriété de ce code", "écoconception"), or via /green-claude to
+  walk through the rule checklist.
 author: Institut du Numérique Responsable
 version: 1.5.0
 license: CC-BY-4.0 (content); Apache-2.0 (scripts); see LICENSE
@@ -45,7 +46,7 @@ themselves. `eco-audit.sh --rules` prints what you need, one line per rule (see
 | Mode | Trigger | Action |
 |---|---|---|
 | Proactive (default) | Always, as soon as you write or modify code | Apply the relevant families from `ecoconception.json`, unprompted; load them with `eco-audit.sh --rules <family>` |
-| Audit | "eco-design audit", "check the sobriety", `--eco-check` | `bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` (see *Finding the scripts*) |
+| Audit | "eco-design audit", "check the sobriety", `--eco-check` | `bash "$SKILL_DIR/scripts/eco-audit.sh" --compact file1 file2 ...` (see *Finding the scripts*) |
 | Browse | `/green-claude` | Full checklist of the 9 RGESN families, 13 responsible-use practices and 30 token sobriety rules: `eco-audit.sh --rules all` |
 
 ## Before you write anything
@@ -90,9 +91,14 @@ rules*). Concretely, without being asked:
 - Load and import only what is used (no whole library for one function).
 - Compress and correctly size images and assets.
 
-When a sobriety constraint conflicts with an explicit user request (performance,
-deadline, readability), state the trade-off in one sentence, and never silently
-block the work that was asked for.
+When a rule conflicts with an explicit user request (performance, deadline,
+readability), state the trade-off in one sentence, propose the lighter option,
+and **deliver what was asked**. A user who requested two-second polling with
+their eyes open is making a decision, not a mistake.
+
+While writing code, stay quiet: apply the rules and mention only what the user
+would otherwise be surprised by. One line at the end, naming the rule id, beats
+a running commentary on every rule you honoured.
 
 For the conversation itself, apply the project-maintained responsible-use
 practices: keep only useful context and retrieve details on demand. Present them
@@ -134,12 +140,15 @@ outcome the user must never be handed.
 
 ## Audit mode
 
-`bash "$SKILL_DIR/scripts/eco-audit.sh" file1 file2 ...` is a deterministic
-script (grep/awk) with no reasoning cost for detection. Run it rather than
+`bash "$SKILL_DIR/scripts/eco-audit.sh" --compact file1 file2 ...` is a
+deterministic script (grep/awk) with no reasoning cost for detection. It prints
+one line per candidate: impact, rule id, title, `file:line` and the fix. Rerun
+without `--compact` on the files you keep: the full block adds the corrected
+example and the rule's `Note`, which you need before giving a verdict. Run it rather than
 grepping by hand: it carries 287 rules, their thresholds, their per-language
 scoping and their known false positives, none of which a hand-written grep
-reproduces. Interpret and prioritize its output (High impact first), and read
-*Common mistakes* below before relaying a result as-is.
+reproduces. Interpret and prioritize its output (High impact first), and read each
+candidate's `Note` before relaying it (see *Reporting what you find*).
 
 Rules with no detectable pattern ("measure before optimizing", "environmental
 criteria in user stories"...) are process rules, listed via
@@ -198,29 +207,20 @@ useful information, whereas a candidate relayed as a defect costs the user time
 and costs the audit its credibility. And naming what would settle a `REVIEW`
 turns it into a task someone can pick up.
 
+A `Note` line under a result gives the limit of that rule's pattern or
+detector: known false positive, threshold, scope. Read it before you give a
+verdict. It lives in the rule itself, so it stays current with every new rule.
+
 When a rule carries an `example`, the audit prints the corrected form under
 `Write`. Use it: it says what the fix looks like rather than describing it, and
 it saves rebuilding that shape from the recommendation every time.
 
 ## Writing your replies
 
-Keep replies simple and direct, in whatever language you write. A sober reply
-costs fewer tokens and less reading time.
-
-- Never use an em dash (—), in any language. Use a comma, a colon or a full stop.
-- Deliver the idea instead of announcing it. Drop openers such as "Here is the
-  key point:" and state the point.
-- No pseudo-cleft sentences. Write "The cache matters", never "What matters is
-  the cache".
-- No emphatic presentatives ("C'est X qui…", "Il y a X qui…", "It is X that…")
-  and no detached fake subordinate clauses ("Because the query runs in a loop.").
-- No epanorthosis ("not X, but Y", "X, or rather Y"), no verbal anaphora
-  (repeating the same opening across sentences), no binary antithesis ("less X,
-  more Y").
-- No counted announcements ("Two things…", "Three reasons…") and no announced
-  lists ("Here are the steps:"). Give the items directly.
-- If the `stop-slop` skill is installed, run it on your reply before sending.
-  It catches the AI writing patterns these rules do not list.
+Keep replies simple and direct, in whatever language you write: a sober reply
+costs fewer tokens and less reading time. Before a long reply or a report, read
+`references/style.md` for the patterns to cut (em dashes, announced lists,
+pseudo-clefts, binary antitheses).
 
 ## Token sobriety
 
@@ -265,15 +265,6 @@ Propose an entry when you and the user settle a trade-off, and read the file
 before relaying a finding the team has already answered. Suggest it, and let the
 user write it: a decision recorded on their behalf is a decision they never made.
 
-While writing code, stay quiet: apply the rules and mention only what the user
-would otherwise be surprised by. One line at the end, naming the rule id, beats
-a running commentary on every rule you honoured.
-
-When a rule conflicts with what the user explicitly asked for, state the
-trade-off in one sentence, propose the lighter option, and **deliver what was
-asked**. A user who requested two-second polling with their eyes open is making
-a decision, not a mistake.
-
 ## Browse mode (`/green-claude`)
 
 Checklist of the 9 RGESN families, the 13 responsible-use practices and the 30
@@ -281,14 +272,6 @@ token sobriety rules, with each rule's
 title and recommendation. Useful for a design review before any code is written.
 Print it with `bash "$SKILL_DIR/scripts/eco-audit.sh" --rules all` rather than
 reading the JSON files.
-
-## Common mistakes
-
-A hit from the audit script is a **candidate**, not a confirmed violation. When a
-`Note` line comes with a result, read it before relaying anything to the user: it
-explains the precise limit of that rule's pattern or detector (known false
-positive, threshold, scope). It lives in the rule itself, so it stays current,
-unlike a separate list here that would go stale with every new rule.
 
 ## Guaranteed application
 

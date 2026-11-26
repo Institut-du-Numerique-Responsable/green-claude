@@ -1726,4 +1726,46 @@ OUT="$(bash eco-audit.sh "$TMP/fichier_png.swift")"
 echo "$OUT" | grep -q 'ECO-CONT-01' || fail "fichier PNG référencé en Swift non détecté"
 true
 
+# ECO-HEB-11 : lire un CSV n'est pas en écrire un.
+printf 'data = open("big.csv").read()\n' > "$TMP/lecture_csv.py"
+OUT="$(bash eco-audit.sh "$TMP/lecture_csv.py")"
+echo "$OUT" | grep -q 'ECO-HEB-11' && fail "faux positif : ECO-HEB-11 sur une lecture de CSV (open sans mode)"
+printf 'df.to_csv("out.csv")\n' > "$TMP/ecriture_csv.py"
+OUT="$(bash eco-audit.sh "$TMP/ecriture_csv.py")"
+echo "$OUT" | grep -q 'ECO-HEB-11' || fail "écriture de CSV sans compression non détectée (ECO-HEB-11)"
+
+# ECO-PY-07 : concaténation dans le corps d'une boucle, variable chaîne ou
+# partie droite chaîne ; silence hors boucle et sur un compteur numérique.
+cat > "$TMP/concat.py" <<'EOF'
+out = ""
+total = 0
+msg = "a"
+msg += " b"
+for c in commandes[1:3]:
+    out += c.client.nom
+    total += c.montant
+EOF
+OUT="$(bash eco-audit.sh "$TMP/concat.py")"
+echo "$OUT" | grep -q "concat.py:6\$" || fail "concaténation d'une variable chaîne en boucle non détectée (ECO-PY-07, ligne 6)"
+echo "$OUT" | grep -qE '^  Line +: (4|7):' && fail "faux positif ECO-PY-07 hors boucle ou sur un compteur"
+
+# ECO-PY-10 : silence quand le fichier crée une Session.
+printf 'import requests\ns = requests.Session()\nfor u in urls:\n    requests.get(u, timeout=5)\n' > "$TMP/session.py"
+OUT="$(bash eco-audit.sh "$TMP/session.py")"
+echo "$OUT" | grep -q 'ECO-PY-10' && fail "faux positif ECO-PY-10 : le fichier crée une Session"
+printf 'import requests\nrequests.get(u, timeout=5)\n' > "$TMP/sans_session.py"
+OUT="$(bash eco-audit.sh "$TMP/sans_session.py")"
+echo "$OUT" | grep -q 'ECO-PY-10' || fail "appel requests sans Session non détecté (ECO-PY-10)"
+true
+
+# --compact : une ligne par résultat, avec fichier:ligne et recommandation,
+# sans les blocs détaillés.
+printf '%s\n' '-- note' 'SELECT * FROM users;' > "$TMP/compact.sql"
+OUT="$(bash eco-audit.sh --compact "$TMP/compact.sql")"
+echo "$OUT" | grep -qE "^\[High\] ECO-BACK-01 .* — $TMP/compact.sql:2 — " \
+    || fail "--compact n'affiche pas la ligne [impact] ID titre — fichier:ligne — recommandation"
+echo "$OUT" | grep -q 'Recommendation :' && fail "--compact affiche encore le bloc détaillé"
+OUT="$(bash eco-audit.sh --compact 2>&1)" && fail "--compact sans fichier réussit"
+true
+
 echo "OK - suite complete"

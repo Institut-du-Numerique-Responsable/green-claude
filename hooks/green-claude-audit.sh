@@ -18,6 +18,15 @@
 set -uo pipefail
 
 AUDIT="$HOME/.claude/skills/green-claude/scripts/eco-audit.sh"
+# Sans copie manuelle, le skill vient du plugin Claude Code (portée
+# utilisateur) : install.sh n'en fait pas de seconde copie, qui chargerait la
+# description du skill deux fois dans chaque session.
+if [ ! -x "$AUDIT" ] && command -v jq >/dev/null 2>&1; then
+    PLUGIN_DIR="$(jq -r '[(.plugins // {}) | to_entries[] | select(.key | startswith("green-claude@"))
+        | .value[] | select(.scope == "user") | .installPath][0] // empty' \
+        "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null)"
+    [ -n "$PLUGIN_DIR" ] && AUDIT="$PLUGIN_DIR/skills/green-claude/scripts/eco-audit.sh"
+fi
 [ -x "$AUDIT" ] || exit 0            # skill absent : le hook ne casse rien
 command -v jq >/dev/null 2>&1 || exit 0
 

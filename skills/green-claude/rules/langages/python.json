@@ -144,9 +144,7 @@
           "title": "String concatenation in a loop",
           "description": "`s += ...` rebuilds the whole string on every iteration (quadratic behaviour on long sequences).",
           "impact": "Low",
-          "patterns": [
-            "\\+=[[:space:]]*[\"'f]"
-          ],
+          "patterns": [],
           "recommendation": "Accumulate in a list then ''.join(...), or write straight to a stream.",
           "rgesn_ref": "9.1",
           "gr491_famille": "Backend",
@@ -154,7 +152,13 @@
             "python",
             "cpu",
             "strings"
-          ]
+          ],
+          "detector": "string_concat_loop",
+          "note": "Only an augmented assignment inside a for/while body is reported, when the variable was given a string earlier in the file or the right-hand side is visibly a string (literal, f-string, str(), concatenation with a literal). A string built from a function's return value is not tracked, and a short fixed loop costs nothing: read the loop bound before acting.",
+          "example": {
+            "bad": "out = \"\"\nfor c in commandes:\n    out += c.client.nom",
+            "good": "out = \"\".join(c.client.nom for c in commandes)"
+          }
         },
         {
           "id": "ECO-PY-08",
@@ -211,7 +215,18 @@
             "python",
             "network",
             "connections"
-          ]
+          ],
+          "exclude_file_patterns": [
+            "requests\\.Session\\(",
+            "Session\\(\\)",
+            "httpx\\.(Async)?Client\\(",
+            "aiohttp\\.ClientSession\\("
+          ],
+          "note": "A requests call in a file that never creates a Session or a shared client is the candidate. A single call in a one-shot script loses nothing worth fixing; a call inside a loop or a request handler opens a new connection every time.",
+          "example": {
+            "bad": "for url in urls:\n    requests.get(url, timeout=5)",
+            "good": "with requests.Session() as s:\n    for url in urls:\n        s.get(url, timeout=5)"
+          }
         },
         {
           "id": "ECO-PY-11",

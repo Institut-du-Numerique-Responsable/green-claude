@@ -50,11 +50,31 @@ fi
 # =============================================================================
 # Étape 1 : Skill (éco-conception du code + pratiques d'usage responsable)
 # =============================================================================
-print_info "Installation du skill dans $SKILLS_DIR..."
-mkdir -p "$SKILLS_DIR"
-cp -r "$SCRIPT_DIR/skills/green-claude/." "$SKILLS_DIR/"
-chmod +x "$SKILLS_DIR/scripts/"*.sh
-print_success "Skill installé"
+# Le plugin Claude Code installe déjà le skill. Une seconde copie dans
+# ~/.claude/skills ferait apparaître le skill deux fois (green-claude et
+# green-claude:green-claude) : sa description serait chargée deux fois dans
+# chaque session, et le choix entre les deux deviendrait ambigu. Les hooks
+# retrouvent les scripts du plugin, la copie n'a donc rien à apporter.
+PLUGIN_DIR=""
+if command -v jq >/dev/null 2>&1 && [ -f "$HOME/.claude/plugins/installed_plugins.json" ]; then
+    PLUGIN_DIR="$(jq -r '[(.plugins // {}) | to_entries[] | select(.key | startswith("green-claude@"))
+        | .value[] | select(.scope == "user") | .installPath][0] // empty' \
+        "$HOME/.claude/plugins/installed_plugins.json" 2>/dev/null || true)"
+fi
+if [ -n "$PLUGIN_DIR" ]; then
+    print_info "Plugin green-claude détecté ($PLUGIN_DIR) : skill non copié dans $SKILLS_DIR."
+    if [ -d "$SKILLS_DIR" ]; then
+        print_warning "$SKILLS_DIR double le plugin : le skill est chargé deux fois."
+        print_warning "Supprime cette copie si tu gardes le plugin : rm -rf \"$SKILLS_DIR\""
+    fi
+    SKILLS_DIR="$PLUGIN_DIR/skills/green-claude"
+else
+    print_info "Installation du skill dans $SKILLS_DIR..."
+    mkdir -p "$SKILLS_DIR"
+    cp -r "$SCRIPT_DIR/skills/green-claude/." "$SKILLS_DIR/"
+    chmod +x "$SKILLS_DIR/scripts/"*.sh
+    print_success "Skill installé"
+fi
 
 if ! command -v jq >/dev/null 2>&1; then
     print_warning "jq n'est pas installé : le script d'audit (scripts/eco-audit.sh) et les hooks en ont besoin."

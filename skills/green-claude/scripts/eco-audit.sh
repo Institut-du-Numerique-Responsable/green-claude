@@ -274,7 +274,7 @@ if [ "${1:-}" = "--list-rules" ]; then
 fi
 
 usage() {
-    echo "Usage: eco-audit.sh <file> [file...]"
+    echo "Usage: eco-audit.sh [--compact] <file> [file...]"
     echo "        eco-audit.sh --list-rules [language]"
     echo "        eco-audit.sh --list-langs"
     echo "        eco-audit.sh --rules [family|language|file|usage|tokens|all]..."
@@ -288,6 +288,16 @@ fi
 case "$1" in
     -h|--help) usage; exit 0 ;;
 esac
+
+# --compact : une ligne par résultat (impact, id, fichier:ligne, titre,
+# recommandation). Pour trier les candidats sans payer le bloc complet de
+# chacun ; l'audit sans option donne ensuite le détail des fichiers retenus.
+COMPACT_OUT=0
+if [ "$1" = "--compact" ]; then
+    COMPACT_OUT=1
+    shift
+    [ $# -gt 0 ] || { usage >&2; exit 1; }
+fi
 
 # Un argument qui n'est pas un fichier lisible arrête l'audit avant toute
 # détection. Avant, l'audit ignorait cet argument et affichait « No ecodesign
@@ -559,7 +569,8 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
             matches=""
         fi
         if [ -n "$matches" ]; then
-            echo "[$impact] $id — $title"
+            if [ "$COMPACT_OUT" -eq 1 ]; then printf '[%s] %s %s — ' "$impact" "$id" "$title"
+            else echo "[$impact] $id — $title"; fi
             # fichier:ligne (première occurrence), puis les suivantes, cinq au
             # plus. Les détecteurs awk impriment déjà « N:texte » sur leurs
             # lignes Line : leur premier numéro sert de la même façon.
@@ -570,6 +581,11 @@ while IFS=$'\x1f' read -r -d $'\x1e' \
             else
                 first_line="$(printf '%s\n' "$matches" | head -1 | grep -oE '^[0-9]+' || true)"
                 other_lines=""
+            fi
+            if [ "$COMPACT_OUT" -eq 1 ]; then
+                echo "$source_file${first_line:+:$first_line}${other_lines:+ (+${other_lines// /,})} — $recommendation"
+                issues_found=$((issues_found + 1))
+                continue
             fi
             echo "  File           : $source_file${first_line:+:$first_line}"
             [ -n "$other_lines" ] && echo "  Also at lines  : $other_lines"
